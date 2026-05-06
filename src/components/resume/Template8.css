@@ -1,0 +1,93 @@
+.tpl8 {
+  background: white;
+  color: #1a1a1a;
+  padding: 2.5rem;
+  font-family: Georgia, serif;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  max-width: 900px;
+}
+
+.tpl8__header {
+  text-align: center;
+  border-bottom: 3px double #333;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tpl8__name {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: 0.05em;
+}
+
+.tpl8__email {
+  font-size: 0.9rem;
+  margin: 0;
+  font-family: Courier New, monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tpl8__section {
+  margin-bottom: 1.5rem;
+}
+
+.tpl8__summary {
+  background: #f9f7f4;
+  padding: 1.25rem;
+  border-left: 4px solid #333;
+  margin-bottom: 2rem;
+}
+
+.tpl8__summary-text {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin: 0;
+  font-style: italic;
+  color: #333;
+}
+
+.tpl8__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.tpl8__column {
+  display: flex;
+  flex-direction: column;
+}
+
+.tpl8__heading {
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 0.75rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #666;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+.tpl8__text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  color: #333;
+  font-family: Georgia, serif;
+}
+
+@media print {
+  .tpl8 {
+    max-width: 100%;
+  }
+
+  .tpl8__summary {
+    background: white;
+    border: 1px solid #ccc;
+  }
+}
