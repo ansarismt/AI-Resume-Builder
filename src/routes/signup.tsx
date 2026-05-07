@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,9 +47,9 @@ function SignupPage() {
       if (!res.ok) throw new Error((j && j.error) || `Signup failed (${res.status})`);
 
       if (!j?.token) throw new Error("No token returned");
-      login(username, j.token);
+      login(username, j.token, j.email || email);
       toast.success("Account created and signed in");
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     } catch (err) {
       console.error("Signup error:", err);
       toast.error(err instanceof Error ? err.message : "Signup failed");
@@ -59,12 +59,14 @@ function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-secondary/30 flex items-center justify-center p-4">
       <form
         onSubmit={submit}
-        className="max-w-md w-full bg-card border border-border rounded-lg p-6"
+        className="max-w-md w-full bg-card border border-border rounded-xl p-6 shadow-sm"
       >
-        <h2 className="text-2xl font-bold mb-4">Create an account</h2>
+        <p className="text-xs font-mono uppercase tracking-[0.2em] text-accent">Step 2</p>
+        <h2 className="text-2xl font-bold mt-2 mb-1">Signup</h2>
+        <p className="mb-5 text-sm text-muted-foreground">Create an account to open your home dashboard.</p>
         <div className="space-y-3">
           <div>
             <Label>Username</Label>
@@ -78,7 +80,10 @@ function SignupPage() {
             <Label>Password</Label>
             <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
           </div>
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between">
+            <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground">
+              Already have an account?
+            </Link>
             <Button type="submit" disabled={loading}>{loading ? "Creating..." : "Create account"}</Button>
           </div>
         </div>

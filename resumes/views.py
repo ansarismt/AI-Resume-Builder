@@ -217,6 +217,48 @@ class SignupView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 
+class AccountUpdateView(APIView):
+    """Update the signed-in user's username and/or password."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request):
+        user = request.user
+        username = (request.data.get('username') or '').strip()
+        password = request.data.get('password') or ''
+
+        if not username and not password:
+            return Response(
+                {'error': 'Enter a new username or password'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if username and username != user.username:
+            if User.objects.filter(username=username).exclude(pk=user.pk).exists():
+                return Response(
+                    {'error': 'Username already exists'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            user.username = username
+
+        if password:
+            if len(password) < 6:
+                return Response(
+                    {'error': 'Password must be at least 6 characters'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            user.set_password(password)
+
+        user.save()
+        token, _ = Token.objects.get_or_create(user=user)
+
+        return Response({
+            'token': token.key,
+            'user_id': user.id,
+            'username': user.username,
+            'email': user.email,
+        })
+
+
 class VerifyView(APIView):
     """Legacy verification endpoint no longer required"""
     permission_classes = [permissions.AllowAny]

@@ -11,6 +11,28 @@ const api = axios.create({
   },
 });
 
+export function getApiErrorMessage(error: unknown, fallback: string) {
+  if (!axios.isAxiosError(error)) {
+    return error instanceof Error ? error.message : fallback;
+  }
+
+  const data = error.response?.data;
+
+  if (typeof data === "string") return data;
+  if (data && typeof data === "object") {
+    const values = Object.entries(data as Record<string, unknown>)
+      .map(([key, value]) => {
+        if (Array.isArray(value)) return `${key}: ${value.join(", ")}`;
+        return `${key}: ${String(value)}`;
+      })
+      .join("; ");
+
+    if (values) return values;
+  }
+
+  return error.response?.status ? `${fallback} (${error.response.status})` : error.message || fallback;
+}
+
 type ResumeApiRecord = Omit<SavedResume, "id" | "template" | "user_type" | "detected_user_type"> & {
   id: number | string;
   template: string;
@@ -81,7 +103,7 @@ export function toResumePayload(data: ResumeData) {
 }
 
 export async function detectResumeUserType(highestEducation: string, yearsOfExperience: number) {
-  const response = await api.post<{ user_type: UserType }>("/resume/detect-type", {
+  const response = await api.post<{ user_type: UserType }>("/resume/detect-type/", {
     highest_education: highestEducation,
     years_of_experience: yearsOfExperience,
   });
@@ -89,12 +111,12 @@ export async function detectResumeUserType(highestEducation: string, yearsOfExpe
 }
 
 export async function createResume(data: ResumeData) {
-  const response = await api.post<ResumeApiRecord>("/resume/create", toResumePayload(data));
+  const response = await api.post<ResumeApiRecord>("/api/resumes/", toResumePayload(data));
   return normalizeResume(response.data);
 }
 
 export async function getResume(id: string) {
-  const response = await api.get<ResumeApiRecord>(`/resume/${id}`);
+  const response = await api.get<ResumeApiRecord>(`/api/resumes/${id}/`);
   return normalizeResume(response.data);
 }
 

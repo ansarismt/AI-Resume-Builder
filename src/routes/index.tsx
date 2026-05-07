@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useCallback, useState, useEffect } from "react";
 import {
   Download,
   FileText,
@@ -21,22 +21,91 @@ import { ResumePreview } from "@/components/resume/ResumePreview";
 import { SavedResumes } from "@/components/resume/SavedResumes";
 import { emptyResume, type ResumeData, type SavedResume, type TemplateId } from "@/components/resume/types";
 import { getResume } from "@/lib/resumeApi";
+import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
-import { Signup } from "@/components/auth/Signup";
-import { Login } from "@/components/auth/Login";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
+function LandingPage() {
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-background">
+      <section className="border-b border-border bg-secondary/40">
+        <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <p className="mb-3 text-xs font-mono uppercase tracking-[0.2em] text-accent">
+              Resume builder for students and professionals
+            </p>
+            <h1 className="max-w-3xl font-display text-4xl font-medium leading-tight text-ink sm:text-5xl">
+              Create polished resumes, save versions, and export with confidence.
+            </h1>
+            <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+              Start from a guided form, choose from 14 templates, preview instantly, and manage resumes from your dashboard after login.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Button asChild className="px-5">
+                <Link to="/signup">Create account</Link>
+              </Button>
+              <Button asChild variant="outline" className="px-5">
+                <Link to="/login">Login</Link>
+              </Button>
+            </div>
+          </div>
+          <div className="lg:col-span-5">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 rounded-lg bg-secondary/50 p-4">
+                  <NotebookPen className="mt-0.5 h-5 w-5 text-accent" />
+                  <div>
+                    <p className="font-semibold">Build in the dashboard</p>
+                    <p className="text-sm text-muted-foreground">Login to access the home dashboard and resume editor.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-lg bg-secondary/50 p-4">
+                  <Eye className="mt-0.5 h-5 w-5 text-accent" />
+                  <div>
+                    <p className="font-semibold">Preview templates</p>
+                    <p className="text-sm text-muted-foreground">Switch layouts and see the resume update immediately.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-lg bg-secondary/50 p-4">
+                  <Download className="mt-0.5 h-5 w-5 text-accent" />
+                  <div>
+                    <p className="font-semibold">Export when ready</p>
+                    <p className="text-sm text-muted-foreground">Download PDF, DOCX, or JSON from the dashboard.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <h2 className="font-display text-2xl font-bold">Admin Panel</h2>
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+            <p className="text-xs font-mono uppercase tracking-widest text-accent">Admin</p>
+            <p className="mt-2 font-semibold">Admin Panel</p>
+            <p className="mt-2 text-sm text-muted-foreground">Open backend management and review users or resumes.</p>
+            <Button asChild variant="outline" className="mt-4">
+              <Link to="/admin-panel">Open Admin Panel</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function Index() {
+  const { isAuthenticated } = useAuth();
   const [data, setData] = useState<ResumeData>(emptyResume);
   const [savedKey, setSavedKey] = useState(0);
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [savedCount, setSavedCount] = useState(0);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
-  const [showSignup, setShowSignup] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
 
   const handleLoad = (r: SavedResume) => {
@@ -83,6 +152,10 @@ function Index() {
   const handleDeleted = (id: string) => {
     if (currentId === id) handleNew();
   };
+
+  const handleSavedCount = useCallback((count: number) => {
+    setSavedCount(count);
+  }, []);
 
   const handleExportPdf = () => window.print();
 
@@ -161,28 +234,16 @@ function Index() {
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
-    } else if (hash === "#signup") {
-      setShowSignup(true);
-      history.replaceState(null, "", window.location.pathname + window.location.search);
-    } else if (hash === "#login") {
-      setShowLogin(true);
-      history.replaceState(null, "", window.location.pathname + window.location.search);
     }
   }, []);
 
   useEffect(() => {
-    const onOpenLogin = () => setShowLogin(true);
-    const onOpenSignup = () => setShowSignup(true);
     const onOpenSaved = () => {
       const el = document.getElementById("saved-resumes-section");
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    window.addEventListener("open-login", onOpenLogin as EventListener);
-    window.addEventListener("open-signup", onOpenSignup as EventListener);
     window.addEventListener("open-saved", onOpenSaved as EventListener);
     return () => {
-      window.removeEventListener("open-login", onOpenLogin as EventListener);
-      window.removeEventListener("open-signup", onOpenSignup as EventListener);
       window.removeEventListener("open-saved", onOpenSaved as EventListener);
     };
   }, []);
@@ -215,17 +276,21 @@ function Index() {
     },
   ];
 
+  if (!isAuthenticated) {
+    return <LandingPage />;
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen overflow-x-hidden bg-background">
       <header className="border-b border-border sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
-          <div className="flex items-baseline gap-3">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 sm:py-5">
+          <div className="flex min-w-0 items-baseline gap-3">
             <h1 className="text-xl sm:text-2xl font-display font-bold tracking-tight">Inkwell</h1>
             <span className="text-[0.65rem] sm:text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground hidden sm:inline">
               Resume Creator
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
@@ -271,10 +336,10 @@ function Index() {
               Create resumes for students, freshers, interns, and working professionals. Start with your details, choose a layout, preview instantly, and export when you are ready.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button onClick={() => window.location.assign("#new")} className="px-5">
+              <Button onClick={() => handleNew()} className="px-5">
                 Create Resume
               </Button>
-              <Button variant="outline" onClick={() => window.location.assign("#saved-resumes")} className="px-5">
+              <Button variant="outline" onClick={() => document.getElementById("saved-resumes-section")?.scrollIntoView({ behavior: "smooth" })} className="px-5">
                 View Saved Resumes
               </Button>
             </div>
@@ -374,7 +439,7 @@ function Index() {
       </section>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 grid lg:grid-cols-2 gap-6 sm:gap-10">
-        <div className="space-y-6 sm:space-y-8">
+        <div className="min-w-0 space-y-6 sm:space-y-8">
           <section className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
             <div className="flex items-baseline justify-between mb-3">
               <h3 className="font-display text-lg sm:text-xl font-bold">Import Resume</h3>
@@ -407,7 +472,7 @@ function Index() {
               onLoad={handleLoad}
               currentId={currentId}
               onDeleted={handleDeleted}
-              onCount={(n) => setSavedCount(n)}
+              onCount={handleSavedCount}
             />
             {savedCount > 0 && (
               <p className="mt-3 text-xs text-muted-foreground">
@@ -431,7 +496,7 @@ function Index() {
           </section>
         </div>
 
-        <div className="space-y-6 sm:space-y-8">
+        <div className="min-w-0 space-y-6 sm:space-y-8">
           <div className="lg:sticky lg:top-24 self-start space-y-4" id="preview-area">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 flex-wrap no-print">
               <h3 className="font-display text-lg sm:text-xl font-bold">Preview</h3>
@@ -506,9 +571,6 @@ function Index() {
           </section>
         </div>
       </main>
-
-      {showSignup && <Signup open={showSignup} onClose={() => setShowSignup(false)} />}
-      {showLogin && <Login open={showLogin} onClose={() => setShowLogin(false)} />}
 
       <footer className="border-t border-border mt-10 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 text-xs font-mono uppercase tracking-widest text-muted-foreground flex flex-col sm:flex-row justify-between items-center gap-4">

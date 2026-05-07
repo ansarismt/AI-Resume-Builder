@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SavedResumesRouteImport } from './routes/saved-resumes'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AdminPanelRouteImport } from './routes/admin-panel'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SignupRoute = SignupRouteImport.update({
@@ -29,6 +31,16 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPanelRoute = AdminPanelRouteImport.update({
+  id: '/admin-panel',
+  path: '/admin-panel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,12 +49,16 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin-panel': typeof AdminPanelRoute
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/saved-resumes': typeof SavedResumesRoute
   '/signup': typeof SignupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin-panel': typeof AdminPanelRoute
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/saved-resumes': typeof SavedResumesRoute
   '/signup': typeof SignupRoute
@@ -50,20 +66,43 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin-panel': typeof AdminPanelRoute
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/saved-resumes': typeof SavedResumesRoute
   '/signup': typeof SignupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/saved-resumes' | '/signup'
+  fullPaths:
+    | '/'
+    | '/admin-panel'
+    | '/dashboard'
+    | '/login'
+    | '/saved-resumes'
+    | '/signup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/saved-resumes' | '/signup'
-  id: '__root__' | '/' | '/login' | '/saved-resumes' | '/signup'
+  to:
+    | '/'
+    | '/admin-panel'
+    | '/dashboard'
+    | '/login'
+    | '/saved-resumes'
+    | '/signup'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin-panel'
+    | '/dashboard'
+    | '/login'
+    | '/saved-resumes'
+    | '/signup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminPanelRoute: typeof AdminPanelRoute
+  DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   SavedResumesRoute: typeof SavedResumesRoute
   SignupRoute: typeof SignupRoute
@@ -92,6 +131,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-panel': {
+      id: '/admin-panel'
+      path: '/admin-panel'
+      fullPath: '/admin-panel'
+      preLoaderRoute: typeof AdminPanelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +157,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminPanelRoute: AdminPanelRoute,
+  DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   SavedResumesRoute: SavedResumesRoute,
   SignupRoute: SignupRoute,

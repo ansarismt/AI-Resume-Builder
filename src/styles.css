@@ -174,7 +174,7 @@
 
 /* Print: only the resume preview is rendered, full page, no chrome. */
 @media print {
-  @page { size: A4; margin: 12mm; }
+  @page { size: A4; margin: 0; }
   html, body { width: 210mm; height: 297mm; background: white !important; }
   body { background: white !important; color: black !important; }
   body * { visibility: hidden !important; }
@@ -185,8 +185,9 @@
     width: 100% !important;
     min-height: 100% !important;
     background: white !important;
-    padding: 0 !important;
+    padding: 12mm !important;
     margin: 0 !important;
+    box-sizing: border-box !important;
   }
   #resume-print > div {
     border: none !important;

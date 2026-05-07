@@ -1,5 +1,15 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { LogOut, Plus, Timer } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
@@ -77,43 +87,68 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function AuthHeader() {
-  const { isAuthenticated, username, logout } = useAuth();
+  const { isAuthenticated, username, email, loginAt, logout } = useAuth();
+  const usageTime = (() => {
+    if (!loginAt) return "0 min";
+    const totalMinutes = Math.max(0, Math.floor((Date.now() - new Date(loginAt).getTime()) / 60000));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes} min`;
+  })();
+
   return (
-    <div className="flex flex-wrap items-center gap-3 ml-0 sm:ml-4">
-      <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-        Home
-      </Link>
-      <Link to="/saved-resumes" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-        Saved Resumes
+    <div className="ml-auto flex flex-wrap items-center gap-3">
+      {isAuthenticated && (
+        <Link to="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          Dashboard
+        </Link>
+      )}
+      <Link to="/admin-panel" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+        Admin Panel
       </Link>
       {isAuthenticated ? (
-        <>
-          <span className="text-sm text-muted-foreground">{username}</span>
-          <button
-            onClick={logout}
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-1 rounded border border-border hover:border-primary/50 hover:bg-primary/10"
-          >
-            Logout
-          </button>
-        </>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                {(username || "U").slice(0, 1).toUpperCase()}
+              </span>
+              Account
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-72">
+            <DropdownMenuLabel>
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                  {(username || "U").slice(0, 1).toUpperCase()}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">{username}</p>
+                  <p className="truncate text-xs font-normal text-muted-foreground">{email || "No email saved"}</p>
+                </div>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/login">
+                <Plus className="h-4 w-4" />
+                Add account
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Timer className="h-4 w-4" />
+              Usage time: {usageTime}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
+              <LogOut className="h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ) : (
-        <>
-          <Link to="/signup" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Signup
-          </Link>
-          <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Login
-          </Link>
-        </>
+        null
       )}
-      <a
-        href="http://127.0.0.1:8000/admin/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-1 rounded border border-border hover:border-primary/50 hover:bg-primary/10"
-      >
-        Admin
-      </a>
     </div>
   );
 }

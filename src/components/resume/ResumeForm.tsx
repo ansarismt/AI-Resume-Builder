@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Save, Sparkles } from "lucide-react";
 
-import { createResume, detectResumeUserType, updateResume } from "@/lib/resumeApi";
+import { createResume, detectResumeUserType, getApiErrorMessage, updateResume } from "@/lib/resumeApi";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -39,6 +39,62 @@ interface Props {
 
 function getUserTypeLabel(userType: UserType) {
   return USER_TYPE_OPTIONS.find((option) => option.value === userType)?.label ?? "College Student";
+}
+
+function sentenceList(value: string, fallback: string) {
+  return value
+    .split(/,|\n/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 4)
+    .join(", ") || fallback;
+}
+
+function fallbackFieldDraft(
+  field: "education" | "projects" | "internships" | "certifications" | "achievements",
+  data: ResumeData,
+) {
+  const skills = sentenceList(data.skills, "communication, teamwork, problem solving");
+  const education = data.education.trim() || data.highest_education || "current academic program";
+
+  if (field === "projects") {
+    return [
+      `Academic Project: Built a practical solution using ${skills}. Focused on planning, implementation, testing, and clear presentation of results.`,
+      `Portfolio Project: Created a user-focused project connected to ${education}. Improved problem-solving ability and documented the workflow clearly.`,
+    ].join("\n\n");
+  }
+
+  if (field === "internships") {
+    return [
+      `Internship / Training: Assisted with real-world tasks using ${skills}. Learned professional communication, task ownership, and deadline management.`,
+      `Practical Exposure: Worked on guided assignments related to ${education}. Supported documentation, research, and basic implementation activities.`,
+    ].join("\n\n");
+  }
+
+  if (field === "education") {
+    return `${education}\nRelevant strengths: ${skills}\nCurrently studying: ${data.is_studying ? "Yes" : "No"}`;
+  }
+
+  if (field === "certifications") {
+    return `Certification in ${skills.split(",")[0]?.trim() || "core skills"}\nOnline training related to ${education}\nWorkshop or course supporting career readiness`;
+  }
+
+  return `Participated in academic and extracurricular activities\nRecognized for consistent performance and teamwork\nContributed to events, projects, or competitions`;
+}
+
+function fallbackSummaryDraft(data: ResumeData) {
+  const skills = sentenceList(data.skills, "communication, teamwork, and problem solving");
+  const education = data.education.trim() || data.highest_education || "my education";
+
+  if (data.user_type === "professional") {
+    return `Results-focused professional with ${data.years_of_experience}+ years of experience. Skilled in ${skills}, with a strong interest in delivering reliable work, improving processes, and contributing to team goals.`;
+  }
+
+  if (data.user_type === "school") {
+    return `Motivated school student with interest in ${skills}. Looking for opportunities to learn, contribute, and build practical experience through academics, activities, and projects.`;
+  }
+
+  return `Motivated college student with background in ${education}. Skilled in ${skills}, with interest in internships, projects, and entry-level opportunities where I can apply my learning and grow professionally.`;
 }
 
 export function ResumeForm({ data, onChange, onSaved, currentId, onNew }: Props) {
@@ -189,12 +245,12 @@ Skills: ${data.skills}`;
 
       if (error) throw error;
 
-      if (response?.summary) {
-        update(field as keyof ResumeData, response.summary);
-        toast.success(`${field} generated`);
-      }
+      const draft = response?.summary || fallbackFieldDraft(field, data);
+      update(field as keyof ResumeData, draft);
+      toast.success(`${field} generated`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : `Failed to generate ${field}`);
+      update(field as keyof ResumeData, fallbackFieldDraft(field, data));
+      toast.success(`${field} drafted locally`);
     } finally {
       setGeneratingField(null);
     }
@@ -236,12 +292,11 @@ Skills: ${data.skills}`;
       if (error) throw error;
       if (response?.error) throw new Error(response.error);
 
-      if (response?.summary) {
-        update("summary", response.summary);
-        toast.success("Summary drafted");
-      }
+      update("summary", response?.summary || fallbackSummaryDraft(data));
+      toast.success(`${data.user_type === "professional" ? "Summary" : "Objective"} drafted`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to generate summary");
+      update("summary", fallbackSummaryDraft(data));
+      toast.success(`${data.user_type === "professional" ? "Summary" : "Objective"} drafted locally`);
     } finally {
       setGenerating(false);
     }
@@ -266,7 +321,7 @@ Skills: ${data.skills}`;
         onSaved(created.id);
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Save failed");
+      toast.error(getApiErrorMessage(error, "Save failed"));
     } finally {
       setSaving(false);
     }

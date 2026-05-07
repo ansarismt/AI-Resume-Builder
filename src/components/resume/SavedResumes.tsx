@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Loader2, Trash2 } from "lucide-react";
+import { AlertCircle, FileText, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { deleteResume, listResumes } from "@/lib/resumeApi";
@@ -34,11 +34,13 @@ interface Props {
 export function SavedResumes({ refreshKey, onLoad, currentId, onDeleted, onCount }: Props) {
   const [items, setItems] = useState<SavedResume[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     setLoading(true);
+    setLoadError(null);
 
     listResumes()
       .then((resumes) => {
@@ -56,8 +58,12 @@ export function SavedResumes({ refreshKey, onLoad, currentId, onDeleted, onCount
         setLoading(false);
       })
       .catch((error) => {
+        if (!active) return;
+
         console.error(error);
-        toast.error("Failed to load saved resumes");
+        setItems([]);
+        onCount?.(0);
+        setLoadError("Saved resumes need the Django backend running on http://localhost:8000.");
         setLoading(false);
       });
 
@@ -92,6 +98,20 @@ export function SavedResumes({ refreshKey, onLoad, currentId, onDeleted, onCount
     return (
       <div className="flex items-center justify-center py-8 text-muted-foreground">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading...
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="rounded-lg border border-border bg-secondary/40 p-4 text-sm text-muted-foreground">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+          <div>
+            <p className="font-medium text-foreground">Saved resumes are offline</p>
+            <p className="mt-1">{loadError}</p>
+          </div>
+        </div>
       </div>
     );
   }
