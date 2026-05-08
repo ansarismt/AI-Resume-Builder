@@ -3,6 +3,8 @@ from io import BytesIO
 from django.http import FileResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -146,6 +148,7 @@ Text:
         )
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
     """User login endpoint"""
     permission_classes = [permissions.AllowAny]
@@ -175,6 +178,7 @@ class LoginView(APIView):
         )
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class SignupView(APIView):
     """User signup endpoint"""
     permission_classes = [permissions.AllowAny]

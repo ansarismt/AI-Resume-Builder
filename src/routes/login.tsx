@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { requestAuth } from "@/lib/authApi";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -16,8 +17,6 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
-  const API_BASE = (import.meta as any).env?.VITE_API_BASE || "http://localhost:8000";
-
   const submit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!username.trim() || !password.trim()) {
@@ -27,27 +26,8 @@ function LoginPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/auth/login/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const contentType = res.headers.get("content-type") || "";
-      let j: any = null;
-
-      if (contentType.includes("application/json")) {
-        j = await res.json();
-      } else {
-        const text = await res.text();
-        console.error("Unexpected non-JSON response from /api/auth/login/:", res.status, text);
-        throw new Error(`Server error (${res.status})`);
-      }
-
-      if (!res.ok) throw new Error((j && j.error) || `Login failed (${res.status})`);
-
-      if (!j?.token) throw new Error("No token returned");
-      login(username, j.token, j.email);
+      const user = await requestAuth("login", { username: username.trim(), password });
+      login(user.username, user.token, user.email);
       toast.success("Signed in");
       window.location.href = "/dashboard";
     } catch (err) {

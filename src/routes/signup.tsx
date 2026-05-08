@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { requestAuth } from "@/lib/authApi";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
@@ -26,28 +27,12 @@ function SignupPage() {
 
     setLoading(true);
     try {
-      const API_BASE = (import.meta as any).env?.VITE_API_BASE || "http://localhost:8000";
-      const res = await fetch(`${API_BASE}/api/auth/signup/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
+      const user = await requestAuth("signup", {
+        username: username.trim(),
+        email: email.trim(),
+        password,
       });
-
-      const contentType = res.headers.get("content-type") || "";
-      let j: any = null;
-
-      if (contentType.includes("application/json")) {
-        j = await res.json();
-      } else {
-        const text = await res.text();
-        console.error("Unexpected non-JSON response from /api/auth/signup/:", res.status, text);
-        throw new Error(`Server error (${res.status})`);
-      }
-
-      if (!res.ok) throw new Error((j && j.error) || `Signup failed (${res.status})`);
-
-      if (!j?.token) throw new Error("No token returned");
-      login(username, j.token, j.email || email);
+      login(user.username, user.token, user.email);
       toast.success("Account created and signed in");
       window.location.href = "/dashboard";
     } catch (err) {

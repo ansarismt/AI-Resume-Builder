@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { requestAuth } from "@/lib/authApi";
 
 export function Signup({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [username, setUsername] = useState("");
@@ -22,48 +23,17 @@ export function Signup({ open, onClose }: { open: boolean; onClose: () => void }
 
     setLoading(true);
     try {
-      const tryUrls = [
-        "http://127.0.0.1:8000/api/auth/signup/",
-        "/api/auth/signup/",
-      ];
-
-      let lastError: any = null;
-      for (const url of tryUrls) {
-        try {
-          const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, email, password }),
-          });
-          const text = await res.text();
-          if (text && text.trim().startsWith("<!DOCTYPE html") && res.status === 404) {
-            lastError = new Error(`Backend returned 404 at ${url}`);
-            continue;
-          }
-
-          let j: any = null;
-          try {
-            j = text ? JSON.parse(text) : null;
-          } catch {
-            throw new Error((text || "").substring(0, 200) || "Signup failed");
-          }
-
-          if (!res.ok) throw new Error((j && j.error) || `Signup failed (${res.status})`);
-          if (!j?.token) throw new Error("No token returned");
-
-          login(username, j.token);
-          toast.success("Account created and signed in");
-          onClose();
-          try {
-            window.dispatchEvent(new CustomEvent("open-saved"));
-          } catch {}
-          return;
-        } catch (err) {
-          lastError = err;
-        }
-      }
-
-      throw lastError || new Error("Signup failed");
+      const user = await requestAuth("signup", {
+        username: username.trim(),
+        email: email.trim(),
+        password,
+      });
+      login(user.username, user.token, user.email);
+      toast.success("Account created and signed in");
+      onClose();
+      try {
+        window.dispatchEvent(new CustomEvent("open-saved"));
+      } catch {}
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Signup failed");
     } finally {

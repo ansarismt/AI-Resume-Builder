@@ -3,8 +3,6 @@ import { useCallback, useState, useEffect } from "react";
 import {
   Download,
   FileText,
-  Sparkles,
-  Zap,
   Eye,
   HelpCircle,
   ChevronDown,
@@ -14,15 +12,16 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ResumeForm } from "@/components/resume/ResumeForm";
-import { ResumeImporter } from "@/components/resume/ResumeImporter";
-import { TemplateSelector } from "@/components/resume/TemplateSelector";
-import { ResumePreview } from "@/components/resume/ResumePreview";
 import { SavedResumes } from "@/components/resume/SavedResumes";
 import { emptyResume, type ResumeData, type SavedResume, type TemplateId } from "@/components/resume/types";
-import { getResume } from "@/lib/resumeApi";
+import { createResume, getApiErrorMessage, getResume, updateResume } from "@/lib/resumeApi";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { ResumeWizard } from "@/pages/ResumeWizard";
+import { ResumePreviewPage } from "@/pages/ResumePreviewPage";
+import { TemplateSelectionPage } from "@/pages/TemplateSelectionPage";
+import { FinalizeResumePage } from "@/pages/FinalizeResumePage";
+import { FLOW_STEPS, getTemplateDefaultColor, type FlowStage } from "@/pages/resumeFlow";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -107,6 +106,9 @@ function Index() {
   const [savedCount, setSavedCount] = useState(0);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
+  const [flowStage, setFlowStage] = useState<FlowStage>("wizard");
+  const [saving, setSaving] = useState(false);
+  const [selectedTemplateColor, setSelectedTemplateColor] = useState(getTemplateDefaultColor(emptyResume.template));
 
   const handleLoad = (r: SavedResume) => {
     setData({
@@ -129,12 +131,16 @@ function Index() {
       template: r.template,
     });
     setCurrentId(r.id);
+    setSelectedTemplateColor(getTemplateDefaultColor(r.template));
+    setFlowStage("preview");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleNew = (template?: TemplateId) => {
     setData({ ...emptyResume, template: template ?? emptyResume.template });
     setCurrentId(null);
+    setSelectedTemplateColor(getTemplateDefaultColor(template ?? emptyResume.template));
+    setFlowStage("wizard");
   };
 
   const handleSaved = async (id: string) => {
@@ -197,9 +203,49 @@ function Index() {
     toast.success("Resume downloaded as JSON");
   };
 
+  const handleSaveResume = async () => {
+    if (!data.name.trim() || !data.email.trim()) {
+      toast.error("Name and email are required");
+      return false;
+    }
+
+    setSaving(true);
+    try {
+      if (currentId) {
+        await updateResume(currentId, data);
+        toast.success("Resume updated");
+        await handleSaved(currentId);
+      } else {
+        const created = await createResume(data);
+        toast.success("Resume saved");
+        await handleSaved(created.id);
+      }
+      return true;
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Save failed"));
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleImported = (fields: Omit<ResumeData, "template">) => {
     setData((prev) => ({ ...fields, template: prev.template }));
     setCurrentId(null);
+    setFlowStage("wizard");
+  };
+
+  const goToStage = (stage: FlowStage) => {
+    const targetIndex = FLOW_STEPS.findIndex((item) => item.id === stage);
+    const currentIndex = FLOW_STEPS.findIndex((item) => item.id === flowStage);
+
+    if (targetIndex > currentIndex && stage !== "wizard" && (!data.name.trim() || !data.email.trim())) {
+      toast.error("Complete your name and email before moving ahead");
+      return;
+    }
+
+    setFlowStage(stage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -438,138 +484,130 @@ function Index() {
         </div>
       </section>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 grid lg:grid-cols-2 gap-6 sm:gap-10">
-        <div className="min-w-0 space-y-6 sm:space-y-8">
-          <section className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-            <div className="flex items-baseline justify-between mb-3">
-              <h3 className="font-display text-lg sm:text-xl font-bold">Import Resume</h3>
-              <span className="text-[0.65rem] font-mono uppercase tracking-widest text-accent">Quick Start</span>
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-4">
-              Paste your existing resume text and let the form organize it into the right sections.
-            </p>
-            <ResumeImporter onParsed={handleImported} />
-          </section>
-
-          <section className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-            <h3 className="font-display text-lg sm:text-xl font-bold mb-1">Your details</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-5">
-              Add your information once and refine it as you go.
-            </p>
-            <ResumeForm
-              data={data}
-              onChange={setData}
-              onSaved={handleSaved}
-              currentId={currentId}
-              onNew={handleNew}
-            />
-          </section>
-
-          <section id="saved-resumes-section" className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-            <h3 className="font-display text-lg sm:text-xl font-bold mb-3">Saved resumes</h3>
-            <SavedResumes
-              refreshKey={savedKey}
-              onLoad={handleLoad}
-              currentId={currentId}
-              onDeleted={handleDeleted}
-              onCount={handleSavedCount}
-            />
-            {savedCount > 0 && (
-              <p className="mt-3 text-xs text-muted-foreground">
-                {savedCount} saved {savedCount === 1 ? "resume" : "resumes"} available.
-              </p>
-            )}
-          </section>
-
-          <section className="bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-xl p-4 sm:p-6">
-            <h3 className="font-display text-lg sm:text-xl font-bold mb-4">Good for Every Goal</h3>
-            <div className="space-y-4">
-              <div className="text-xs sm:text-sm">
-                <p className="text-muted-foreground italic mb-2">"I used one version for internships and another for campus placements. Switching templates made it easy."</p>
-                <p className="font-semibold">- College student</p>
-              </div>
-              <div className="text-xs sm:text-sm">
-                <p className="text-muted-foreground italic mb-2">"The export options helped me keep a clean PDF and DOCX version ready for different applications."</p>
-                <p className="font-semibold">- Working professional</p>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <div className="min-w-0 space-y-6 sm:space-y-8">
-          <div className="lg:sticky lg:top-24 self-start space-y-4" id="preview-area">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 flex-wrap no-print">
-              <h3 className="font-display text-lg sm:text-xl font-bold">Preview</h3>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-wrap w-full sm:w-auto">
-                <TemplateSelector
-                  value={data.template}
-                  onChange={(t) => setData({ ...data, template: t })}
-                />
-                <div className="flex gap-2 flex-wrap">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleExportPdf}
-                    className="border-accent/30 text-accent hover:bg-accent/10 hover:text-accent text-xs sm:text-sm flex-1 sm:flex-none"
-                  >
-                    <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                    PDF
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleExportDocx}
-                    className="border-accent/30 text-accent hover:bg-accent/10 hover:text-accent text-xs sm:text-sm flex-1 sm:flex-none"
-                  >
-                    <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                    DOCX
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleExportJson}
-                    className="border-accent/30 text-accent hover:bg-accent/10 hover:text-accent text-xs sm:text-sm flex-1 sm:flex-none"
-                  >
-                    <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                    JSON
-                  </Button>
-                </div>
-              </div>
-            </div>
-            <div id="resume-print" className="rounded-lg border border-border shadow-sm">
-              <ResumePreview data={data} />
-            </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
+        <section className="rounded-xl border border-border bg-card p-3 shadow-sm no-print">
+          <div className="grid gap-2 sm:grid-cols-4">
+            {FLOW_STEPS.map((step, index) => {
+              const active = step.id === flowStage;
+              const completed = FLOW_STEPS.findIndex((item) => item.id === flowStage) > index;
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  onClick={() => goToStage(step.id)}
+                  className={`rounded-lg border px-3 py-3 text-left transition-all ${
+                    active
+                      ? "border-accent/40 bg-accent/10 text-foreground"
+                      : completed
+                      ? "border-accent/20 bg-secondary/40 text-foreground hover:bg-secondary/60"
+                      : "border-border bg-background/40 text-muted-foreground hover:bg-secondary/50"
+                  }`}
+                >
+                  <span className="block text-[0.65rem] font-mono uppercase tracking-widest">
+                    Step {index + 1}
+                  </span>
+                  <span className="mt-1 block text-sm font-semibold">{step.title}</span>
+                </button>
+              );
+            })}
           </div>
+        </section>
 
-          <section className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
-            <h3 className="font-display text-lg sm:text-xl font-bold mb-4">Frequently Asked</h3>
-            <div className="space-y-3">
-              {faqItems.map((item) => (
-                <div key={item.id} className="border border-border rounded-lg">
-                  <button
-                    onClick={() => setExpandedFaq(expandedFaq === item.id ? null : item.id)}
-                    className="w-full flex items-center justify-between p-3 sm:p-4 hover:bg-secondary/50 transition-colors"
-                  >
-                    <span className="text-xs sm:text-sm font-semibold text-left">{item.question}</span>
-                    <ChevronDown
-                      className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${
-                        expandedFaq === item.id ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedFaq === item.id && (
-                    <div className="px-3 sm:px-4 py-3 border-t border-border bg-secondary/30 animate-in fade-in">
-                      <p className="text-xs sm:text-sm text-muted-foreground">{item.answer}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
+          {flowStage === "wizard" && (
+            <ResumeWizard
+              data={data}
+              currentId={currentId}
+              onChange={setData}
+              onImported={handleImported}
+              onSaved={handleSaved}
+              onNew={handleNew}
+              onComplete={() => goToStage("preview")}
+            />
+          )}
+
+          {flowStage === "preview" && (
+            <ResumePreviewPage
+              data={data}
+              selectedColor={selectedTemplateColor}
+              onEdit={() => goToStage("wizard")}
+              onContinue={() => goToStage("templates")}
+            />
+          )}
+
+          {flowStage === "templates" && (
+            <TemplateSelectionPage
+              data={data}
+              selectedTemplate={data.template}
+              selectedColor={selectedTemplateColor}
+              onSelectTemplate={(template) => {
+                setData((prev) => ({ ...prev, template }));
+                setSelectedTemplateColor(getTemplateDefaultColor(template));
+              }}
+              onSelectColor={(template, color) => {
+                setData((prev) => ({ ...prev, template }));
+                setSelectedTemplateColor(color);
+              }}
+              onBack={() => goToStage("preview")}
+              onContinue={() => goToStage("finalize")}
+            />
+          )}
+
+          {flowStage === "finalize" && (
+            <FinalizeResumePage
+              data={data}
+              selectedColor={selectedTemplateColor}
+              saving={saving}
+              onBack={() => goToStage("templates")}
+              onSave={handleSaveResume}
+              onExportPdf={handleExportPdf}
+              onExportDocx={handleExportDocx}
+              onExportJson={handleExportJson}
+            />
+          )}
         </div>
+
+        <section id="saved-resumes-section" className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow duration-200 no-print">
+          <h3 className="font-display text-lg sm:text-xl font-bold mb-3">Saved resumes</h3>
+          <SavedResumes
+            refreshKey={savedKey}
+            onLoad={handleLoad}
+            currentId={currentId}
+            onDeleted={handleDeleted}
+            onCount={handleSavedCount}
+          />
+          {savedCount > 0 && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              {savedCount} saved {savedCount === 1 ? "resume" : "resumes"} available.
+            </p>
+          )}
+        </section>
+
+        <section className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm no-print">
+          <h3 className="font-display text-lg sm:text-xl font-bold mb-4">Frequently Asked</h3>
+          <div className="space-y-3">
+            {faqItems.map((item) => (
+              <div key={item.id} className="border border-border rounded-lg">
+                <button
+                  onClick={() => setExpandedFaq(expandedFaq === item.id ? null : item.id)}
+                  className="w-full flex items-center justify-between p-3 sm:p-4 hover:bg-secondary/50 transition-colors"
+                >
+                  <span className="text-xs sm:text-sm font-semibold text-left">{item.question}</span>
+                  <ChevronDown
+                    className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${
+                      expandedFaq === item.id ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {expandedFaq === item.id && (
+                  <div className="px-3 sm:px-4 py-3 border-t border-border bg-secondary/30 animate-in fade-in">
+                    <p className="text-xs sm:text-sm text-muted-foreground">{item.answer}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
 
       <footer className="border-t border-border mt-10 no-print">

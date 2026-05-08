@@ -1,33 +1,29 @@
-import { useEffect, useState } from "react";
-import { Loader2, Save, Sparkles } from "lucide-react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 import { createResume, detectResumeUserType, getApiErrorMessage, updateResume } from "@/lib/resumeApi";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { BuilderLayout } from "@/components/layout/BuilderLayout";
+import type { WizardStep } from "@/components/layout/Sidebar";
+import { StepControls } from "@/components/navigation/StepControls";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-import { TemplateSelector } from "./TemplateSelector";
 import {
-  HIGHEST_EDUCATION_OPTIONS,
   USER_TYPE_OPTIONS,
   type ResumeData,
   type TemplateId,
   type UserType,
 } from "./types";
+
+const PersonalDetails = lazy(() => import("@/components/steps/PersonalDetails"));
+const Education = lazy(() => import("@/components/steps/Education"));
+const Skills = lazy(() => import("@/components/steps/Skills"));
+const Projects = lazy(() => import("@/components/steps/Projects"));
+const Internships = lazy(() => import("@/components/steps/Internships"));
+const Experience = lazy(() => import("@/components/steps/Experience"));
+const Certifications = lazy(() => import("@/components/steps/Certifications"));
+const Achievements = lazy(() => import("@/components/steps/Achievements"));
+const Objective = lazy(() => import("@/components/steps/Objective"));
+const Summary = lazy(() => import("@/components/steps/Summary"));
 
 interface Props {
   data: ResumeData;
@@ -35,7 +31,54 @@ interface Props {
   onSaved: (id: string) => void;
   currentId: string | null;
   onNew: (template?: TemplateId) => void;
+  onComplete?: () => void;
 }
+
+type StepId =
+  | "personal"
+  | "education"
+  | "skills"
+  | "achievements"
+  | "objective"
+  | "projects"
+  | "internships"
+  | "certifications"
+  | "summary"
+  | "experience";
+
+const STEP_LABELS: Record<StepId, string> = {
+  personal: "Personal Details",
+  education: "Education",
+  skills: "Skills",
+  achievements: "Achievements",
+  objective: "Career Objective",
+  projects: "Projects",
+  internships: "Internships",
+  certifications: "Certifications",
+  summary: "Professional Summary",
+  experience: "Work Experience",
+};
+
+const STEP_FIELDS: Partial<Record<StepId, Array<keyof ResumeData>>> = {
+  personal: ["name", "email", "highest_education"],
+  education: ["education"],
+  skills: ["skills"],
+  achievements: ["achievements"],
+  objective: ["summary"],
+  summary: ["summary"],
+  experience: ["experience"],
+};
+
+const FIELD_LABELS: Partial<Record<keyof ResumeData, string>> = {
+  name: "full name",
+  email: "email",
+  highest_education: "highest education",
+  education: "education",
+  skills: "skills",
+  achievements: "achievements",
+  summary: "summary",
+  experience: "work experience",
+};
 
 function getUserTypeLabel(userType: UserType) {
   return USER_TYPE_OPTIONS.find((option) => option.value === userType)?.label ?? "College Student";
@@ -97,14 +140,64 @@ function fallbackSummaryDraft(data: ResumeData) {
   return `Motivated college student with background in ${education}. Skilled in ${skills}, with interest in internships, projects, and entry-level opportunities where I can apply my learning and grow professionally.`;
 }
 
-export function ResumeForm({ data, onChange, onSaved, currentId, onNew }: Props) {
+function getSteps(userType: UserType): WizardStep[] {
+  if (userType === "school") {
+    return ["personal", "education", "skills", "achievements", "objective"].map((id) => ({
+      id,
+      title: STEP_LABELS[id as StepId],
+    }));
+  }
+
+  if (userType === "professional") {
+    return ["personal", "summary", "experience", "skills", "certifications", "education"].map((id) => ({
+      id,
+      title: STEP_LABELS[id as StepId],
+    }));
+  }
+
+  return ["personal", "education", "skills", "projects", "internships", "certifications", "objective"].map((id) => ({
+    id,
+    title: STEP_LABELS[id as StepId],
+  }));
+}
+
+export function ResumeForm({ data, onChange, onSaved, currentId, onNew, onComplete }: Props) {
+  const [currentStep, setCurrentStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [generating, setGenerating] = useState(false);
   const [generatingField, setGeneratingField] = useState<string | null>(null);
   const [manualOverride, setManualOverride] = useState(data.user_type !== data.detected_user_type);
+  const stepPanelRef = useRef<HTMLDivElement | null>(null);
 
-  const update = <K extends keyof ResumeData>(key: K, value: ResumeData[K]) =>
-    onChange({ ...data, [key]: value });
+  const steps = useMemo(() => getSteps(data.user_type), [data.user_type]);
+  const activeStep = steps[currentStep] ?? steps[0];
+
+  const update = useCallback(
+    <K extends keyof ResumeData>(key: K, value: ResumeData[K]) => {
+      onChange({ ...data, [key]: value });
+    },
+    [data, onChange],
+  );
+
+  useEffect(() => {
+    setCurrentStep((step) => Math.min(step, steps.length - 1));
+  }, [steps.length]);
+
+  useEffect(() => {
+    stepPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    window.setTimeout(() => {
+      const firstField = stepPanelRef.current?.querySelector<HTMLElement>(
+        "input:not([type='hidden']):not([disabled]), textarea:not([disabled]), button[role='combobox']:not([disabled])",
+      );
+      firstField?.focus();
+    }, 120);
+  }, [currentStep]);
+
+  useEffect(() => {
+    setSaveStatus("idle");
+  }, [data]);
 
   useEffect(() => {
     setManualOverride(data.user_type !== data.detected_user_type);
@@ -169,6 +262,102 @@ export function ResumeForm({ data, onChange, onSaved, currentId, onNew }: Props)
       resume.summary,
     ].every((value) => !(value || "").toString().trim());
 
+  const isStepComplete = useCallback(
+    (stepId: StepId) => {
+      const requiredFields = STEP_FIELDS[stepId] ?? [];
+      if (!requiredFields.length) return true;
+
+      return requiredFields.every((field) => {
+        const value = data[field];
+        return typeof value === "number" ? value >= 0 : Boolean(value?.toString().trim());
+      });
+    },
+    [data],
+  );
+
+  const completedSteps = useMemo(() => {
+    return new Set(steps.filter((step) => isStepComplete(step.id as StepId)).map((step) => step.id));
+  }, [isStepComplete, steps]);
+
+  const completionPercentage = useMemo(() => {
+    if (!steps.length) return 0;
+    return Math.round((completedSteps.size / steps.length) * 100);
+  }, [completedSteps.size, steps.length]);
+
+  const canMoveForward = Boolean(activeStep && isStepComplete(activeStep.id as StepId));
+
+  const validationMessage = useMemo(() => {
+    if (!activeStep || canMoveForward) return "";
+    const requiredFields = STEP_FIELDS[activeStep.id as StepId] ?? [];
+    const missingFields = requiredFields.filter((field) => {
+      const value = data[field];
+      return typeof value === "number" ? value < 0 : !value?.toString().trim();
+    });
+
+    if (!missingFields.length) return "";
+    return `Add ${missingFields.map((field) => FIELD_LABELS[field] ?? field).join(", ")} to continue.`;
+  }, [activeStep, canMoveForward, data]);
+
+  const saveResume = useCallback(
+    async (showToast = true) => {
+      if (!data.name.trim() || !data.email.trim()) {
+        if (showToast) toast.error("Name and email are required");
+        return false;
+      }
+
+      setSaving(true);
+      setSaveStatus("saving");
+      try {
+        if (currentId) {
+          await updateResume(currentId, data);
+          if (showToast) toast.success("Resume updated");
+          onSaved(currentId);
+        } else {
+          const created = await createResume(data);
+          if (showToast) toast.success("Resume saved");
+          onSaved(created.id);
+        }
+        setSaveStatus("saved");
+        return true;
+      } catch (error) {
+        setSaveStatus("idle");
+        toast.error(getApiErrorMessage(error, "Save failed"));
+        return false;
+      } finally {
+        setSaving(false);
+      }
+    },
+    [currentId, data, onSaved],
+  );
+
+  const autoSaveIfPossible = async () => {
+    if (!data.name.trim() || !data.email.trim()) return true;
+    return saveResume(false);
+  };
+
+  const goToStep = async (index: number) => {
+    if (index === currentStep) return;
+    if (index > currentStep && !canMoveForward) {
+      toast.error("Complete the required fields before continuing");
+      return;
+    }
+
+    const saved = await autoSaveIfPossible();
+    if (saved) setCurrentStep(index);
+  };
+
+  const goNext = () => goToStep(Math.min(currentStep + 1, steps.length - 1));
+  const goBack = () => goToStep(Math.max(currentStep - 1, 0));
+  const completeWizard = async () => {
+    if (!canMoveForward) {
+      toast.error("Complete the required fields before continuing");
+      return;
+    }
+
+    const saved = await autoSaveIfPossible();
+    if (saved) onComplete?.();
+  };
+
   const handleCreateNew = (template?: TemplateId) => {
     if (!isEmptyResume(data)) {
       const shouldDiscard = window.confirm(
@@ -177,11 +366,13 @@ export function ResumeForm({ data, onChange, onSaved, currentId, onNew }: Props)
       if (!shouldDiscard) return;
     }
 
+    setCurrentStep(0);
     onNew(template);
   };
 
   const handleUserTypeChange = (value: UserType) => {
     setManualOverride(true);
+    setCurrentStep(0);
     onChange({
       ...data,
       user_type: value,
@@ -192,6 +383,7 @@ export function ResumeForm({ data, onChange, onSaved, currentId, onNew }: Props)
 
   const handleUseDetectedType = () => {
     setManualOverride(false);
+    setCurrentStep(0);
     onChange({
       ...data,
       user_type: data.detected_user_type,
@@ -248,7 +440,7 @@ Skills: ${data.skills}`;
       const draft = response?.summary || fallbackFieldDraft(field, data);
       update(field as keyof ResumeData, draft);
       toast.success(`${field} generated`);
-    } catch (error) {
+    } catch {
       update(field as keyof ResumeData, fallbackFieldDraft(field, data));
       toast.success(`${field} drafted locally`);
     } finally {
@@ -294,7 +486,7 @@ Skills: ${data.skills}`;
 
       update("summary", response?.summary || fallbackSummaryDraft(data));
       toast.success(`${data.user_type === "professional" ? "Summary" : "Objective"} drafted`);
-    } catch (error) {
+    } catch {
       update("summary", fallbackSummaryDraft(data));
       toast.success(`${data.user_type === "professional" ? "Summary" : "Objective"} drafted locally`);
     } finally {
@@ -302,285 +494,83 @@ Skills: ${data.skills}`;
     }
   };
 
-  const handleSave = async () => {
-    if (!data.name.trim() || !data.email.trim()) {
-      toast.error("Name and email are required");
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      if (currentId) {
-        await updateResume(currentId, data);
-        toast.success("Resume updated");
-        onSaved(currentId);
-      } else {
-        const created = await createResume(data);
-        toast.success("Resume saved");
-        onSaved(created.id);
-      }
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, "Save failed"));
-    } finally {
-      setSaving(false);
+  const renderStep = () => {
+    switch (activeStep?.id as StepId) {
+      case "personal":
+        return (
+          <PersonalDetails
+            data={data}
+            manualOverride={manualOverride}
+            userTypeLabel={getUserTypeLabel(data.user_type)}
+            detectedTypeLabel={getUserTypeLabel(data.detected_user_type)}
+            onUpdate={update}
+            onUserTypeChange={handleUserTypeChange}
+            onUseDetectedType={handleUseDetectedType}
+          />
+        );
+      case "education":
+        return <Education data={data} generatingField={generatingField} onUpdate={update} onGenerateField={handleGenerateField} />;
+      case "skills":
+        return <Skills data={data} onUpdate={update} />;
+      case "projects":
+        return <Projects data={data} generatingField={generatingField} onUpdate={update} onGenerateField={handleGenerateField} />;
+      case "internships":
+        return <Internships data={data} generatingField={generatingField} onUpdate={update} onGenerateField={handleGenerateField} />;
+      case "experience":
+        return <Experience data={data} onUpdate={update} />;
+      case "certifications":
+        return <Certifications data={data} generatingField={generatingField} onUpdate={update} onGenerateField={handleGenerateField} />;
+      case "achievements":
+        return <Achievements data={data} generatingField={generatingField} onUpdate={update} onGenerateField={handleGenerateField} />;
+      case "summary":
+        return <Summary data={data} generating={generating} onUpdate={update} onGenerateSummary={handleGenerateSummary} />;
+      case "objective":
+        return <Objective data={data} generating={generating} onUpdate={update} onGenerateSummary={handleGenerateSummary} />;
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Personal Information
-        </h4>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full name</Label>
-            <Input id="name" value={data.name} onChange={(event) => update("name", event.target.value)} placeholder="Ada Lovelace" />
+    <BuilderLayout
+      steps={steps}
+      currentStep={currentStep}
+      completedSteps={completedSteps}
+      completionPercentage={completionPercentage}
+      activeTitle={activeStep?.title ?? "Resume Builder"}
+      userTypeLabel={getUserTypeLabel(data.user_type)}
+      saveStatus={saveStatus}
+      onStepClick={goToStep}
+      controls={
+        <StepControls
+          canGoBack={currentStep > 0}
+          canGoNext={canMoveForward}
+          isLastStep={currentStep === steps.length - 1}
+          saving={saving}
+          validationMessage={validationMessage}
+          finishLabel="Preview resume"
+          onBack={goBack}
+          onNext={goNext}
+          onFinish={completeWizard}
+          onSave={() => saveResume(true)}
+        />
+      }
+    >
+      <Suspense
+        fallback={
+          <div className="flex min-h-48 items-center justify-center text-muted-foreground">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Loading step
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={data.email} onChange={(event) => update("email", event.target.value)} placeholder="student@example.com" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input id="phone" value={data.phone} onChange={(event) => update("phone", event.target.value)} placeholder="+91 98765 43210" />
-          </div>
+        }
+      >
+        <div
+          ref={stepPanelRef}
+          className="animate-in fade-in slide-in-from-right-2 duration-200"
+        >
+          {renderStep()}
         </div>
-      </div>
-
-      <div className="border-t border-border pt-4" />
-
-      <div>
-        <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          User Type Identification
-        </h4>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label>Highest education</Label>
-            <Select value={data.highest_education} onValueChange={(value) => update("highest_education", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select highest education" />
-              </SelectTrigger>
-              <SelectContent>
-                {HIGHEST_EDUCATION_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="years_of_experience">Years of experience</Label>
-            <Input
-              id="years_of_experience"
-              type="number"
-              min={0}
-              value={data.years_of_experience}
-              onChange={(event) => update("years_of_experience", Number(event.target.value || 0))}
-              placeholder="0"
-            />
-          </div>
-
-          <label className="flex items-center gap-3 rounded-xl border border-border bg-secondary/30 px-4 py-3 text-sm sm:col-span-2">
-            <input
-              type="checkbox"
-              checked={data.is_studying}
-              onChange={(event) => update("is_studying", event.target.checked)}
-              className="h-4 w-4"
-            />
-            <span>Currently studying</span>
-          </label>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-accent/20 bg-accent/5 p-4">
-          <p className="text-xs font-mono uppercase tracking-[0.25em] text-accent">Detected User Type</p>
-          <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-foreground">
-              Detected user type: <span className="font-semibold">{getUserTypeLabel(data.detected_user_type)}</span>
-            </p>
-            {manualOverride && (
-              <Button type="button" variant="outline" size="sm" onClick={handleUseDetectedType}>
-                Use detected type
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-4 space-y-2">
-          <Label>Manual override</Label>
-          <Select value={data.user_type} onValueChange={(value) => handleUserTypeChange(value as UserType)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choose a user type" />
-            </SelectTrigger>
-            <SelectContent>
-              {USER_TYPE_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">
-            {manualOverride
-              ? `Manual override active. Current type: ${getUserTypeLabel(data.user_type)}`
-              : `Using detected type automatically: ${getUserTypeLabel(data.user_type)}`}
-          </p>
-        </div>
-      </div>
-
-      <div className="border-t border-border pt-4" />
-
-      <div>
-        <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Resume Sections
-        </h4>
-        <div className="space-y-4">
-          {data.user_type !== "professional" && (
-            <>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="education">Education</Label>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => handleGenerateField("education")} disabled={generatingField === "education"} className="text-accent hover:bg-accent/10 hover:text-accent">
-                    {generatingField === "education" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                    <span className="ml-1 text-xs">{generatingField === "education" ? "Generating..." : "Draft for me"}</span>
-                  </Button>
-                </div>
-                <Textarea id="education" rows={3} value={data.education} onChange={(event) => update("education", event.target.value)} placeholder="Write your academic background in detail." />
-              </div>
-            </>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="skills">Skills</Label>
-            <Textarea id="skills" rows={3} value={data.skills} onChange={(event) => update("skills", event.target.value)} placeholder="Communication, Python, React, Excel, teamwork, SQL..." />
-          </div>
-
-          {data.user_type === "school" && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="achievements">Achievements / Activities</Label>
-                <Button type="button" variant="ghost" size="sm" onClick={() => handleGenerateField("achievements")} disabled={generatingField === "achievements"} className="text-accent hover:bg-accent/10 hover:text-accent">
-                  {generatingField === "achievements" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                  <span className="ml-1 text-xs">{generatingField === "achievements" ? "Generating..." : "Generate"}</span>
-                </Button>
-              </div>
-              <Textarea id="achievements" rows={3} value={data.achievements} onChange={(event) => update("achievements", event.target.value)} placeholder="Olympiad rank, sports captaincy, club work, volunteering..." />
-            </div>
-          )}
-
-          {data.user_type === "college" && (
-            <>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="projects">Projects</Label>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => handleGenerateField("projects")} disabled={generatingField === "projects"} className="text-accent hover:bg-accent/10 hover:text-accent">
-                    {generatingField === "projects" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                    <span className="ml-1 text-xs">{generatingField === "projects" ? "Generating..." : "Generate"}</span>
-                  </Button>
-                </div>
-                <Textarea id="projects" rows={4} value={data.projects} onChange={(event) => update("projects", event.target.value)} placeholder="Highlight your best academic or personal projects here." />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="internships">Internships</Label>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => handleGenerateField("internships")} disabled={generatingField === "internships"} className="text-accent hover:bg-accent/10 hover:text-accent">
-                    {generatingField === "internships" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                    <span className="ml-1 text-xs">{generatingField === "internships" ? "Generating..." : "Generate"}</span>
-                  </Button>
-                </div>
-                <Textarea id="internships" rows={3} value={data.internships} onChange={(event) => update("internships", event.target.value)} placeholder="Add internships, training, research roles, or practical experience." />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="certifications">Certifications</Label>
-                <Textarea id="certifications" rows={3} value={data.certifications} onChange={(event) => update("certifications", event.target.value)} placeholder="Certifications, badges, trainings..." />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="achievements_college">Achievements</Label>
-                <Textarea id="achievements_college" rows={3} value={data.achievements} onChange={(event) => update("achievements", event.target.value)} placeholder="Hackathons, competitions, awards, leadership..." />
-              </div>
-            </>
-          )}
-
-          {data.user_type === "professional" && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="experience">Work Experience</Label>
-                <Textarea id="experience" rows={6} value={data.experience} onChange={(event) => update("experience", event.target.value)} placeholder="Write roles, responsibilities, impact, leadership, and measurable outcomes." />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="certifications">Certifications</Label>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => handleGenerateField("certifications")} disabled={generatingField === "certifications"} className="text-accent hover:bg-accent/10 hover:text-accent">
-                    {generatingField === "certifications" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                    <span className="ml-1 text-xs">{generatingField === "certifications" ? "Generating..." : "Generate"}</span>
-                  </Button>
-                </div>
-                <Textarea id="certifications" rows={3} value={data.certifications} onChange={(event) => update("certifications", event.target.value)} placeholder="AWS, PMP, Scrum, domain certifications, licenses..." />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="education_professional">Education</Label>
-                <Textarea id="education_professional" rows={3} value={data.education} onChange={(event) => update("education", event.target.value)} placeholder="Degree, college, year, and relevant specialization." />
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="border-t border-border pt-4" />
-
-      <div>
-        <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          {data.user_type === "professional" ? "Professional Summary" : "Career Objective"}
-        </h4>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="summary">{data.user_type === "professional" ? "Summary" : "Objective"}</Label>
-            <Button type="button" variant="ghost" size="sm" onClick={handleGenerateSummary} disabled={generating} className="text-accent hover:bg-accent/10 hover:text-accent">
-              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              <span className="ml-1.5 text-xs">{generating ? "Drafting..." : "Draft for me"}</span>
-            </Button>
-          </div>
-          <Textarea id="summary" rows={4} value={data.summary} onChange={(event) => update("summary", event.target.value)} placeholder="Write a short introduction tailored to the selected user type." />
-        </div>
-      </div>
-
-      <div className="border-t border-border pt-4" />
-
-      <div className="flex gap-2">
-        <Button onClick={handleSave} disabled={saving || !data.name.trim() || !data.email.trim()} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">
-          {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-          {currentId ? "Update resume" : "Save resume"}
-        </Button>
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button type="button" variant="outline">New</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Start a new resume</DialogTitle>
-              <DialogDescription>Choose a template for your new resume. This will create a fresh resume using the selected template.</DialogDescription>
-            </DialogHeader>
-            <div className="mt-4">
-              <TemplateSelector value={data.template} onChange={(template) => update("template", template)} />
-            </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="ghost">Cancel</Button>
-              </DialogClose>
-              <Button onClick={() => handleCreateNew(data.template)} className="ml-2">Create</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </div>
+      </Suspense>
+    </BuilderLayout>
   );
 }

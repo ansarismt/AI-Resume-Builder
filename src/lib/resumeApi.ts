@@ -2,7 +2,12 @@ import axios from "axios";
 
 import type { ResumeData, SavedResume, TemplateId, UserType } from "@/components/resume/types";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = (() => {
+  const raw = (import.meta as any).env?.VITE_API_URL || "";
+  const trimmed = raw.replace(/\/$/, "");
+  const base = trimmed.endsWith("/api") ? trimmed.slice(0, -4) : trimmed || "http://127.0.0.1:8000";
+  return base;
+})();
 
 const api = axios.create({
   baseURL: API_BASE,
