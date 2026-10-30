@@ -66,3 +66,6 @@ test_resume.docx
 # Local user data
 data/
 resumes/
+# Personal resume files
+/ra.pdf
+/test_resume.docx
