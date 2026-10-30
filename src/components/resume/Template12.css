@@ -1,0 +1,6 @@
+.tpl12{display:flex;font-family:Helvetica,Arial,sans-serif}
+.tpl12__sidebar{width:220px;background:#0d2533;color:#fff;padding:20px}
+.tpl12__name{font-size:20px;margin:0}
+.tpl12__main{flex:1;padding:20px}
+.tpl12 h3{color:#0d2533}
+.tpl12__contact{font-size:12px;opacity:.9}

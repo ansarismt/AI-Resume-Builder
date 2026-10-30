@@ -1,0 +1,87 @@
+.resume-theme {
+  --resume-primary: var(--accent);
+  --resume-primary-foreground: #ffffff;
+  --resume-soft: color-mix(in srgb, var(--resume-primary) 12%, white);
+}
+
+.resume-theme .tpl2__sidebar,
+.resume-theme .tpl12__sidebar {
+  background: var(--resume-primary);
+  color: var(--resume-primary-foreground);
+}
+
+.resume-theme .tpl2__role,
+.resume-theme .tpl2__heading::before,
+.resume-theme .tpl4__chip,
+.resume-theme .tpl9__number {
+  background: var(--resume-primary);
+  color: var(--resume-primary-foreground);
+}
+
+.resume-theme .tpl6__sidebar,
+.resume-theme .tpl7__summary-box,
+.resume-theme .tpl8__summary,
+.resume-theme .tpl9__highlight,
+.resume-theme .tpl10__right,
+.resume-theme .tpl13__block {
+  background: var(--resume-soft);
+}
+
+.resume-theme .tpl6__profile,
+.resume-theme .tpl8__header {
+  border-color: var(--resume-primary);
+}
+
+.resume-theme .tpl6__title,
+.resume-theme .tpl13__block {
+  border-left-color: var(--resume-primary);
+}
+
+.resume-theme .tpl7__header,
+.resume-theme .tpl7__heading {
+  background: linear-gradient(135deg, var(--resume-primary) 0%, color-mix(in srgb, var(--resume-primary) 68%, #111827) 100%);
+}
+
+.resume-theme .tpl9__accent,
+.resume-theme .tpl9__number {
+  background: linear-gradient(180deg, var(--resume-primary), color-mix(in srgb, var(--resume-primary) 45%, #4ecdc4));
+}
+
+.resume-theme .tpl1__heading,
+.resume-theme .tpl2__sideHeading,
+.resume-theme .tpl4__h,
+.resume-theme .tpl5__name::before,
+.resume-theme .tpl5__email::before,
+.resume-theme .tpl5__h,
+.resume-theme .tpl6__heading,
+.resume-theme .tpl6__title,
+.resume-theme .tpl10 h2,
+.resume-theme .tpl10 h3,
+.resume-theme .tpl11 h2,
+.resume-theme .tpl12 h3,
+.resume-theme .tpl13 h2,
+.resume-theme .tpl14 h3 {
+  color: var(--resume-primary);
+}
+
+.resume-theme .tpl1__summary,
+.resume-theme .tpl5__summary {
+  border-left-color: var(--resume-primary);
+}
+
+.resume-theme .tpl5 {
+  background: color-mix(in srgb, var(--resume-primary) 30%, #111827);
+}
+
+.resume-theme .tpl7__summary-box {
+  border-left-color: var(--resume-primary);
+}
+
+@media print {
+  .resume-theme .tpl7__header,
+  .resume-theme .tpl7__heading,
+  .resume-theme .tpl9__header {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
