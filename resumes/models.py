@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 class Resume(models.Model):
@@ -7,22 +8,7 @@ class Resume(models.Model):
         ('professional', 'Working Professional'),
     ]
 
-    TEMPLATE_CHOICES = [
-        ('template1', 'Template 1'),
-        ('template2', 'Template 2'),
-        ('template3', 'Template 3'),
-        ('template4', 'Template 4'),
-        ('template5', 'Template 5'),
-        ('template6', 'Template 6'),
-        ('template7', 'Template 7'),
-        ('template8', 'Template 8'),
-        ('template9', 'Template 9'),
-        ('template10', 'Template 10'),
-        ('template11', 'Template 11'),
-        ('template12', 'Template 12'),
-        ('template13', 'Template 13'),
-        ('template14', 'Template 14'),
-    ]
+    TEMPLATE_CHOICES = [(f'template{number}', f'Template {number}') for number in range(1, 21)]
     
     name = models.CharField(max_length=100)
     email = models.EmailField()
@@ -40,7 +26,27 @@ class Resume(models.Model):
     certifications = models.TextField(blank=True, default="")
     summary = models.TextField(blank=True, default="")
     template = models.CharField(max_length=10, choices=TEMPLATE_CHOICES, default='template1')
+    title = models.CharField(max_length=150, blank=True, default="")
+    job_title_target = models.CharField(max_length=150, blank=True, default="")
+    links = models.JSONField(blank=True, default=dict)
+    location = models.CharField(max_length=150, blank=True, default="")
+    is_archived = models.BooleanField(default=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="resumes",
+        null=True,
+        blank=True,
+    )
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        related_name="versions",
+        null=True,
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f"{self.name}'s Resume"

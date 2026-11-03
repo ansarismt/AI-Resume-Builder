@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import {
   HIGHEST_EDUCATION_OPTIONS,
+  JOB_CATEGORY_OPTIONS,
   USER_TYPE_OPTIONS,
   type ResumeData,
   type UserType,
@@ -34,6 +35,10 @@ export default function PersonalDetails({
   onUserTypeChange,
   onUseDetectedType,
 }: Props) {
+  const hasCustomTarget =
+    Boolean(data.job_title_target) &&
+    !JOB_CATEGORY_OPTIONS.some((category) => category === data.job_title_target);
+
   return (
     <div className="space-y-6">
       <div>
@@ -164,6 +169,32 @@ export default function PersonalDetails({
             {manualOverride
               ? `Manual override active. Current type: ${userTypeLabel}`
               : `Using detected type automatically: ${userTypeLabel}`}
+          </p>
+        </div>
+
+        <div className="mt-4 space-y-2">
+          <Label>Target job category (optional)</Label>
+          <Select
+            value={hasCustomTarget ? data.job_title_target : data.job_title_target || "none"}
+            onValueChange={(value) => onUpdate("job_title_target", value === "none" ? "" : value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Choose a target job category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No target selected</SelectItem>
+              {hasCustomTarget && data.job_title_target && (
+                <SelectItem value={data.job_title_target}>{data.job_title_target}</SelectItem>
+              )}
+              {JOB_CATEGORY_OPTIONS.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Choose from the 24 career categories in the resume training data.
           </p>
         </div>
       </div>

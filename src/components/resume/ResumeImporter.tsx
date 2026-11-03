@@ -41,7 +41,8 @@ export function ResumeImporter({ onParsed }: Props) {
   const handleImport = () => {
     if (!parsed) return;
     const data = { ...emptyResume, ...parsed };
-    const { template: _template, ...fields } = data;
+    const fields = { ...data };
+    Reflect.deleteProperty(fields, "template");
     onParsed(fields);
     setRawText("");
     setFile(undefined);

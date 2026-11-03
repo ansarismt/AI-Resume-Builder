@@ -1,0 +1,500 @@
+/* Shared styles for all 20 resume templates (10 layouts x sans/serif). */
+
+.rd-wrap {
+  container-type: inline-size;
+  background: #ffffff;
+  color: #1a202c;
+}
+
+.rd {
+  --rd-accent: var(--resume-primary, #1f3a5f);
+  --rd-on-accent: var(--resume-primary-foreground, #ffffff);
+  --rd-ink: #1a202c;
+  --rd-muted: #4a5568;
+  --rd-rule: #d6dbe2;
+  --rd-soft: color-mix(in srgb, var(--rd-accent) 7%, #ffffff);
+  --rd-font: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+
+  font-family: var(--rd-font);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--rd-ink);
+  background: #ffffff;
+  padding: 2.25rem 2.5rem;
+  min-height: 141cqw; /* A4 proportions */
+  box-sizing: border-box;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.rd--serif {
+  --rd-font: Georgia, "Times New Roman", Times, serif;
+}
+
+.rd * {
+  box-sizing: border-box;
+}
+
+/* ---------- shared pieces ---------- */
+
+.rd__name {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--rd-ink);
+  overflow-wrap: anywhere;
+}
+
+.rd__headline {
+  margin: 0.3rem 0 0;
+  font-size: 1rem;
+  color: var(--rd-muted);
+}
+
+.rd__contact {
+  list-style: none;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1rem;
+  font-size: 0.82rem;
+  color: var(--rd-muted);
+}
+
+.rd__contact li {
+  overflow-wrap: anywhere;
+}
+
+.rd__section {
+  margin-top: 1.2rem;
+  break-inside: avoid;
+}
+
+.rd__heading {
+  margin: 0 0 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rd-accent);
+}
+
+.rd__body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rd__placeholder {
+  color: #8a94a3;
+  font-style: italic;
+}
+
+.rd__skills {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.4rem;
+}
+
+.rd__skills li {
+  border: 1px solid var(--rd-rule);
+  border-radius: 3px;
+  padding: 0.08rem 0.5rem;
+  font-size: 0.82rem;
+}
+
+.rd__main {
+  min-width: 0;
+}
+
+.rd__main > .rd__section:first-child,
+.rd__aside > .rd__section:first-of-type {
+  margin-top: 0;
+}
+
+/* ---------- classic: centred header, ruled sections ---------- */
+
+.rd--classic .rd__header {
+  text-align: center;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--rd-accent);
+}
+
+.rd--classic .rd__contact {
+  justify-content: center;
+}
+
+.rd--classic .rd__main {
+  margin-top: 0.4rem;
+}
+
+.rd--classic .rd__heading {
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--rd-rule);
+}
+
+/* ---------- modern: left header, accent-marked headings ---------- */
+
+.rd--modern .rd__name {
+  color: var(--rd-accent);
+}
+
+.rd--modern .rd__header {
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--rd-rule);
+}
+
+.rd--modern .rd__heading {
+  padding-left: 0.6rem;
+  border-left: 3px solid var(--rd-accent);
+}
+
+/* ---------- sidebar (left / right) ---------- */
+
+.rd--sidebar-left,
+.rd--sidebar-right {
+  padding: 0;
+}
+
+.rd__frame {
+  display: flex;
+  align-items: stretch;
+  min-height: 141cqw;
+}
+
+.rd--sidebar-left .rd__aside,
+.rd--sidebar-right .rd__aside {
+  flex: 0 0 33%;
+  max-width: 33%;
+  padding: 2.25rem 1.4rem;
+}
+
+.rd--sidebar-left .rd__main,
+.rd--sidebar-right .rd__main {
+  flex: 1 1 auto;
+  padding: 2.25rem 2rem;
+}
+
+.rd--sidebar-left .rd__frame {
+  flex-direction: row;
+}
+
+.rd--sidebar-right .rd__frame {
+  flex-direction: row-reverse;
+}
+
+.rd--sidebar-left .rd__aside {
+  background: var(--rd-accent);
+  color: var(--rd-on-accent);
+}
+
+.rd--sidebar-left .rd__aside .rd__contact {
+  margin-top: 0;
+  color: inherit;
+}
+
+.rd--sidebar-left .rd__aside .rd__heading {
+  color: var(--rd-on-accent);
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--rd-on-accent) 40%, transparent);
+}
+
+.rd--sidebar-left .rd__aside .rd__skills li {
+  border-color: color-mix(in srgb, var(--rd-on-accent) 45%, transparent);
+}
+
+.rd--sidebar-left .rd__aside .rd__placeholder {
+  color: color-mix(in srgb, var(--rd-on-accent) 70%, transparent);
+}
+
+.rd--sidebar-right .rd__aside {
+  background: var(--rd-soft);
+  border-left: 1px solid var(--rd-rule);
+}
+
+.rd--sidebar-right .rd__aside .rd__contact {
+  margin-top: 0;
+}
+
+.rd--sidebar-right .rd__name {
+  color: var(--rd-accent);
+}
+
+.rd--sidebar-left .rd__aside .rd__contact,
+.rd--sidebar-right .rd__aside .rd__contact {
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 1.4rem;
+}
+
+.rd--sidebar-left .rd__header,
+.rd--sidebar-right .rd__header {
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--rd-rule);
+  margin-bottom: 0.4rem;
+}
+
+.rd--sidebar-left .rd__aside .rd__skills,
+.rd--sidebar-right .rd__aside .rd__skills {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* ---------- banner: solid header band ---------- */
+
+.rd--banner {
+  padding: 0;
+}
+
+.rd--banner .rd__header {
+  background: var(--rd-accent);
+  color: var(--rd-on-accent);
+  padding: 2rem 2.5rem;
+}
+
+.rd--banner .rd__name,
+.rd--banner .rd__headline,
+.rd--banner .rd__contact {
+  color: var(--rd-on-accent);
+}
+
+.rd--banner .rd__headline,
+.rd--banner .rd__contact {
+  opacity: 0.9;
+}
+
+.rd--banner .rd__main {
+  padding: 0.6rem 2.5rem 2.25rem;
+}
+
+.rd--banner .rd__heading {
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--rd-rule);
+}
+
+/* ---------- split: header, then main + side column ---------- */
+
+.rd--split .rd__header {
+  padding-bottom: 1rem;
+  border-bottom: 3px solid var(--rd-accent);
+}
+
+.rd--split .rd__name {
+  color: var(--rd-accent);
+}
+
+.rd__cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+  gap: 1.75rem;
+  margin-top: 1.4rem;
+}
+
+.rd--split .rd__aside {
+  background: var(--rd-soft);
+  border: 1px solid var(--rd-rule);
+  border-radius: 4px;
+  padding: 1rem 1.1rem;
+  align-self: start;
+}
+
+.rd--split .rd__aside .rd__skills {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* ---------- compact: dense, shaded headings ---------- */
+
+.rd--compact {
+  font-size: 0.86rem;
+  line-height: 1.45;
+  padding: 1.75rem 2rem;
+}
+
+.rd--compact .rd__name {
+  font-size: 1.65rem;
+}
+
+.rd--compact .rd__headline {
+  font-size: 0.92rem;
+}
+
+.rd--compact .rd__section {
+  margin-top: 0.9rem;
+}
+
+.rd--compact .rd__heading {
+  margin-bottom: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  background: var(--rd-soft);
+  border-left: 3px solid var(--rd-accent);
+  font-size: 0.74rem;
+}
+
+.rd--compact .rd__header {
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--rd-rule);
+}
+
+/* ---------- timeline: vertical rule with markers ---------- */
+
+.rd--timeline .rd__name {
+  color: var(--rd-accent);
+}
+
+.rd--timeline .rd__header {
+  padding-bottom: 0.9rem;
+}
+
+.rd--timeline .rd__main {
+  margin-top: 0.4rem;
+  margin-left: 0.4rem;
+}
+
+.rd--timeline .rd__section {
+  position: relative;
+  padding-left: 1.3rem;
+  border-left: 2px solid var(--rd-rule);
+  padding-bottom: 0.2rem;
+}
+
+.rd--timeline .rd__section::before {
+  content: "";
+  position: absolute;
+  left: -0.4rem;
+  top: 0.12rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--rd-accent);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px var(--rd-accent);
+}
+
+/* ---------- ats: plain, black on white ---------- */
+
+.rd--ats {
+  --rd-accent: var(--rd-ink);
+}
+
+.rd--ats .rd__header {
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--rd-ink);
+}
+
+.rd--ats .rd__heading {
+  color: var(--rd-ink);
+  letter-spacing: 0.1em;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid var(--rd-ink);
+}
+
+.rd--ats .rd__contact,
+.rd--ats .rd__headline {
+  color: var(--rd-ink);
+}
+
+.rd--ats .rd__skills {
+  display: block;
+}
+
+.rd--ats .rd__skills li {
+  display: inline;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+
+.rd--ats .rd__skills li:not(:last-child)::after {
+  content: ", ";
+}
+
+/* ---------- framed: bold top rule, contact on the right ---------- */
+
+.rd--framed {
+  border-top: 8px solid var(--rd-accent);
+  padding-top: 1.75rem;
+}
+
+.rd--framed .rd__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.5rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--rd-rule);
+}
+
+.rd--framed .rd__contact {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  margin-top: 0;
+  text-align: right;
+}
+
+.rd--framed .rd__heading {
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--rd-accent);
+}
+
+/* ---------- narrow containers (small screens, side previews) ---------- */
+
+@container (max-width: 480px) {
+  .rd {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .rd--sidebar-left,
+  .rd--sidebar-right,
+  .rd--banner {
+    padding: 0;
+  }
+
+  .rd__name {
+    font-size: 1.6rem;
+  }
+
+  .rd__frame {
+    flex-direction: column !important;
+  }
+
+  .rd--sidebar-left .rd__aside,
+  .rd--sidebar-right .rd__aside {
+    flex: none;
+    max-width: none;
+    padding: 1.25rem;
+  }
+
+  .rd--sidebar-left .rd__main,
+  .rd--sidebar-right .rd__main {
+    padding: 1.25rem;
+  }
+
+  .rd--banner .rd__header {
+    padding: 1.4rem 1.25rem;
+  }
+
+  .rd--banner .rd__main {
+    padding: 0.4rem 1.25rem 1.5rem;
+  }
+
+  .rd__cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rd--framed .rd__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rd--framed .rd__contact {
+    align-items: flex-start;
+    text-align: left;
+  }
+}

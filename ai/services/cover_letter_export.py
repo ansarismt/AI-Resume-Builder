@@ -27,7 +27,7 @@ def render_cover_letter(name, content, extension):
         run = title.add_run(clean_name)
         run.bold = True
         run.font.size = Pt(20)
-        run.font.color.rgb = RGBColor(0, 72, 187)
+        run.font.color.rgb = RGBColor(0x1F, 0x3A, 0x5F)
         for paragraph in clean_content.splitlines():
             document.add_paragraph(paragraph)
         result = BytesIO()
@@ -37,7 +37,7 @@ def render_cover_letter(name, content, extension):
         title_style = ParagraphStyle(
             "LetterTitle",
             parent=styles["Title"],
-            textColor=colors.HexColor("#0048BB"),
+            textColor=colors.HexColor("#1F3A5F"),
         )
         body_style = ParagraphStyle(
             "LetterBody",

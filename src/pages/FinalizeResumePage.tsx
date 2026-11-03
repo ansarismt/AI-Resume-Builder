@@ -14,6 +14,7 @@ interface Props {
   onExportPdf: () => Promise<void> | void;
   onExportDocx: () => Promise<void>;
   onExportJson: () => Promise<void> | void;
+  onExportTxt: () => Promise<void> | void;
   onExportAll: () => Promise<void>;
 }
 
@@ -26,6 +27,7 @@ export function FinalizeResumePage({
   onExportPdf,
   onExportDocx,
   onExportJson,
+  onExportTxt,
   onExportAll,
 }: Props) {
   return (
@@ -43,7 +45,8 @@ export function FinalizeResumePage({
             Ready for export
           </div>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            PDF uses the current print flow. DOCX and JSON keep the existing backend/data behavior.
+            Download PDF, editable DOCX, structured JSON, or plain-text TXT. The PDF uses the
+            selected template without opening the browser print dialog.
           </p>
         </div>
 
@@ -54,6 +57,7 @@ export function FinalizeResumePage({
             onExportPdf={onExportPdf}
             onExportDocx={onExportDocx}
             onExportJson={onExportJson}
+            onExportTxt={onExportTxt}
             onExportAll={onExportAll}
           />
         </div>

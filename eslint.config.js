@@ -20,8 +20,20 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-      "@typescript-eslint/no-unused-vars": "off",
+      "react-refresh/only-export-components": [
+        "warn",
+        {
+          allowConstantExport: true,
+          allowExportNames: ["badgeVariants", "buttonVariants", "useAuth"],
+        },
+      ],
+      "@typescript-eslint/no-unused-vars": "warn",
+    },
+  },
+  {
+    files: ["src/router.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
     },
   },
   eslintPluginPrettier,

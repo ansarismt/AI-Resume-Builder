@@ -8,6 +8,14 @@ class ResumeSerializer(serializers.ModelSerializer):
     def get_detected_user_type(self, obj):
         return detect_user_type(obj.highest_education, obj.years_of_experience)
 
+    def validate_parent(self, parent):
+        request = self.context.get("request")
+        if parent and request and parent.user_id != request.user.pk:
+            raise serializers.ValidationError(
+                "The parent resume must belong to the signed-in user."
+            )
+        return parent
+
     def validate(self, attrs):
         instance = getattr(self, "instance", None)
         highest_education = attrs.get("highest_education", getattr(instance, "highest_education", ""))
@@ -46,3 +54,4 @@ class ResumeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resume
         fields = '__all__'
+        read_only_fields = ("user",)

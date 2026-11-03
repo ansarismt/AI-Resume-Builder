@@ -10,13 +10,19 @@ from .utils import detect_user_type
 class ResumeCreateView(generics.CreateAPIView):
     queryset = Resume.objects.all()
     serializer_class = ResumeSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class ResumeDetailView(generics.RetrieveAPIView):
     queryset = Resume.objects.all()
     serializer_class = ResumeSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Resume.objects.filter(user=self.request.user)
 
 
 class DetectResumeTypeView(APIView):

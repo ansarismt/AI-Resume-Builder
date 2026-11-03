@@ -1,17 +1,20 @@
 # AI Resume Builder
 
-AI Resume Builder is a full-stack resume builder with a React, TypeScript, and Vite frontend and a Django REST API. It supports a guided resume editor, live previews, 14 templates, private saved resumes, resume exports, local dataset-based career analysis, and optional generative-AI writing tools.
+AI Resume Builder is a full-stack resume builder with a React, TypeScript, and Vite frontend and a Django REST API. It supports a guided resume editor, live previews, 20 templates, private saved resumes, resume exports, local dataset-based career analysis, and optional generative-AI writing tools.
 
 > **Important:** The dataset-trained model and generative AI are different systems. The local model can analyze and classify resume content, but it does not generate or parse text. Generative tools require a configured AI provider and API key.
 
 ## Features
 
-- Guided resume editor with a live preview and 14 templates.
+- Guided resume editor with a live preview and 20 templates.
 - User accounts and private saved resumes, with resume versions.
-- PDF, DOCX, and JSON exports.
+- PDF, DOCX, JSON, and plain-text TXT exports.
 - PDF/DOCX resume import and AI-assisted field extraction.
 - Dataset-powered AI Studio for resume-strength feedback, career-category matches, skills to explore, and job-description comparisons.
 - Optional AI writing tools for summaries, bullet improvements, resume tailoring, cover letters, grammar checks, interview preparation, and LinkedIn headlines.
+
+PDF exports use the selected template and accent color directly, without relying on the browser
+print dialog. DOCX remains editable, though Word may render some spacing differently.
 
 ## Which AI features need an API key?
 
@@ -37,35 +40,27 @@ The training dataset is mostly professional resumes, so recommendations for stud
 
 ## Setup on Windows
 
-Open PowerShell in the `AIResumeBuilder` project directory:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-
-if (-not (Test-Path .env)) {
-    Copy-Item .env.example .env
-}
-
-.\.venv\Scripts\python.exe manage.py migrate
-npm install
-```
-
-Edit `.env` for your local configuration. In particular, change `DJANGO_SECRET_KEY` from its example value. Do not overwrite an existing `.env`; it may contain your local settings.
-
-Start the application:
+Open PowerShell in the `AI-Resume-Builder` project directory:
 
 ```powershell
 .\start-dev.bat
 ```
 
-The launcher opens the Django API and the Vite frontend in separate terminal windows. Open <http://127.0.0.1:8080>. The API is at <http://127.0.0.1:8000/api/> and the Django staff admin is at <http://127.0.0.1:8000/admin/>.
+
+The launcher creates `.env` from `.env.example` only when needed, creates the Python
+virtual environment, installs missing dependencies, applies database migrations, and
+opens the Django API and Vite frontend in separate terminal windows. Review `.env`
+for local configuration; do not overwrite an existing file. Replace the example
+`DJANGO_SECRET_KEY` before deploying, and keep `DJANGO_DEBUG=True` for local
+development only. Open <http://127.0.0.1:8080>. The API is at
+<http://127.0.0.1:8000/api/> and the Django staff admin is at
+<http://127.0.0.1:8000/admin/>.
 
 Alternatively, run each server in its own terminal:
 
 ```powershell
 # Terminal 1: Django backend
-.\.venv\Scripts\python.exe manage.py runserver
+.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
 ```
 
 ```powershell

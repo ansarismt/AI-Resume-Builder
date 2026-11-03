@@ -115,7 +115,7 @@ function getSteps(userType: UserType): WizardStep[] {
   }));
 }
 
-export function ResumeForm({ data, onChange, onSaved, currentId, onNew, onComplete }: Props) {
+export function ResumeForm({ data, onChange, onSaved, currentId, onComplete }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
@@ -210,22 +210,6 @@ export function ResumeForm({ data, onChange, onSaved, currentId, onNew, onComple
     manualOverride,
     onChange,
   ]);
-
-  const isEmptyResume = (resume: ResumeData) =>
-    [
-      resume.name,
-      resume.email,
-      resume.phone,
-      resume.highest_education,
-      resume.education,
-      resume.skills,
-      resume.projects,
-      resume.experience,
-      resume.certifications,
-      resume.internships,
-      resume.achievements,
-      resume.summary,
-    ].every((value) => !(value || "").toString().trim());
 
   const isStepComplete = useCallback(
     (stepId: StepId) => {
@@ -323,18 +307,6 @@ export function ResumeForm({ data, onChange, onSaved, currentId, onNew, onComple
 
     const saved = await autoSaveIfPossible();
     if (saved) onComplete?.();
-  };
-
-  const handleCreateNew = (template?: TemplateId) => {
-    if (!isEmptyResume(data)) {
-      const shouldDiscard = window.confirm(
-        "You have unsaved changes. Create a new resume and lose current changes?",
-      );
-      if (!shouldDiscard) return;
-    }
-
-    setCurrentStep(0);
-    onNew(template);
   };
 
   const handleUserTypeChange = (value: UserType) => {

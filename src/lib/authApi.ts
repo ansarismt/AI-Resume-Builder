@@ -20,8 +20,8 @@ function normalizeApiBase(raw: string) {
 }
 
 function getAuthApiBases() {
-  const envBase = normalizeApiBase((import.meta as any).env?.VITE_API_URL || "");
-  return [envBase, DEFAULT_API_BASE, "http://localhost:8000"].filter(
+  const envBase = normalizeApiBase(import.meta.env.VITE_API_URL || "");
+  return [envBase, DEFAULT_API_BASE].filter(
     (value, index, self) => !!value && self.indexOf(value) === index,
   );
 }
@@ -53,7 +53,9 @@ export async function requestAuth(endpoint: "login" | "signup", payload: AuthPay
       const data = await readJsonResponse(response, `/api/auth/${endpoint}/`);
 
       if (!response.ok) {
-        throw new Error(data?.error || `${endpoint === "login" ? "Login" : "Signup"} failed (${response.status})`);
+        throw new Error(
+          data?.error || `${endpoint === "login" ? "Login" : "Signup"} failed (${response.status})`,
+        );
       }
 
       if (!data?.token) {
@@ -72,7 +74,9 @@ export async function requestAuth(endpoint: "login" | "signup", payload: AuthPay
   }
 
   if (sawNetworkFailure) {
-    throw new Error(`Cannot reach Django API at ${DEFAULT_API_BASE}. Start it with: python manage.py runserver 127.0.0.1:8000`);
+    throw new Error(
+      `Cannot reach Django API at ${DEFAULT_API_BASE}. Start it with: python manage.py runserver 127.0.0.1:8000`,
+    );
   }
 
   throw new Error(`${endpoint === "login" ? "Login" : "Signup"} failed`);
