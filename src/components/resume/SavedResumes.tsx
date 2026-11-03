@@ -5,24 +5,12 @@ import { toast } from "sonner";
 import axios from "axios";
 import { deleteResume, getApiErrorMessage, listResumes } from "@/lib/resumeApi";
 
+import { TEMPLATE_CATALOG } from "./templateCatalog";
 import { TEMPLATE_IDS, type SavedResume, type TemplateId } from "./types";
 
-const TEMPLATE_LABELS: Record<TemplateId, string> = {
-  template1: "Editorial",
-  template2: "Modern",
-  template3: "Minimal",
-  template4: "Compact",
-  template5: "Terminal",
-  template6: "Classic",
-  template7: "Gradient",
-  template8: "Two-Column",
-  template9: "Color Block",
-  template10: "Executive",
-  template11: "Mono",
-  template12: "Split",
-  template13: "Creative",
-  template14: "Clean",
-};
+const TEMPLATE_LABELS = Object.fromEntries(
+  TEMPLATE_CATALOG.map((template) => [template.id, template.name]),
+) as Record<TemplateId, string>;
 
 interface Props {
   refreshKey: number;
@@ -49,7 +37,7 @@ export function SavedResumes({ refreshKey, onLoad, currentId, onDeleted, onCount
 
         const normalized = resumes.map((resume) => ({
           ...resume,
-          template: (TEMPLATE_IDS.includes(resume.template as TemplateId)
+          template: ((TEMPLATE_IDS as readonly string[]).includes(resume.template)
             ? resume.template
             : "template1") as TemplateId,
         }));

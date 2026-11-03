@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import ResumeViewSet
-from .views import AccountUpdateView, LoginView, SignupView, VerifyView
+from .views import AccountUpdateView, CurrentUserView, LoginView, SignupView, VerifyView
 from .api_views import ResumeCreateView, ResumeDetailView, DetectResumeTypeView
 
 router = DefaultRouter()
@@ -18,5 +18,6 @@ urlpatterns = [
     path('auth/login/', LoginView.as_view(), name='login'),
     path('auth/signup/', SignupView.as_view(), name='signup'),
     path('auth/account/', AccountUpdateView.as_view(), name='account-update'),
+    path('auth/me/', CurrentUserView.as_view(), name='current-user'),
     path('auth/verify/', VerifyView.as_view(), name='verify'),
 ]

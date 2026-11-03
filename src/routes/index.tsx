@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useState, useEffect, useRef } from "react";
 import {
   Download,
-  FileText,
   Eye,
   HelpCircle,
   ChevronDown,
@@ -41,7 +40,7 @@ export const Route = createFileRoute("/")({
 
 function LandingPage({ isStaff }: { isStaff: boolean }) {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background">
+    <div className="min-h-screen overflow-x-clip bg-background">
       <section className="relative overflow-hidden border-b border-border bg-secondary/40 text-foreground">
         <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-12">
           <div className="lg:col-span-7">
@@ -52,7 +51,7 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
               Create polished resumes, save versions, and export with confidence.
             </h1>
             <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-              Start from a guided form, choose from 14 templates, preview instantly, and manage
+              Start from a guided form, choose from 20 templates, preview instantly, and manage
               resumes from your dashboard after login.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
@@ -66,7 +65,7 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
             <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-accent" />
-                14 professional templates
+                20 professional templates
               </span>
               <span className="inline-flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-accent" />
@@ -151,7 +150,7 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
                     [
                       "Add your contact details, education, skills, and experience.",
                       "Review your content and make any edits.",
-                      "Select from 14 layouts to suit your needs.",
+                      "Select from 20 layouts to suit your needs.",
                       "Save your resume and export it in your preferred format.",
                     ][index]
                   }
@@ -169,7 +168,7 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
             {[
               "Build a resume for school, college, or professional roles.",
               "Get writing suggestions when you want a little help.",
-              "Save versions and export polished PDF, DOCX, or JSON files.",
+              "Save versions and export PDF, DOCX, JSON, or TXT files.",
             ].map((text) => (
               <div key={text} className="rounded-lg border border-border bg-card p-5">
                 <CheckCircle2 className="mb-3 h-5 w-5 text-primary" />
@@ -187,7 +186,7 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
             <article className="rounded-lg border border-border bg-card p-5">
               <h3 className="font-semibold">Can I choose from different resume styles?</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Yes. Preview and choose from 14 templates, and change your selection at any time.
+                Yes. Preview and choose from 20 templates, and change your selection at any time.
               </p>
             </article>
             <article className="rounded-lg border border-border bg-card p-5">
@@ -199,7 +198,7 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
             <article className="rounded-lg border border-border bg-card p-5">
               <h3 className="font-semibold">Which download formats are available?</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Download PDF, DOCX, and JSON files from the resume workflow.
+                Download PDF, DOCX, JSON, and TXT files from the resume workflow.
               </p>
             </article>
             <article className="rounded-lg border border-border bg-card p-5">
@@ -223,6 +222,105 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
       )}
     </div>
   );
+}
+
+async function downloadPreviewPdf(name: string) {
+  const preview = document.querySelector<HTMLElement>("#resume-print .rd-wrap");
+  if (!preview) {
+    throw new Error("The resume preview is not ready to export.");
+  }
+
+  await document.fonts.ready;
+  const { default: html2pdf } = await import("html2pdf.js");
+  const { jsPDF } = await import("jspdf");
+  const previewWidth = preview.getBoundingClientRect().width;
+  if (!previewWidth) {
+    throw new Error("The resume preview has no visible width.");
+  }
+  try {
+    const worker = html2pdf()
+      .set({
+        margin: 0,
+        html2canvas: {
+          backgroundColor: "#ffffff",
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          onclone: (clonedDocument: Document) => {
+            clonedDocument.documentElement.style.backgroundColor = "#ffffff";
+            if (clonedDocument.body) clonedDocument.body.style.backgroundColor = "#ffffff";
+            const container = clonedDocument.querySelector<HTMLElement>(".html2pdf__container");
+            if (!container) return;
+            container.style.setProperty("width", `${previewWidth}px`, "important");
+
+            const unsupportedColor = /\b(?:oklch|oklab|lch|lab|color|color-mix)\(/i;
+            for (const element of [container, ...container.querySelectorAll<HTMLElement>("*")]) {
+              const styles = clonedDocument.defaultView?.getComputedStyle(element);
+              if (!styles) continue;
+
+              for (let index = 0; index < styles.length; index += 1) {
+                const property = styles[index];
+                if (!unsupportedColor.test(styles.getPropertyValue(property))) continue;
+
+                if (property.includes("shadow") || property.includes("image")) {
+                  element.style.setProperty(property, "none");
+                } else if (property.includes("background")) {
+                  element.style.setProperty(property, "#ffffff");
+                } else if (property.includes("border") || property.includes("outline")) {
+                  element.style.setProperty(property, "#d6dbe2");
+                } else {
+                  element.style.setProperty(property, "#1a202c");
+                }
+              }
+            }
+          },
+        },
+      })
+      .from(preview)
+      .toCanvas();
+    const canvasValue: unknown = await worker.get("canvas");
+    if (!(canvasValue instanceof HTMLCanvasElement) || !canvasValue.width || !canvasValue.height) {
+      throw new Error("The PDF renderer did not produce a usable preview image.");
+    }
+
+    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const pageMargin = 8;
+    const imageScale = (pageWidth - pageMargin * 2) / canvasValue.width;
+    const imageWidth = canvasValue.width * imageScale;
+    const imageHeight = canvasValue.height * imageScale;
+    const image = canvasValue.toDataURL("image/jpeg", 0.98);
+    const pageContentHeight = pageHeight - pageMargin * 2;
+    const pageCount = Math.ceil(imageHeight / pageContentHeight);
+    for (let pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
+      if (pageIndex > 0) pdf.addPage();
+      pdf.addImage(
+        image,
+        "JPEG",
+        pageMargin,
+        pageMargin - pageIndex * pageContentHeight,
+        imageWidth,
+        imageHeight,
+        undefined,
+        "FAST",
+      );
+    }
+    const pdfBlob = pdf.output("blob");
+    const url = window.URL.createObjectURL(pdfBlob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${name.replace(/\s+/g, "_")}_Resume.pdf`;
+    document.body.appendChild(anchor);
+    try {
+      anchor.click();
+    } finally {
+      anchor.remove();
+      window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    }
+  } finally {
+    document.querySelectorAll(".html2pdf__overlay").forEach((overlay) => overlay.remove());
+  }
 }
 
 function Index() {
@@ -326,11 +424,11 @@ function Index() {
 
   const handleSaveResume = async () => Boolean(await saveResumeAndGetId());
 
-  const downloadExport = async (format: "pdf" | "docx" | "json") => {
+  const downloadExport = async (format: "pdf" | "docx" | "json" | "txt") => {
     const id = await saveResumeAndGetId();
     if (!id) return;
     try {
-      const blob = await downloadResumeExport(id, format);
+      const blob = await downloadResumeExport(id, format, selectedTemplateColor);
       const url = window.URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
@@ -345,9 +443,18 @@ function Index() {
     }
   };
 
-  const handleExportPdf = () => downloadExport("pdf");
+  const handleExportPdf = async () => {
+    try {
+      await downloadPreviewPdf(data.name);
+      toast.success("Resume downloaded as PDF");
+    } catch (error) {
+      console.error("Could not create PDF from preview", error);
+      toast.error(error instanceof Error ? error.message : "Could not create PDF from preview");
+    }
+  };
   const handleExportDocx = () => downloadExport("docx");
   const handleExportJson = () => downloadExport("json");
+  const handleExportTxt = () => downloadExport("txt");
   const exportPdfRef = useRef<() => void | Promise<void>>(() => {});
   exportPdfRef.current = handleExportPdf;
 
@@ -355,8 +462,10 @@ function Index() {
     const id = await saveResumeAndGetId();
     if (!id) return;
     try {
-      for (const format of ["pdf", "docx", "json"] as const) {
-        const blob = await downloadResumeExport(id, format);
+      await downloadPreviewPdf(data.name);
+
+      for (const format of ["docx", "json", "txt"] as const) {
+        const blob = await downloadResumeExport(id, format, selectedTemplateColor);
         const url = window.URL.createObjectURL(blob);
         const anchor = document.createElement("a");
         anchor.href = url;
@@ -366,7 +475,7 @@ function Index() {
         anchor.remove();
         window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
       }
-      toast.success("Downloaded PDF, DOCX, and JSON");
+      toast.success("Downloaded preview PDF, DOCX, JSON, and TXT");
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Could not download all formats"));
     }
@@ -446,12 +555,12 @@ function Index() {
       id: "export",
       question: "What export formats are available?",
       answer:
-        "You can export your resume as PDF, DOCX, and JSON. Each format preserves your content and layout for reuse.",
+        "You can export your resume as PDF, DOCX, JSON, and TXT. TXT provides a plain-text copy.",
     },
     {
       id: "templates",
       question: "Can I switch templates after building?",
-      answer: "Yes. You can move between all 14 templates at any time without losing your details.",
+      answer: "Yes. You can move between all 20 templates at any time without losing your details.",
     },
     {
       id: "students",
@@ -478,7 +587,7 @@ function Index() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background">
+    <div className="min-h-screen overflow-x-clip bg-background">
       {showKeyboardShortcuts && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full shadow-lg animate-in zoom-in-95">
@@ -515,7 +624,7 @@ function Index() {
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
               Build a polished resume for school, college, or your next role. Get real AI writing
-              help, preview 14 designs, and export the version that feels like you.
+              help, preview 20 designs, and export the version that feels like you.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button onClick={() => handleNew()} className="px-5">
@@ -579,7 +688,7 @@ function Index() {
                   <div>
                     <p className="text-sm font-semibold">Preview, choose, and export</p>
                     <p className="text-xs text-muted-foreground">
-                      14 templates with PDF, DOCX, and JSON downloads.
+                      20 templates with PDF, DOCX, JSON, and TXT downloads.
                     </p>
                   </div>
                 </div>
@@ -597,21 +706,21 @@ function Index() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             <div className="text-center p-4 rounded-lg hover:bg-secondary/50 transition-colors duration-200">
-              <div className="text-2xl sm:text-3xl font-bold text-primary">14</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary">20</div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground mt-1">
                 Templates
               </p>
             </div>
             <div className="text-center p-4 rounded-lg hover:bg-secondary/50 transition-colors duration-200">
-              <div className="text-2xl sm:text-3xl font-bold text-primary">3</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary">4</div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground mt-1">
                 Export Formats
               </p>
             </div>
             <div className="text-center p-4 rounded-lg hover:bg-secondary/50 transition-colors duration-200">
-              <div className="text-2xl sm:text-3xl font-bold text-primary">3</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary">24</div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground mt-1">
-                User Types
+                Job Categories
               </p>
             </div>
             <div className="text-center p-4 rounded-lg hover:bg-secondary/50 transition-colors duration-200">
@@ -754,6 +863,7 @@ function Index() {
               onExportPdf={handleExportPdf}
               onExportDocx={handleExportDocx}
               onExportJson={handleExportJson}
+              onExportTxt={handleExportTxt}
               onExportAll={handleExportAll}
             />
           )}

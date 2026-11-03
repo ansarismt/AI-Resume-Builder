@@ -31,9 +31,7 @@ export function Signup({ open, onClose }: { open: boolean; onClose: () => void }
       login(user.username, user.token, user.email);
       toast.success("Account created and signed in");
       onClose();
-      try {
-        window.dispatchEvent(new CustomEvent("open-saved"));
-      } catch {}
+      window.dispatchEvent(new CustomEvent("open-saved"));
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Signup failed");
     } finally {
@@ -60,8 +58,12 @@ export function Signup({ open, onClose }: { open: boolean; onClose: () => void }
             <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={onClose}>Cancel</Button>
-            <Button onClick={doSignup} disabled={loading}>{loading ? "Creating..." : "Create account"}</Button>
+            <Button variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button onClick={doSignup} disabled={loading}>
+              {loading ? "Creating..." : "Create account"}
+            </Button>
           </div>
         </div>
       </div>

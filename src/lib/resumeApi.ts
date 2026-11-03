@@ -1,6 +1,12 @@
 import axios from "axios";
 
-import type { ResumeData, SavedResume, TemplateId, UserType } from "@/components/resume/types";
+import {
+  TEMPLATE_IDS,
+  type ResumeData,
+  type SavedResume,
+  type TemplateId,
+  type UserType,
+} from "@/components/resume/types";
 
 const API_BASE = (() => {
   const raw = import.meta.env.VITE_API_URL || "";
@@ -137,24 +143,9 @@ type ResumeApiRecord = Omit<SavedResume, "id" | "template" | "user_type" | "dete
 };
 
 function normalizeTemplate(template: string): TemplateId {
-  const allowed: TemplateId[] = [
-    "template1",
-    "template2",
-    "template3",
-    "template4",
-    "template5",
-    "template6",
-    "template7",
-    "template8",
-    "template9",
-    "template10",
-    "template11",
-    "template12",
-    "template13",
-    "template14",
-  ];
-
-  return allowed.includes(template as TemplateId) ? (template as TemplateId) : "template1";
+  return (TEMPLATE_IDS as readonly string[]).includes(template)
+    ? (template as TemplateId)
+    : "template1";
 }
 
 function normalizeUserType(userType: string | undefined): UserType {
@@ -234,9 +225,14 @@ export async function deleteResume(id: string) {
   await api.delete(`/api/resumes/${id}/`);
 }
 
-export async function downloadResumeExport(id: string, format: "pdf" | "docx" | "json") {
+export async function downloadResumeExport(
+  id: string,
+  format: "pdf" | "docx" | "json" | "txt",
+  accentColor?: string,
+) {
   const response = await api.get<Blob>(`/api/resumes/${id}/export_${format}/`, {
     responseType: "blob",
+    params: accentColor ? { accent_color: accentColor } : undefined,
   });
   return response.data;
 }

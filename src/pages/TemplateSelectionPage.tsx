@@ -35,8 +35,8 @@ export function TemplateSelectionPage({
             </p>
             <h2 className="mt-2 font-display text-3xl font-bold">Pick a resume template</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Choose a style inspired by premium resume builders. Your existing template components
-              stay intact.
+              Choose from 20 professional layouts and a restrained colour palette. Every template
+              shows the same content, so you can switch freely.
             </p>
           </div>
           <div className="flex gap-2">
@@ -52,8 +52,8 @@ export function TemplateSelectionPage({
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.65fr)]">
-        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
+        <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {TEMPLATE_OPTIONS.map((template) => (
             <TemplateCard
               key={template.id}
@@ -66,12 +66,24 @@ export function TemplateSelectionPage({
           ))}
         </section>
 
-        <aside className="self-start rounded-xl border border-border bg-card p-3 shadow-sm xl:sticky xl:top-24">
-          <p className="mb-3 px-1 text-xs font-mono uppercase tracking-widest text-accent">
-            Live Preview
-          </p>
-          <div id="resume-print" className="rounded-lg border border-border">
-            <ResumePreview data={data} accentColor={selectedColor} />
+        <aside className="self-start rounded-xl border border-border bg-card p-3 shadow-lg lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto">
+          <div className="mb-3 flex items-center justify-between gap-3 px-1">
+            <div>
+              <p className="text-xs font-mono uppercase tracking-widest text-accent">
+                Live Preview
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">Updates as you choose a design</p>
+            </div>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/5 px-2.5 py-1 text-[0.65rem] font-medium text-accent">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+              Live
+            </span>
+          </div>
+          <div
+            id="resume-print"
+            className="overflow-hidden rounded-lg border border-border bg-secondary/30 p-1.5 shadow-inner"
+          >
+            <ResumePreview data={data} accentColor={selectedColor} sticky={false} />
           </div>
         </aside>
       </div>

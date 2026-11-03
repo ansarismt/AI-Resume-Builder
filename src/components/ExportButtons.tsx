@@ -9,10 +9,11 @@ interface Props {
   onExportPdf: () => Promise<void> | void;
   onExportDocx: () => Promise<void>;
   onExportJson: () => Promise<void> | void;
+  onExportTxt: () => Promise<void> | void;
   onExportAll: () => Promise<void>;
 }
 
-type ExportState = "idle" | "pdf" | "docx" | "json" | "all";
+type ExportState = "idle" | "pdf" | "docx" | "json" | "txt" | "all";
 
 export function ExportButtons({
   saving,
@@ -20,6 +21,7 @@ export function ExportButtons({
   onExportPdf,
   onExportDocx,
   onExportJson,
+  onExportTxt,
   onExportAll,
 }: Props) {
   const [exporting, setExporting] = useState<ExportState>("idle");
@@ -87,6 +89,15 @@ export function ExportButtons({
         >
           <FileJson className="mr-2 h-4 w-4" />
           Download JSON
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => runExport("txt", onExportTxt)}
+          disabled={busy}
+        >
+          <FileText className="mr-2 h-4 w-4" />
+          Download TXT
         </Button>
         <Button
           type="button"

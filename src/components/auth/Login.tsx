@@ -25,9 +25,7 @@ export function Login({ open, onClose }: { open: boolean; onClose: () => void })
       login(user.username, user.token, user.email);
       toast.success("Signed in");
       onClose();
-      try {
-        window.dispatchEvent(new CustomEvent("open-saved"));
-      } catch {}
+      window.dispatchEvent(new CustomEvent("open-saved"));
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Login failed");
     } finally {
@@ -50,8 +48,12 @@ export function Login({ open, onClose }: { open: boolean; onClose: () => void })
             <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
           </div>
           <div className="flex gap-2 justify-end">
-            <Button variant="ghost" onClick={onClose}>Cancel</Button>
-            <Button onClick={doLogin} disabled={loading}>{loading ? "Signing…" : "Sign in"}</Button>
+            <Button variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button onClick={doLogin} disabled={loading}>
+              {loading ? "Signing…" : "Sign in"}
+            </Button>
           </div>
         </div>
       </div>

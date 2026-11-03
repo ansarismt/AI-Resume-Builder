@@ -9,6 +9,7 @@ import "./templateTheme.css";
 interface Props {
   data: ResumeData;
   accentColor?: string;
+  sticky?: boolean;
 }
 
 function getReadableTextColor(color: string) {
@@ -21,7 +22,11 @@ function getReadableTextColor(color: string) {
   return brightness > 150 ? "#111827" : "#ffffff";
 }
 
-export const ResumePreview = memo(function ResumePreview({ data, accentColor = "#0f5c7a" }: Props) {
+export const ResumePreview = memo(function ResumePreview({
+  data,
+  accentColor = "#1f3a5f",
+  sticky = true,
+}: Props) {
   const preview = useMemo(() => {
     if (data.user_type === "school") return <SchoolPreview data={data} />;
     if (data.user_type === "professional") return <ProfessionalPreview data={data} />;
@@ -44,7 +49,7 @@ export const ResumePreview = memo(function ResumePreview({ data, accentColor = "
   );
 
   return (
-    <div className="resume-theme lg:sticky lg:top-24" style={style}>
+    <div className={`resume-theme${sticky ? " lg:sticky lg:top-24" : ""}`} style={style}>
       {preview}
     </div>
   );

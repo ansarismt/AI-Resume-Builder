@@ -62,7 +62,11 @@ export function AiBuilder({ onBuilt }: Props) {
           disabled={loading}
           className="bg-accent text-accent-foreground hover:bg-accent/90"
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <Wand2 className="h-4 w-4 mr-2" />
+          )}
           {loading ? "Building…" : "Build with AI"}
         </Button>
       </div>

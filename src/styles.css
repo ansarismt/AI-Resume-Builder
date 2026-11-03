@@ -211,17 +211,15 @@
     color: black !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    page-break-inside: avoid !important;
   }
-  #resume-print .tpl1,
-  #resume-print .tpl2,
-  #resume-print .tpl3,
-  #resume-print .tpl4,
-  #resume-print .tpl5 {
-    background: white !important;
-    color: black !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+  #resume-print .rd-wrap,
+  #resume-print .rd {
+    width: 100% !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  #resume-print .rd {
+    min-height: 141cqw !important;
   }
   .no-print { display: none !important; }
 }

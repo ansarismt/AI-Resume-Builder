@@ -1,20 +1,4 @@
-export type TemplateId =
-  | "template1"
-  | "template2"
-  | "template3"
-  | "template4"
-  | "template5"
-  | "template6"
-  | "template7"
-  | "template8"
-  | "template9"
-  | "template10"
-  | "template11"
-  | "template12"
-  | "template13"
-  | "template14";
-
-export const TEMPLATE_IDS: TemplateId[] = [
+export const TEMPLATE_IDS = [
   "template1",
   "template2",
   "template3",
@@ -29,9 +13,44 @@ export const TEMPLATE_IDS: TemplateId[] = [
   "template12",
   "template13",
   "template14",
-];
+  "template15",
+  "template16",
+  "template17",
+  "template18",
+  "template19",
+  "template20",
+] as const;
+
+export type TemplateId = (typeof TEMPLATE_IDS)[number];
 
 export type UserType = "school" | "college" | "professional";
+
+export const JOB_CATEGORY_OPTIONS = [
+  "Accountant",
+  "Advocate",
+  "Agriculture",
+  "Apparel",
+  "Arts",
+  "Automobile",
+  "Aviation",
+  "Banking",
+  "BPO",
+  "Business Development",
+  "Chef",
+  "Construction",
+  "Consultant",
+  "Designer",
+  "Digital Media",
+  "Engineering",
+  "Finance",
+  "Fitness",
+  "Healthcare",
+  "Human Resources",
+  "Information Technology",
+  "Public Relations",
+  "Sales",
+  "Teacher",
+] as const;
 
 export const USER_TYPE_OPTIONS: Array<{ value: UserType; label: string; description: string }> = [
   {
