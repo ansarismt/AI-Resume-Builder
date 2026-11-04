@@ -3,15 +3,15 @@ from django.core.cache import cache
 from django.test import SimpleTestCase, override_settings
 from django.urls import Resolver404, resolve
 from django.utils import timezone
-import json
 from datetime import timedelta
+import json
 from io import BytesIO
 from docx import Document
 from pypdf import PdfReader
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from .exports import TEMPLATE_COLORS
+from .exports import TEMPLATE_COLORS, _accent, safe_filename
 from .models import Resume
 
 
@@ -63,7 +63,26 @@ class ResumeOwnershipTests(APITestCase):
         response = self.client.get("/api/resumes/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual([item["id"] for item in response.data], [self.owned_resume.pk])
+        self.assertEqual([item["id"] for item in response.data["results"]], [self.owned_resume.pk])
+
+    def test_resume_list_is_ordered_and_paged_at_fifty(self):
+        Resume.objects.bulk_create(
+            [
+                Resume(
+                    user=self.owner,
+                    name=f"Resume {index}",
+                    email=f"resume-{index}@example.com",
+                )
+                for index in range(51)
+            ]
+        )
+        self.client.force_authenticate(self.owner)
+
+        response = self.client.get("/api/resumes/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["count"], 52)
+        self.assertEqual(len(response.data["results"]), 50)
 
     def test_resume_detail_does_not_expose_another_users_resume(self):
         self.client.force_authenticate(self.owner)
@@ -86,6 +105,105 @@ class ResumeOwnershipTests(APITestCase):
             Resume.objects.get(pk=response.data["id"]).user_id,
             self.other_user.pk,
         )
+
+    def test_parent_validation_does_not_disclose_resume_ownership_or_existence(self):
+        self.client.force_authenticate(self.owner)
+        missing_id = self.other_resume.pk + 10000
+        errors = []
+        for parent_id in (self.other_resume.pk, missing_id):
+            response = self.client.post(
+                "/api/resumes/",
+                {
+                    "name": "Child",
+                    "email": "child@example.com",
+                    "parent": parent_id,
+                },
+                format="json",
+            )
+            self.assertEqual(response.status_code, 400)
+            errors.append(str(response.data["parent"][0]))
+
+        self.assertEqual(errors, ["Invalid parent resume.", "Invalid parent resume."])
+
+    def test_accent_color_must_be_in_the_allowed_palette_and_is_saved(self):
+        self.client.force_authenticate(self.owner)
+
+        response = self.client.post(
+            "/api/resumes/",
+            {
+                "name": "Colored",
+                "email": "colored@example.com",
+                "accent_color": "#2f5d8a",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["accent_color"], "#2F5D8A")
+        self.assertEqual(
+            Resume.objects.get(pk=response.data["id"]).accent_color,
+            "#2F5D8A",
+        )
+        resume = Resume.objects.get(pk=response.data["id"])
+        self.assertEqual(_accent(resume), "2F5D8A")
+        invalid = self.client.post(
+            "/api/resumes/",
+            {
+                "name": "Invalid color",
+                "email": "invalid@example.com",
+                "accent_color": "#ff0000",
+            },
+            format="json",
+        )
+        self.assertEqual(invalid.status_code, 400)
+
+    def test_links_reject_invalid_shapes_and_values(self):
+        self.client.force_authenticate(self.owner)
+        invalid_links = (
+            ["https://example.com"],
+            {"other": "https://example.com"},
+            {"github": 123},
+            {"linkedin": "x" * 201},
+        )
+
+        for links in invalid_links:
+            with self.subTest(links=links):
+                response = self.client.post(
+                    "/api/resumes/",
+                    {
+                        "name": "Invalid links",
+                        "email": "invalid-links@example.com",
+                        "links": links,
+                    },
+                    format="json",
+                )
+                self.assertEqual(response.status_code, 400)
+
+    def test_legacy_non_string_links_do_not_break_text_export(self):
+        self.client.force_authenticate(self.owner)
+        self.owned_resume.links = {"github": 123, "linkedin": None}
+        self.owned_resume.save()
+
+        for export in ("export_pdf", "export_docx", "export_json", "export_txt"):
+            with self.subTest(export=export):
+                response = self.client.get(f"/api/resumes/{self.owned_resume.pk}/{export}/")
+                self.assertEqual(response.status_code, 200)
+                if export == "export_txt":
+                    self.assertIn(b"123", b"".join(response.streaming_content))
+
+    def test_safe_filename_is_ascii_and_has_unicode_fallback(self):
+        self.assertEqual(safe_filename("../Róshan/Resume", "Resume"), "Roshan_Resume_Resume")
+        self.assertEqual(safe_filename("தமிழ்", "Resume"), "resume_Resume")
+
+    def test_resume_export_uses_a_sanitized_filename(self):
+        self.client.force_authenticate(self.owner)
+        self.owned_resume.name = "தமிழ்/../Candidate"
+        self.owned_resume.save()
+
+        response = self.client.get(f"/api/resumes/{self.owned_resume.pk}/export_pdf/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Candidate_Resume.pdf", response["Content-Disposition"])
 
     def test_current_user_requires_authentication(self):
         response = self.client.get("/api/auth/me/")
@@ -327,7 +445,7 @@ class AuthenticationSecurityTests(APITestCase):
         User.objects.create_user(
             username="existing-user",
             email="person@example.com",
-            password="P@ssword-2231",
+            password="Strong-Password-928!",
         )
 
         response = self.client.post(
@@ -358,8 +476,8 @@ class AuthenticationSecurityTests(APITestCase):
         self.assertEqual(user.username, "new-user")
         self.assertEqual(user.email, "new.user@example.com")
 
-    def test_login_issues_new_token_after_password_change(self):
-        user = User.objects.create_user(username="account-user", password="Initial-Password-123!")
+    def test_password_change_replaces_and_invalidates_the_old_token(self):
+        user = User.objects.create_user(username="account-user", password="Old-Password-928!")
         old_token = Token.objects.create(user=user)
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {old_token.key}")
 
@@ -376,7 +494,7 @@ class AuthenticationSecurityTests(APITestCase):
         self.assertEqual(self.client.get("/api/auth/me/").status_code, 401)
 
     def test_logout_invalidates_token(self):
-        user = User.objects.create_user(username="logout-user", password="P@ssword-2231")
+        user = User.objects.create_user(username="logout-user", password="Strong-Password-928!")
         token = Token.objects.create(user=user)
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
 
@@ -387,7 +505,7 @@ class AuthenticationSecurityTests(APITestCase):
         self.assertEqual(self.client.get("/api/auth/me/").status_code, 401)
 
     def test_expired_token_is_rejected_and_deleted(self):
-        user = User.objects.create_user(username="expired-user", password="P@ssword-2231")
+        user = User.objects.create_user(username="expired-user", password="Strong-Password-928!")
         token = Token.objects.create(user=user)
         Token.objects.filter(pk=token.pk).update(created=timezone.now() - timedelta(days=15))
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
@@ -398,7 +516,7 @@ class AuthenticationSecurityTests(APITestCase):
         self.assertFalse(Token.objects.filter(pk=token.pk).exists())
 
     def test_deleting_user_deletes_resumes(self):
-        user = User.objects.create_user(username="delete-user", password="P@ssword-2231")
+        user = User.objects.create_user(username="delete-user", password="Strong-Password-928!")
         resume = Resume.objects.create(user=user, name="Private", email="private@example.com")
 
         user.delete()

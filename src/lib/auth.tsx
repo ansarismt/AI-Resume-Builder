@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { endSession, getCurrentUser } from "@/lib/resumeApi";
+import { getCurrentUser, logoutApi } from "@/lib/resumeApi";
 
 interface AuthContextValue {
   token: string | null;
@@ -17,22 +17,22 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(() =>
-    typeof window === "undefined" ? null : localStorage.getItem("token"),
-  );
-  const [username, setUsername] = useState<string | null>(() =>
-    typeof window === "undefined" ? null : localStorage.getItem("username"),
-  );
-  const [email, setEmail] = useState<string | null>(() =>
-    typeof window === "undefined" ? null : localStorage.getItem("email"),
-  );
-  const [loginAt, setLoginAt] = useState<string | null>(() =>
-    typeof window === "undefined" ? null : localStorage.getItem("loginAt"),
-  );
+  const [token, setToken] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [loginAt, setLoginAt] = useState<string | null>(null);
   const [isStaff, setIsStaff] = useState(false);
 
   useEffect(() => {
-    if (token) {
+    const t = localStorage.getItem("token");
+    const u = localStorage.getItem("username");
+    const e = localStorage.getItem("email");
+    const started = localStorage.getItem("loginAt");
+    if (t) setToken(t);
+    if (u) setUsername(u);
+    if (e) setEmail(e);
+    if (started) setLoginAt(started);
+    if (t) {
       getCurrentUser()
         .then((user) => {
           setUsername(user.username);
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error("Could not verify the saved session.", error);
         });
     }
-  }, [token]);
+  }, []);
 
   const login = (u: string, t: string, e = "", staff = false) => {
     const started = new Date().toISOString();
@@ -83,20 +83,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    try {
-      await endSession();
-    } finally {
-      localStorage.removeItem("token");
-      localStorage.removeItem("username");
-      localStorage.removeItem("email");
-      localStorage.removeItem("loginAt");
-      setToken(null);
-      setUsername(null);
-      setEmail(null);
-      setLoginAt(null);
-      setIsStaff(false);
-      window.location.href = "/";
-    }
+    await logoutApi();
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("email");
+    localStorage.removeItem("loginAt");
+    setToken(null);
+    setUsername(null);
+    setEmail(null);
+    setLoginAt(null);
+    setIsStaff(false);
+    window.location.href = "/";
   };
 
   return (

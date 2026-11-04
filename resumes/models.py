@@ -27,7 +27,9 @@ class Resume(models.Model):
     summary = models.TextField(blank=True, default="")
     template = models.CharField(max_length=10, choices=TEMPLATE_CHOICES, default='template1')
     title = models.CharField(max_length=150, blank=True, default="")
+    headline = models.CharField(max_length=120, blank=True, default="")
     job_title_target = models.CharField(max_length=150, blank=True, default="")
+    accent_color = models.CharField(max_length=7, blank=True, default="")
     links = models.JSONField(blank=True, default=dict)
     location = models.CharField(max_length=150, blank=True, default="")
     is_archived = models.BooleanField(default=False)
@@ -47,7 +49,9 @@ class Resume(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
     
     def __str__(self):
         return f"{self.name}'s Resume"
-

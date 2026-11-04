@@ -1,5 +1,6 @@
 import json
 import re
+import unicodedata
 from io import BytesIO
 from xml.sax.saxutils import escape
 
@@ -47,9 +48,16 @@ TEMPLATE_COLORS = {
 
 
 def _clean(value):
-    if not isinstance(value, str):
-        return value
-    return re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", value).strip()
+    if value is None:
+        return ""
+    text = value if isinstance(value, str) else str(value)
+    return re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text).strip()
+
+
+def safe_filename(name, suffix):
+    ascii_name = unicodedata.normalize("NFKD", str(name)).encode("ascii", "ignore").decode("ascii")
+    slug = re.sub(r"[^A-Za-z0-9]+", "_", ascii_name).strip("_")
+    return f"{slug or 'resume'}_{suffix}"
 
 
 def _sections(resume):
@@ -98,10 +106,12 @@ def _layout(resume):
 
 
 def _accent(resume, accent_color=None):
+    selected = accent_color or getattr(resume, "accent_color", "")
+    allowed = {f"#{color.upper()}" for color in TEMPLATE_COLORS.values()} | {"#2F5D8A"}
+    if isinstance(selected, str) and selected.upper() in allowed:
+        return selected[1:].upper()
     if _layout(resume) == "ats":
         return "111111"
-    if isinstance(accent_color, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", accent_color):
-        return accent_color[1:].upper()
     return TEMPLATE_COLORS.get(resume.template, DEFAULT_ACCENT)
 
 

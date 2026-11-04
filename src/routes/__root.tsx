@@ -10,9 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BrainCircuit, LogOut, Plus, Timer } from "lucide-react";
+import { toast } from "sonner";
 
 import { Toaster } from "@/components/ui/sonner";
-import { toast } from "sonner";
 
 function NotFoundComponent() {
   return (
@@ -154,11 +154,7 @@ function AuthHeader() {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {
-                void logout().catch(() => {
-                  toast.error(
-                    "Your browser session ended, but the server could not invalidate its token.",
-                  );
-                });
+                void logout().catch(() => toast.error("Could not log out. Please try again."));
               }}
               className="text-destructive focus:text-destructive"
             >

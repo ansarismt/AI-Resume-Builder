@@ -97,6 +97,7 @@ export interface ResumeData {
   certifications: string;
   summary: string;
   template: TemplateId;
+  accent_color?: string;
   title?: string;
   job_title_target?: string;
   links?: { linkedin?: string; github?: string; portfolio?: string };
@@ -129,6 +130,7 @@ export const emptyResume: ResumeData = {
   certifications: "",
   summary: "",
   template: "template1",
+  accent_color: "",
   title: "",
   job_title_target: "",
   links: {},

@@ -7,6 +7,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from resumes.models import Resume
+from resumes.exports import safe_filename
 from resumes.serializers import ResumeSerializer
 
 from .models import AIUsage
@@ -394,7 +395,7 @@ class CoverLetterExportView(AIAPIView):
                 {"format": "The URL format must match the request format."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        name = re.sub(r"[^A-Za-z0-9_-]+", "_", payload["name"]).strip("_") or "cover-letter"
+        name = payload["name"]
         buffer = render_cover_letter(name, payload["content"], extension)
         content_type = (
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -404,7 +405,7 @@ class CoverLetterExportView(AIAPIView):
         return FileResponse(
             buffer,
             as_attachment=True,
-            filename=f"{name}_Cover_Letter.{extension}",
+            filename=f"{safe_filename(name, 'Cover_Letter')}.{extension}",
             content_type=content_type,
         )
 
