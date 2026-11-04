@@ -49,7 +49,6 @@ export function SavedResumes({ refreshKey, onLoad, currentId, onDeleted, onCount
       .catch((error) => {
         if (!active) return;
 
-        console.error(error);
         setItems([]);
         onCount?.(0);
         setLoadError(
@@ -83,8 +82,7 @@ export function SavedResumes({ refreshKey, onLoad, currentId, onDeleted, onCount
       onDeleted(id);
       toast.success("Resume deleted");
     } catch (error) {
-      console.error(error);
-      toast.error("Delete failed");
+      toast.error(getApiErrorMessage(error, "Delete failed"));
     } finally {
       setDeletingId(null);
     }

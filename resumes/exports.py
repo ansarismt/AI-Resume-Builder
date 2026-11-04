@@ -169,10 +169,10 @@ def export_docx(resume, accent_color=None):
         bold=True,
         after=2,
     )
-    if _clean(resume.job_title_target):
+    if _clean(resume.headline):
         _docx_paragraph(
             document,
-            _clean(resume.job_title_target),
+            _clean(resume.headline),
             font,
             size=10,
             color="4A5568",
@@ -198,7 +198,7 @@ def export_pdf(resume, accent_color=None):
     title = _clean(resume.title) or f"{_clean(resume.name)} Resume"
     ensure_pdf_text_supported(
         _clean(resume.name),
-        _clean(resume.job_title_target),
+        _clean(resume.headline),
         contact,
         title,
         *(text for _heading, text in sections),
@@ -259,8 +259,8 @@ def export_pdf(resume, accent_color=None):
         spaceAfter=4,
     )
     story = [_pdf_paragraph(_clean(resume.name) or "Your Name", name_style)]
-    if _clean(resume.job_title_target):
-        story.append(_pdf_paragraph(_clean(resume.job_title_target), headline_style))
+    if _clean(resume.headline):
+        story.append(_pdf_paragraph(_clean(resume.headline), headline_style))
     if contact:
         story.append(_pdf_paragraph(contact, contact_style))
     story.append(Spacer(1, 4))
@@ -296,8 +296,8 @@ def export_json(resume, accent_color=None):
 
 def export_txt(resume):
     lines = [_clean(resume.name), _contact(resume)]
-    if _clean(resume.job_title_target):
-        lines.append(_clean(resume.job_title_target))
+    if _clean(resume.headline):
+        lines.append(_clean(resume.headline))
     for title, text in _sections(resume):
         lines.extend(("", title.upper(), text))
     return BytesIO("\n".join(lines).encode("utf-8"))

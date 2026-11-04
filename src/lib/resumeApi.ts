@@ -8,15 +8,14 @@ import {
   type UserType,
 } from "@/components/resume/types";
 
-const API_BASE = (() => {
+export function getApiBase() {
   const raw = import.meta.env.VITE_API_URL || "";
   const trimmed = raw.replace(/\/$/, "");
-  const base = trimmed.endsWith("/api") ? trimmed.slice(0, -4) : trimmed || "http://127.0.0.1:8000";
-  return base;
-})();
+  return trimmed.endsWith("/api") ? trimmed.slice(0, -4) : trimmed || "http://127.0.0.1:8000";
+}
 
 const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: getApiBase(),
   headers: {
     "Content-Type": "application/json",
   },
@@ -151,7 +150,7 @@ type ResumeApiRecord = Omit<SavedResume, "id" | "template" | "user_type" | "dete
   detected_user_type?: string;
 };
 
-function normalizeTemplate(template: string): TemplateId {
+export function normalizeTemplate(template: string): TemplateId {
   return (TEMPLATE_IDS as readonly string[]).includes(template)
     ? (template as TemplateId)
     : "template1";
@@ -175,6 +174,7 @@ function normalizeResume(record: ResumeApiRecord): SavedResume {
     years_of_experience: Number(record.years_of_experience ?? 0),
     template: normalizeTemplate(record.template),
     accent_color: record.accent_color ?? "",
+    headline: record.headline ?? "",
   };
 }
 
@@ -198,6 +198,7 @@ function toResumePayload(data: ResumeData) {
     template: data.template,
     accent_color: data.accent_color ?? "",
     title: data.title ?? "",
+    headline: data.headline ?? "",
     job_title_target: data.job_title_target ?? "",
     links: data.links ?? {},
     location: data.location ?? "",
