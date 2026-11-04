@@ -21,9 +21,7 @@ def extract_resume_text(upload):
         if extension == ".pdf":
             reader = PdfReader(BytesIO(content))
             if len(reader.pages) > MAX_PDF_PAGES:
-                raise ValueError(
-                    f"Resume PDFs must contain {MAX_PDF_PAGES} pages or fewer."
-                )
+                raise ValueError(f"Resume PDFs must contain {MAX_PDF_PAGES} pages or fewer.")
             text = "\n".join(page.extract_text() or "" for page in reader.pages)
         elif extension == ".docx":
             with ZipFile(BytesIO(content)) as archive:
@@ -38,16 +36,11 @@ def extract_resume_text(upload):
                     with archive.open(entry) as stream:
                         expanded_size += len(stream.read(remaining + 1))
                     if expanded_size > MAX_DOCX_EXPANDED_SIZE:
-                        raise ValueError(
-                            "The DOCX file contains too much expanded content."
-                        )
+                        raise ValueError("The DOCX file contains too much expanded content.")
             document = Document(BytesIO(content))
             paragraphs = [paragraph.text for paragraph in document.paragraphs]
             tables = [
-                cell.text
-                for table in document.tables
-                for row in table.rows
-                for cell in row.cells
+                cell.text for table in document.tables for row in table.rows for cell in row.cells
             ]
             text = "\n".join(paragraphs + tables)
         else:

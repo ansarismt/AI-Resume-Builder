@@ -33,9 +33,7 @@ class ResumeSerializer(serializers.ModelSerializer):
             return value
         normalized = value.upper()
         if not re.fullmatch(r"#[0-9A-F]{6}", normalized) or normalized not in ALLOWED_ACCENT_COLORS:
-            raise serializers.ValidationError(
-                "Choose one of the supported resume accent colors."
-            )
+            raise serializers.ValidationError("Choose one of the supported resume accent colors.")
         return normalized
 
     def validate_links(self, value):
@@ -43,7 +41,9 @@ class ResumeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Links must be an object.")
         allowed_keys = {"linkedin", "github", "portfolio"}
         if any(key not in allowed_keys for key in value):
-            raise serializers.ValidationError("Links may only include linkedin, github, and portfolio.")
+            raise serializers.ValidationError(
+                "Links may only include linkedin, github, and portfolio."
+            )
         normalized = {}
         for key, link in value.items():
             if not isinstance(link, str):
@@ -56,16 +56,21 @@ class ResumeSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         instance = getattr(self, "instance", None)
-        highest_education = attrs.get("highest_education", getattr(instance, "highest_education", ""))
+        highest_education = attrs.get(
+            "highest_education", getattr(instance, "highest_education", "")
+        )
         years_of_experience = attrs.get(
             "years_of_experience",
             getattr(instance, "years_of_experience", 0),
         )
-        user_type = attrs.get("user_type") or getattr(instance, "user_type", "") or detect_user_type(
-            highest_education,
-            years_of_experience,
+        user_type = (
+            attrs.get("user_type")
+            or getattr(instance, "user_type", "")
+            or detect_user_type(
+                highest_education,
+                years_of_experience,
+            )
         )
-        experience = attrs.get("experience", getattr(instance, "experience", ""))
         certifications = attrs.get("certifications", getattr(instance, "certifications", ""))
         projects = attrs.get("projects", getattr(instance, "projects", ""))
         internships = attrs.get("internships", getattr(instance, "internships", ""))
@@ -76,7 +81,9 @@ class ResumeSerializer(serializers.ModelSerializer):
 
         if user_type == "professional" and int(years_of_experience or 0) <= 0:
             raise serializers.ValidationError(
-                {"years_of_experience": "Working professionals must have more than 0 years of experience."}
+                {
+                    "years_of_experience": "Working professionals must have more than 0 years of experience."
+                }
             )
 
         if user_type == "school":
@@ -91,5 +98,5 @@ class ResumeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Resume
-        fields = '__all__'
+        fields = "__all__"
         read_only_fields = ("user",)

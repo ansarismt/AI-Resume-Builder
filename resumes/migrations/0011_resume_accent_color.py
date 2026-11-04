@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('resumes', '0010_alter_resume_options_resume_headline'),
+        ("resumes", "0010_alter_resume_options_resume_headline"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='resume',
-            name='accent_color',
-            field=models.CharField(blank=True, default='', max_length=7),
+            model_name="resume",
+            name="accent_color",
+            field=models.CharField(blank=True, default="", max_length=7),
         ),
     ]

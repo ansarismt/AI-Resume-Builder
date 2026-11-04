@@ -105,9 +105,7 @@ class PredictionTests(SimpleTestCase):
                 "education": "Computer science",
             },
             pipeline=fixture_pipeline(),
-            category_stats={
-                "INFORMATION-TECHNOLOGY": {"typical_resume_length": 100}
-            },
+            category_stats={"INFORMATION-TECHNOLOGY": {"typical_resume_length": 100}},
         )
 
         self.assertEqual(report["score"], sum(rule["score"] for rule in report["rules"]))

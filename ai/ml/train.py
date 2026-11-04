@@ -24,14 +24,61 @@ DATA_PATH = ROOT / "data" / "Resume.csv"
 ARTIFACTS_DIR = Path(__file__).resolve().parent / "artifacts"
 
 SKILL_TERMS = (
-    "python", "java", "javascript", "typescript", "sql", "excel", "power bi", "tableau",
-    "react", "django", "aws", "azure", "machine learning", "data analysis", "project management",
-    "communication", "leadership", "sales", "marketing", "accounting", "financial analysis",
-    "customer service", "html", "css", "node.js", "c++", "c#", "linux", "git", "docker",
-    "kubernetes", "networking", "cybersecurity", "human resources", "recruiting", "research",
-    "teaching", "public relations", "writing", "graphic design", "autocad", "quality assurance",
-    "supply chain", "operations", "negotiation", "forecasting", "budgeting", "healthcare",
-    "clinical", "food safety", "aviation", "logistics", "consulting", "agile", "scrum",
+    "python",
+    "java",
+    "javascript",
+    "typescript",
+    "sql",
+    "excel",
+    "power bi",
+    "tableau",
+    "react",
+    "django",
+    "aws",
+    "azure",
+    "machine learning",
+    "data analysis",
+    "project management",
+    "communication",
+    "leadership",
+    "sales",
+    "marketing",
+    "accounting",
+    "financial analysis",
+    "customer service",
+    "html",
+    "css",
+    "node.js",
+    "c++",
+    "c#",
+    "linux",
+    "git",
+    "docker",
+    "kubernetes",
+    "networking",
+    "cybersecurity",
+    "human resources",
+    "recruiting",
+    "research",
+    "teaching",
+    "public relations",
+    "writing",
+    "graphic design",
+    "autocad",
+    "quality assurance",
+    "supply chain",
+    "operations",
+    "negotiation",
+    "forecasting",
+    "budgeting",
+    "healthcare",
+    "clinical",
+    "food safety",
+    "aviation",
+    "logistics",
+    "consulting",
+    "agile",
+    "scrum",
 )
 
 SECTION_HEADINGS = {
@@ -47,9 +94,7 @@ SECTION_HEADINGS = {
 class BalancedComplementNB(ComplementNB):
     def fit(self, X, y, sample_weight=None):
         balanced_weights = (
-            compute_sample_weight("balanced", y)
-            if sample_weight is None
-            else sample_weight
+            compute_sample_weight("balanced", y) if sample_weight is None else sample_weight
         )
         return super().fit(X, y, sample_weight=balanced_weights)
 
@@ -95,9 +140,7 @@ def _category_statistics(texts, labels, vectorizer, matrix):
             r"(?<![A-Za-z0-9])" + escaped_term + r"(?![A-Za-z0-9])",
             re.I,
         )
-        global_skill_counts[term] = sum(
-            bool(pattern.search(text)) for text in texts
-        )
+        global_skill_counts[term] = sum(bool(pattern.search(text)) for text in texts)
 
     for category in sorted(set(labels)):
         category_mask = np.asarray(labels) == category
@@ -118,8 +161,7 @@ def _category_statistics(texts, labels, vectorizer, matrix):
             if count and count / len(category_text) >= 0.05:
                 counts[term] = count
         lifts = {
-            term: (count / len(category_text))
-            / (global_skill_counts[term] / total_text_count)
+            term: (count / len(category_text)) / (global_skill_counts[term] / total_text_count)
             for term, count in counts.items()
             if global_skill_counts[term]
         }
@@ -129,17 +171,11 @@ def _category_statistics(texts, labels, vectorizer, matrix):
             reverse=True,
         )[:20]
         skill_statistics[category] = ranked_skills
-        skill_frequency_statistics[category] = {
-            term: counts[term] for term in ranked_skills
-        }
-        skill_lift_statistics[category] = {
-            term: round(lifts[term], 4) for term in ranked_skills
-        }
+        skill_frequency_statistics[category] = {term: counts[term] for term in ranked_skills}
+        skill_lift_statistics[category] = {term: round(lifts[term], 4) for term in ranked_skills}
 
         orders = Counter(
-            tuple(order)
-            for order in (_section_order(text) for text in category_text)
-            if order
+            tuple(order) for order in (_section_order(text) for text in category_text) if order
         )
         section_statistics[category] = list(orders.most_common(1)[0][0]) if orders else []
         length_statistics[category] = int(np.median([len(text) for text in category_text]))
@@ -163,8 +199,7 @@ def _small_class_recall(test_labels, report):
         key=lambda item: (item[1], item[0]),
     )[:2]
     return {
-        category: report.get(category, {}).get("recall", 0.0)
-        for category, _ in smallest_categories
+        category: report.get(category, {}).get("recall", 0.0) for category, _ in smallest_categories
     }
 
 
@@ -239,12 +274,15 @@ def train_model(data_path=DATA_PATH, artifacts_dir=ARTIFACTS_DIR):
         )
     best_pipeline = Pipeline(
         [
-            ("tfidf", TfidfVectorizer(
-                ngram_range=(1, 2),
-                sublinear_tf=True,
-                max_features=50000,
-                stop_words="english",
-            )),
+            (
+                "tfidf",
+                TfidfVectorizer(
+                    ngram_range=(1, 2),
+                    sublinear_tf=True,
+                    max_features=50000,
+                    stop_words="english",
+                ),
+            ),
             ("classifier", best_classifier),
         ]
     )

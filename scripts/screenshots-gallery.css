@@ -1,0 +1,187 @@
+:root {
+  color: #172033;
+  background: #f3f5f8;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+.topbar {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 42px;
+  background: #fff;
+  border-bottom: 1px solid #e1e6ed;
+}
+
+.topbar strong {
+  font-family: Georgia, serif;
+  font-size: 20px;
+}
+
+.topbar span,
+.muted,
+.preview-title span {
+  color: #667085;
+  font-size: 13px;
+}
+
+.editor-hero {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 36px;
+  display: grid;
+  grid-template-columns: minmax(320px, 0.72fr) minmax(600px, 1.28fr);
+  gap: 28px;
+}
+
+.editor-panel,
+.live-preview {
+  min-width: 0;
+  border: 1px solid #e1e6ed;
+  border-radius: 16px;
+  background: #fff;
+  padding: 26px;
+  box-shadow: 0 12px 35px rgb(23 32 51 / 7%);
+}
+
+.editor-panel h1,
+.gallery-header h1 {
+  margin: 8px 0;
+  font: 700 30px/1.15 Georgia, serif;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #2f5d8a;
+  font: 700 10px/1.4 "Segoe UI", Arial, sans-serif;
+  letter-spacing: 0.18em;
+}
+
+.editor-panel label {
+  display: block;
+  margin-top: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.editor-panel input,
+.editor-panel textarea {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+  border: 1px solid #d6dbe2;
+  border-radius: 7px;
+  padding: 10px;
+  color: #344054;
+  background: #fbfcfe;
+  font: 13px/1.5 "Segoe UI", Arial, sans-serif;
+}
+
+.editor-panel textarea {
+  min-height: 76px;
+  resize: none;
+}
+
+.editor-panel button {
+  width: 100%;
+  margin-top: 22px;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px;
+  color: white;
+  background: #1f3a5f;
+  font-weight: 600;
+}
+
+.preview-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.preview-title h2 {
+  margin: 3px 0 0;
+  font: 600 16px "Segoe UI", Arial, sans-serif;
+}
+
+.live-preview > .rd-wrap {
+  border: 1px solid #e1e6ed;
+  box-shadow: 0 5px 18px rgb(23 32 51 / 8%);
+}
+
+.gallery-page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 34px 40px 48px;
+}
+
+.gallery-header {
+  margin-bottom: 26px;
+}
+
+.gallery-header h1 {
+  font-size: 34px;
+}
+
+.gallery-header > p:last-child {
+  margin: 8px 0 0;
+  color: #667085;
+}
+
+.template-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.template-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e1e6ed;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 5px 18px rgb(23 32 51 / 6%);
+}
+
+.sample-sheet {
+  width: 100%;
+  height: 340px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.scaled-resume {
+  width: 794px;
+  transform: scale(0.30);
+  transform-origin: top left;
+}
+
+.scaled-resume .rd-wrap {
+  width: 794px;
+}
+
+.template-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 12px;
+  font-size: 12px;
+}
+
+.template-label span {
+  color: #667085;
+  text-transform: capitalize;
+}

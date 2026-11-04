@@ -4,19 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('resumes', '0009_alter_resume_user_delete_emailverification'),
+        ("resumes", "0009_alter_resume_user_delete_emailverification"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='resume',
-            options={'ordering': ['-updated_at']},
+            name="resume",
+            options={"ordering": ["-updated_at"]},
         ),
         migrations.AddField(
-            model_name='resume',
-            name='headline',
-            field=models.CharField(blank=True, default='', max_length=120),
+            model_name="resume",
+            name="headline",
+            field=models.CharField(blank=True, default="", max_length=120),
         ),
     ]

@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ai', '0001_initial'),
+        ("ai", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='aiusage',
-            name='created_at',
+            model_name="aiusage",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True, db_index=True),
         ),
         migrations.AlterField(
-            model_name='aiusage',
-            name='endpoint',
+            model_name="aiusage",
+            name="endpoint",
             field=models.CharField(db_index=True, max_length=40),
         ),
     ]

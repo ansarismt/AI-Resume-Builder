@@ -6,17 +6,12 @@ from docx.oxml.ns import qn
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
-TEMPLATE_CATALOG = json.loads(
-    (BASE_DIR / "shared" / "templates.json").read_text(encoding="utf-8")
-)
+TEMPLATE_CATALOG = json.loads((BASE_DIR / "shared" / "templates.json").read_text(encoding="utf-8"))
 TEMPLATE_COLORS = {
-    template["id"]: template["colors"][0].removeprefix("#").upper()
-    for template in TEMPLATE_CATALOG
+    template["id"]: template["colors"][0].removeprefix("#").upper() for template in TEMPLATE_CATALOG
 }
 ALLOWED_COLORS = {
-    color.removeprefix("#").upper()
-    for template in TEMPLATE_CATALOG
-    for color in template["colors"]
+    color.removeprefix("#").upper() for template in TEMPLATE_CATALOG for color in template["colors"]
 }
 DEFAULT_ACCENT = TEMPLATE_COLORS["template1"]
 
@@ -31,11 +26,7 @@ def resolve_export_style(template_id, accent_color=None):
         TEMPLATE_CATALOG[0],
     )
     default_color = template["colors"][0].removeprefix("#").upper()
-    selected_color = (
-        accent_color.removeprefix("#").upper()
-        if isinstance(accent_color, str)
-        else ""
-    )
+    selected_color = accent_color.removeprefix("#").upper() if isinstance(accent_color, str) else ""
     accent = selected_color if selected_color in ALLOWED_COLORS else default_color
     font = "Georgia" if template["font"] == "serif" else "Arial"
     return accent, font
@@ -54,6 +45,4 @@ def set_docx_font(run, font):
 
 def ensure_pdf_text_supported(*values):
     if any(ord(character) > 255 for value in values for character in value):
-        raise UnsupportedPdfLanguageError(
-            "Use the Download PDF button for this language."
-        )
+        raise UnsupportedPdfLanguageError("Use the Download PDF button for this language.")

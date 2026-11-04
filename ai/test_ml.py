@@ -40,8 +40,12 @@ class MLRegressionTests(SimpleTestCase):
         self.assertAlmostEqual(sum(item["confidence"] for item in results), 1.0)
         self.assertGreater(results[1]["confidence"], results[0]["confidence"])
 
-    @patch("ai.ml.predict.load_category_stats", return_value={"TECH": {"common_skills": ["Python"]}})
-    @patch("ai.ml.predict.predict_categories", return_value=[{"category": "TECH", "confidence": 0.1}])
+    @patch(
+        "ai.ml.predict.load_category_stats", return_value={"TECH": {"common_skills": ["Python"]}}
+    )
+    @patch(
+        "ai.ml.predict.predict_categories", return_value=[{"category": "TECH", "confidence": 0.1}]
+    )
     def test_category_skills_obey_the_confidence_threshold(self, mock_predict, mock_stats):
         with self.assertRaises(predict.ModelUnavailableError):
             predict.category_skills("uncertain role")
@@ -99,7 +103,9 @@ class MLRegressionTests(SimpleTestCase):
         self.assertEqual(set(missing), {"Kubernetes", "AWS", "Python", ".NET", "C++"})
         self.assertEqual(percent, 0)
 
-    @patch("ai.ml.predict.predict_categories", return_value=[{"category": "TECH", "confidence": 0.9}])
+    @patch(
+        "ai.ml.predict.predict_categories", return_value=[{"category": "TECH", "confidence": 0.9}]
+    )
     def test_strength_ignores_name_and_contact_fields_for_pronouns(self, mock_predict):
         resume = {
             "name": "Ivy Usher",
@@ -119,7 +125,9 @@ class MLRegressionTests(SimpleTestCase):
         pronouns = next(rule for rule in result["rules"] if rule["rule"] == "first_person_pronouns")
         self.assertEqual(pronouns["score"], 10)
 
-    @patch("ai.ml.predict.predict_categories", return_value=[{"category": "TECH", "confidence": 0.9}])
+    @patch(
+        "ai.ml.predict.predict_categories", return_value=[{"category": "TECH", "confidence": 0.9}]
+    )
     def test_strength_flags_uppercase_first_person_i(self, mock_predict):
         resume = {
             "summary": "I developed documented tools.",
@@ -137,7 +145,9 @@ class MLRegressionTests(SimpleTestCase):
         pronouns = next(rule for rule in result["rules"] if rule["rule"] == "first_person_pronouns")
         self.assertEqual(pronouns["score"], 0)
 
-    @patch("ai.ml.predict.predict_categories", return_value=[{"category": "TECH", "confidence": 0.9}])
+    @patch(
+        "ai.ml.predict.predict_categories", return_value=[{"category": "TECH", "confidence": 0.9}]
+    )
     def test_strength_accepts_mixed_date_formats_in_either_monotonic_direction(self, mock_predict):
         for date_text in (
             "Built tools 2019.\nDelivered projects 2022.",
@@ -158,10 +168,7 @@ class MLRegressionTests(SimpleTestCase):
                     category_stats={"TECH": {"typical_resume_length": 100}},
                 )
 
-                dates = next(
-                    rule for rule in result["rules"]
-                    if rule["rule"] == "date_consistency"
-                )
+                dates = next(rule for rule in result["rules"] if rule["rule"] == "date_consistency")
                 self.assertEqual(dates["score"], 10)
 
     def test_model_artifact_cache_uses_the_artifact_modification_time(self):
@@ -173,7 +180,9 @@ class MLRegressionTests(SimpleTestCase):
             predict._load_pipeline.cache_clear()
             with (
                 patch.object(predict, "ARTIFACTS_DIR", artifact_directory),
-                patch.object(predict.joblib, "load", side_effect=["old-model", "new-model"]) as load,
+                patch.object(
+                    predict.joblib, "load", side_effect=["old-model", "new-model"]
+                ) as load,
             ):
                 self.assertEqual(predict.load_pipeline(), "old-model")
                 os.utime(model_path, ns=(first_mtime + 1000000, first_mtime + 1000000))
@@ -202,9 +211,7 @@ class MLRegressionTests(SimpleTestCase):
 class ResumeImportRegressionTests(SimpleTestCase):
     @patch("ai.services.resume_import.PdfReader")
     def test_pdf_import_uses_default_non_strict_parsing(self, mock_reader):
-        mock_reader.return_value.pages = [
-            SimpleNamespace(extract_text=lambda: "Candidate resume")
-        ]
+        mock_reader.return_value.pages = [SimpleNamespace(extract_text=lambda: "Candidate resume")]
         upload = SimpleUploadedFile("resume.pdf", b"pdf bytes")
 
         result = extract_resume_text(upload)

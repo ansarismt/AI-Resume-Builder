@@ -59,15 +59,11 @@ def _log_request_failure(provider, error, status_code=None):
 def generate_json(system_prompt, data, response_schema=None):
     provider = settings.LLM_PROVIDER
     if not provider or not settings.LLM_MODEL:
-        raise AIConfigurationError(
-            "AI not configured. Set LLM_PROVIDER and LLM_MODEL in .env."
-        )
+        raise AIConfigurationError("AI not configured. Set LLM_PROVIDER and LLM_MODEL in .env.")
     if not settings.LLM_API_KEY and not (
         provider == "openai-compatible" and _is_local_compatible_endpoint()
     ):
-        raise AIConfigurationError(
-            "AI not configured. Set LLM_API_KEY for the selected provider."
-        )
+        raise AIConfigurationError("AI not configured. Set LLM_API_KEY for the selected provider.")
 
     client = _client(provider)
     messages = [
@@ -99,9 +95,7 @@ def generate_json(system_prompt, data, response_schema=None):
                 completion_options["max_tokens"] = settings.LLM_MAX_TOKENS
             if settings.LLM_TEMPERATURE:
                 try:
-                    completion_options["temperature"] = float(
-                        settings.LLM_TEMPERATURE
-                    )
+                    completion_options["temperature"] = float(settings.LLM_TEMPERATURE)
                 except ValueError as error:
                     raise AIConfigurationError(
                         "LLM_TEMPERATURE must be a number or empty."

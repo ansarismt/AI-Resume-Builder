@@ -157,11 +157,7 @@ def _keyword_match(resume_text, job_description, vectorizer):
     feature_names = vectorizer.get_feature_names_out()
     weights = jd_vector.toarray()[0]
     ranked_indices = weights.argsort()[::-1]
-    keywords = [
-        str(feature_names[index])
-        for index in ranked_indices
-        if weights[index] > 0
-    ]
+    keywords = [str(feature_names[index]) for index in ranked_indices if weights[index] > 0]
     domain_terms = re.findall(
         r"(?<!\w)(?:\.NET|[A-Za-z][A-Za-z0-9]*(?:[.+#/-][A-Za-z0-9+#.-]*)*)(?!\w)",
         job_description,
@@ -173,11 +169,7 @@ def _keyword_match(resume_text, job_description, vectorizer):
         if (
             len(normalized) < 2
             or normalized in ENGLISH_STOP_WORDS
-            or not (
-                term.isupper()
-                or term[0].isupper()
-                or re.search(r"\d|[.+#/-]", term)
-            )
+            or not (term.isupper() or term[0].isupper() or re.search(r"\d|[.+#/-]", term))
             or normalized in seen
         ):
             continue
@@ -212,11 +204,7 @@ def ats_analysis(resume, job_description, pipeline=None):
         for section in _required_sections(user_type)
     }
     completeness = round(100 * sum(sections.values()) / len(sections))
-    overall = round(
-        0.45 * similarity * 100
-        + 0.4 * keyword_percent
-        + 0.15 * completeness
-    )
+    overall = round(0.45 * similarity * 100 + 0.4 * keyword_percent + 0.15 * completeness)
     warnings = []
     if not resume.get("email") and not resume.get("phone"):
         warnings.append("Add at least one contact method.")
@@ -238,13 +226,27 @@ def ats_analysis(resume, job_description, pipeline=None):
 
 
 _ACTION_VERBS = {
-    "achieved", "analyzed", "built", "created", "delivered", "designed", "developed",
-    "directed", "improved", "implemented", "increased", "launched", "led", "managed",
-    "optimized", "organized", "reduced", "resolved", "streamlined",
+    "achieved",
+    "analyzed",
+    "built",
+    "created",
+    "delivered",
+    "designed",
+    "developed",
+    "directed",
+    "improved",
+    "implemented",
+    "increased",
+    "launched",
+    "led",
+    "managed",
+    "optimized",
+    "organized",
+    "reduced",
+    "resolved",
+    "streamlined",
 }
-_FIRST_PERSON = re.compile(
-    r"\bI\b|(?i:\b(?:me|my|mine|we|our|ours)\b)"
-)
+_FIRST_PERSON = re.compile(r"\bI\b|(?i:\b(?:me|my|mine|we|our|ours)\b)")
 _DATE_PATTERN = re.compile(
     r"\b(?:19|20)\d{2}\b",
 )
@@ -303,25 +305,53 @@ def resume_strength(resume, pipeline=None, category_stats=None):
     pronoun_score = 10 if no_first_person else 0
     dates = [int(year) for year in _DATE_PATTERN.findall(resume_text)]
     consistent_dates = (
-        len(dates) < 2
-        or dates == sorted(dates)
-        or dates == sorted(dates, reverse=True)
+        len(dates) < 2 or dates == sorted(dates) or dates == sorted(dates, reverse=True)
     )
     date_score = 10 if consistent_dates else 0
 
     rules = [
-        {"rule": "section_completeness", "score": section_score, "max_score": 30,
-         "feedback": f"{completed} of {len(sections)} recommended sections are complete."},
-        {"rule": "bullet_quality", "score": bullet_score, "max_score": 25,
-         "feedback": "Use clear action verbs and add measurable results when factual."},
-        {"rule": "resume_length", "score": length_score, "max_score": 15,
-         "feedback": "Resume length is compared with the predicted role category."},
-        {"rule": "contact_information", "score": contact_score, "max_score": 10,
-         "feedback": "Include a reachable email address or phone number." if not has_contact else "Contact information is present."},
-        {"rule": "first_person_pronouns", "score": pronoun_score, "max_score": 10,
-         "feedback": "Use concise resume phrasing without first-person pronouns." if not no_first_person else "No first-person pronouns found."},
-        {"rule": "date_consistency", "score": date_score, "max_score": 10,
-         "feedback": "Check that date ranges are consistently ordered." if not consistent_dates else "No inconsistent date order was detected."},
+        {
+            "rule": "section_completeness",
+            "score": section_score,
+            "max_score": 30,
+            "feedback": f"{completed} of {len(sections)} recommended sections are complete.",
+        },
+        {
+            "rule": "bullet_quality",
+            "score": bullet_score,
+            "max_score": 25,
+            "feedback": "Use clear action verbs and add measurable results when factual.",
+        },
+        {
+            "rule": "resume_length",
+            "score": length_score,
+            "max_score": 15,
+            "feedback": "Resume length is compared with the predicted role category.",
+        },
+        {
+            "rule": "contact_information",
+            "score": contact_score,
+            "max_score": 10,
+            "feedback": "Include a reachable email address or phone number."
+            if not has_contact
+            else "Contact information is present.",
+        },
+        {
+            "rule": "first_person_pronouns",
+            "score": pronoun_score,
+            "max_score": 10,
+            "feedback": "Use concise resume phrasing without first-person pronouns."
+            if not no_first_person
+            else "No first-person pronouns found.",
+        },
+        {
+            "rule": "date_consistency",
+            "score": date_score,
+            "max_score": 10,
+            "feedback": "Check that date ranges are consistently ordered."
+            if not consistent_dates
+            else "No inconsistent date order was detected.",
+        },
     ]
     return {
         "score": sum(rule["score"] for rule in rules),

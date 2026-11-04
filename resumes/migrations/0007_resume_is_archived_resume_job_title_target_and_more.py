@@ -6,51 +6,62 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('resumes', '0006_resume_highest_education_resume_is_studying_and_more'),
+        ("resumes", "0006_resume_highest_education_resume_is_studying_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='resume',
-            name='is_archived',
+            model_name="resume",
+            name="is_archived",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='resume',
-            name='job_title_target',
-            field=models.CharField(blank=True, default='', max_length=150),
+            model_name="resume",
+            name="job_title_target",
+            field=models.CharField(blank=True, default="", max_length=150),
         ),
         migrations.AddField(
-            model_name='resume',
-            name='links',
+            model_name="resume",
+            name="links",
             field=models.JSONField(blank=True, default=dict),
         ),
         migrations.AddField(
-            model_name='resume',
-            name='location',
-            field=models.CharField(blank=True, default='', max_length=150),
+            model_name="resume",
+            name="location",
+            field=models.CharField(blank=True, default="", max_length=150),
         ),
         migrations.AddField(
-            model_name='resume',
-            name='parent',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='versions', to='resumes.resume'),
+            model_name="resume",
+            name="parent",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="versions",
+                to="resumes.resume",
+            ),
         ),
         migrations.AddField(
-            model_name='resume',
-            name='title',
-            field=models.CharField(blank=True, default='', max_length=150),
+            model_name="resume",
+            name="title",
+            field=models.CharField(blank=True, default="", max_length=150),
         ),
         migrations.AddField(
-            model_name='resume',
-            name='updated_at',
+            model_name="resume",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True),
         ),
         migrations.AddField(
-            model_name='resume',
-            name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='resumes', to=settings.AUTH_USER_MODEL),
+            model_name="resume",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="resumes",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

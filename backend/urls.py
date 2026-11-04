@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.http import JsonResponse
@@ -21,18 +22,20 @@ from django.http import JsonResponse
 
 def home_view(request):
     """Root URL handler - returns API info"""
-    return JsonResponse({
-        'message': 'Welcome to AI Resume Builder API',
-        'endpoints': {
-            'admin': '/admin/',
-            'api': '/api/',
+    return JsonResponse(
+        {
+            "message": "Welcome to AI Resume Builder API",
+            "endpoints": {
+                "admin": "/admin/",
+                "api": "/api/",
+            },
         }
-    })
+    )
 
 
 urlpatterns = [
-    path('', home_view, name='home'),
-    path('admin/', admin.site.urls),
-    path('api/', include('resumes.urls')),
-    path('api/ai/', include('ai.urls')),
+    path("", home_view, name="home"),
+    path("admin/", admin.site.urls),
+    path("api/", include("resumes.urls")),
+    path("api/ai/", include("ai.urls")),
 ]

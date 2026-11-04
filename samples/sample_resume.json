@@ -1,0 +1,28 @@
+{
+  "name": "Jordan Example",
+  "email": "jordan.example@example.test",
+  "phone": "+1 555 010 2040",
+  "user_type": "college",
+  "detected_user_type": "college",
+  "highest_education": "Bachelor's Degree",
+  "is_studying": true,
+  "years_of_experience": 1,
+  "skills": "TypeScript, React, Python, data visualization, teamwork",
+  "experience": "Student research assistant | 2024–2025\nOrganized a small public-data collection and documented reproducible analysis steps.",
+  "education": "BSc, Information Systems | Example State University | 2023–2026\nRelevant study: databases, human-computer interaction, and applied statistics.",
+  "internships": "Software Intern | Sample Studio | Summer 2025\nBuilt a small dashboard prototype and wrote setup notes for the project team.",
+  "achievements": "Selected for a fictional campus technology showcase.",
+  "projects": "Community Data Explorer | Created an accessible interface for exploring public datasets.",
+  "certifications": "Foundations of Web Accessibility | Example Learning Lab | 2025",
+  "summary": "Curious information-systems student who enjoys turning complex data into clear, useful tools.",
+  "template": "template1",
+  "accent_color": "#1f3a5f",
+  "title": "Sample resume",
+  "headline": "Information Systems Student",
+  "job_title_target": "INFORMATION-TECHNOLOGY",
+  "links": {
+    "linkedin": "https://example.test/jordan",
+    "github": "https://example.test/jordan/projects"
+  },
+  "location": "Sample City"
+}

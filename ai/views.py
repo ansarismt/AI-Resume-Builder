@@ -224,9 +224,7 @@ def _normalize_resume_parse_output(output):
             normalized["years_of_experience"] = int(match.group(1))
         else:
             normalized.pop("years_of_experience", None)
-    elif isinstance(years, bool) or (
-        years is not None and not isinstance(years, int)
-    ):
+    elif isinstance(years, bool) or (years is not None and not isinstance(years, int)):
         normalized.pop("years_of_experience", None)
     elif years is not None and not 0 <= years <= 80:
         normalized.pop("years_of_experience", None)
