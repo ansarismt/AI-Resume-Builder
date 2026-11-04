@@ -174,6 +174,19 @@
   select {
     color: var(--color-foreground);
   }
+
+  /* Visible keyboard focus everywhere, using the existing ring colour. */
+  :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Keep narrow screens (360px) from scrolling sideways. */
+  html, body { overflow-x: clip; }
+  img, svg, video { max-width: 100%; }
+  :where(p, li, td, h1, h2, h3, h4, label) { overflow-wrap: anywhere; }
+
+  button:disabled, [aria-busy="true"] { cursor: not-allowed; }
 }
 
 @layer utilities {
