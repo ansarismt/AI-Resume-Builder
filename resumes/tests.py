@@ -247,7 +247,8 @@ class ResumeOwnershipTests(APITestCase):
     def test_pdf_export_includes_preview_content_and_selected_accent(self):
         self.client.force_authenticate(self.owner)
         self.owned_resume.summary = "A dependable analyst."
-        self.owned_resume.job_title_target = "Finance"
+        self.owned_resume.headline = "Finance"
+        self.owned_resume.job_title_target = "FINANCE"
         self.owned_resume.save()
 
         response = self.client.get(
@@ -280,7 +281,8 @@ class ResumeOwnershipTests(APITestCase):
         self.client.force_authenticate(self.owner)
         self.owned_resume.template = "template20"
         self.owned_resume.summary = "A dependable analyst."
-        self.owned_resume.job_title_target = "Finance"
+        self.owned_resume.headline = "Finance"
+        self.owned_resume.job_title_target = "FINANCE"
         self.owned_resume.save()
 
         response = self.client.get(
@@ -324,7 +326,8 @@ class ResumeOwnershipTests(APITestCase):
     def test_txt_export_returns_resume_content_as_utf8_plain_text(self):
         self.client.force_authenticate(self.owner)
         self.owned_resume.summary = "A dependable analyst."
-        self.owned_resume.job_title_target = "Finance"
+        self.owned_resume.headline = "Finance"
+        self.owned_resume.job_title_target = "FINANCE"
         self.owned_resume.save()
 
         response = self.client.get(f"/api/resumes/{self.owned_resume.pk}/export_txt/")
@@ -337,6 +340,40 @@ class ResumeOwnershipTests(APITestCase):
         self.assertIn(b"Finance", content)
         self.assertIn(b"CAREER OBJECTIVE", content)
         self.assertIn(b"A dependable analyst.", content)
+
+    def test_target_category_is_not_exported_as_the_resume_headline(self):
+        self.client.force_authenticate(self.owner)
+        self.owned_resume.headline = "Lead data analyst"
+        self.owned_resume.job_title_target = "INFORMATION-TECHNOLOGY"
+        self.owned_resume.save()
+
+        for export in ("export_pdf", "export_docx", "export_txt", "export_json"):
+            with self.subTest(export=export):
+                response = self.client.get(
+                    f"/api/resumes/{self.owned_resume.pk}/{export}/"
+                )
+                content = b"".join(response.streaming_content)
+                self.assertEqual(response.status_code, 200)
+                if export == "export_pdf":
+                    text = "\n".join(
+                        page.extract_text() or ""
+                        for page in PdfReader(BytesIO(content)).pages
+                    )
+                    self.assertIn("Lead data analyst", text)
+                    self.assertNotIn("INFORMATION-TECHNOLOGY", text)
+                elif export == "export_docx":
+                    text = "\n".join(
+                        paragraph.text for paragraph in Document(BytesIO(content)).paragraphs
+                    )
+                    self.assertIn("Lead data analyst", text)
+                    self.assertNotIn("INFORMATION-TECHNOLOGY", text)
+                elif export == "export_txt":
+                    self.assertIn(b"Lead data analyst", content)
+                    self.assertNotIn(b"INFORMATION-TECHNOLOGY", content)
+                else:
+                    exported = json.loads(content)
+                    self.assertEqual(exported["headline"], "Lead data analyst")
+                    self.assertEqual(exported["job_title_target"], "INFORMATION-TECHNOLOGY")
 
 
 class ResumeTemplateTests(APITestCase):

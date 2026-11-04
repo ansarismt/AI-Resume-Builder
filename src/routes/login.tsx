@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
-import { requestAuth } from "@/lib/resumeApi";
+import { getApiErrorMessage, requestAuth } from "@/lib/resumeApi";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -31,8 +31,7 @@ function LoginPage() {
       toast.success("Signed in");
       window.location.href = "/dashboard";
     } catch (err) {
-      console.error("Login error:", err);
-      toast.error(err instanceof Error ? err.message : "Login failed");
+      toast.error(getApiErrorMessage(err, "Login failed"));
     } finally {
       setLoading(false);
     }
@@ -51,12 +50,21 @@ function LoginPage() {
         </p>
         <div className="space-y-3">
           <div>
-            <Label>Username</Label>
-            <Input value={username} onChange={(e) => setUsername(e.target.value)} />
+            <Label htmlFor="login-username">Username</Label>
+            <Input
+              id="login-username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
           </div>
           <div>
-            <Label>Password</Label>
-            <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
+            <Label htmlFor="login-password">Password</Label>
+            <Input
+              id="login-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+            />
           </div>
 
           <div className="flex items-center justify-between gap-2">

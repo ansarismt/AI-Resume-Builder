@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
-import { requestAuth } from "@/lib/resumeApi";
+import { getApiErrorMessage, requestAuth } from "@/lib/resumeApi";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
@@ -36,8 +36,7 @@ function SignupPage() {
       toast.success("Account created and signed in");
       window.location.href = "/dashboard";
     } catch (err) {
-      console.error("Signup error:", err);
-      toast.error(err instanceof Error ? err.message : "Signup failed");
+      toast.error(getApiErrorMessage(err, "Signup failed"));
     } finally {
       setLoading(false);
     }
@@ -56,16 +55,30 @@ function SignupPage() {
         </p>
         <div className="space-y-3">
           <div>
-            <Label>Username</Label>
-            <Input value={username} onChange={(e) => setUsername(e.target.value)} />
+            <Label htmlFor="signup-username">Username</Label>
+            <Input
+              id="signup-username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
           </div>
           <div>
-            <Label>Email</Label>
-            <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
+            <Label htmlFor="signup-email">Email</Label>
+            <Input
+              id="signup-email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+            />
           </div>
           <div>
-            <Label>Password</Label>
-            <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
+            <Label htmlFor="signup-password">Password</Label>
+            <Input
+              id="signup-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+            />
           </div>
           <div className="flex items-center justify-between">
             <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground">

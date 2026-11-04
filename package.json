@@ -1,6 +1,9 @@
 {
   "name": "ai-resume-builder",
   "private": true,
+  "engines": {
+    "node": ">=20.19"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite dev",
@@ -9,6 +12,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src vite.config.ts",
+    "test": "vitest",
+    "check": "npm run typecheck && npm run lint && npm run test -- --run && npm run build",
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -34,19 +39,24 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
+    "jsdom": "^29.1.1",
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vitest": "^5.1.0"
   }
 }

@@ -1,6 +1,7 @@
 import "./ResumeDocument.css";
 import { getTemplateMeta } from "./templateCatalog";
 import type { ResumeData, UserType } from "./types";
+import { splitSkills } from "./resumeUtils";
 import type { CSSProperties } from "react";
 
 type SectionKey =
@@ -55,26 +56,6 @@ const SECTION_SETS: Record<UserType, SectionDef[]> = {
 
 // Sections that move into the side column on sidebar and split layouts.
 const ASIDE_KEYS: SectionKey[] = ["skills", "education", "certifications"];
-
-function splitSkills(text: string): string[] {
-  const items: string[] = [];
-  let current = "";
-  let depth = 0;
-  for (const char of text) {
-    if (char === "(" || char === "[") depth += 1;
-    if (char === ")" || char === "]") depth = Math.max(0, depth - 1);
-    const isSeparator =
-      depth === 0 && (char === "," || char === ";" || char === "\n" || char === "|");
-    if (isSeparator) {
-      items.push(current);
-      current = "";
-    } else {
-      current += char;
-    }
-  }
-  items.push(current);
-  return items.map((item) => item.replace(/^[\s•\-–*]+/, "").trim()).filter(Boolean);
-}
 
 function contactItems(data: ResumeData): string[] {
   const links = data.links ?? {};
@@ -136,7 +117,7 @@ export function ResumeDocument({ data, accentColor }: { data: ResumeData; accent
   const meta = getTemplateMeta(data.template);
   const sections = SECTION_SETS[data.user_type] ?? SECTION_SETS.college;
   const contact = contactItems(data);
-  const headline = (data.job_title_target ?? "").trim();
+  const headline = (data.headline ?? "").trim();
   const style = accentColor
     ? ({
         "--accent": accentColor,

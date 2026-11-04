@@ -1,4 +1,5 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import type { KeyboardEvent } from "react";
 
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { TemplateCard } from "@/components/TemplateCard";
@@ -25,6 +26,34 @@ export function TemplateSelectionPage({
   onBack,
   onContinue,
 }: Props) {
+  const handleTemplateKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    const directions: Record<string, number> = {
+      ArrowDown: 1,
+      ArrowRight: 1,
+      ArrowUp: -1,
+      ArrowLeft: -1,
+    };
+    const direction = directions[event.key];
+    if (!direction) return;
+
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const currentRadio = target.closest<HTMLButtonElement>('[role="radio"]');
+    if (!currentRadio) return;
+
+    const radios = Array.from(
+      event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]'),
+    );
+    const currentIndex = radios.indexOf(currentRadio);
+    if (currentIndex < 0 || radios.length === 0) return;
+
+    event.preventDefault();
+    const nextIndex = (currentIndex + direction + radios.length) % radios.length;
+    const nextRadio = radios[nextIndex];
+    nextRadio.focus();
+    nextRadio.click();
+  };
+
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
@@ -53,7 +82,13 @@ export function TemplateSelectionPage({
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
-        <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <div
+          role="radiogroup"
+          aria-label="Resume templates"
+          tabIndex={-1}
+          onKeyDown={handleTemplateKeyDown}
+          className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
+        >
           {TEMPLATE_OPTIONS.map((template) => (
             <TemplateCard
               key={template.id}
@@ -64,7 +99,7 @@ export function TemplateSelectionPage({
               onColorSelect={onSelectColor}
             />
           ))}
-        </section>
+        </div>
 
         <aside className="self-start rounded-xl border border-border bg-card p-3 shadow-lg lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto">
           <div className="mb-3 flex items-center justify-between gap-3 px-1">

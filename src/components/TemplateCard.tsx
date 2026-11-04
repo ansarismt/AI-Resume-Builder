@@ -252,12 +252,16 @@ export function TemplateCard({
     >
       <button
         type="button"
+        role="radio"
+        aria-checked={selected}
+        aria-label={`${template.name} template`}
+        tabIndex={selected ? 0 : -1}
         onClick={() => onSelect(template.id)}
         className={`relative w-full overflow-hidden rounded-xl border bg-card p-3 text-left shadow-sm transition-all duration-200 ${
           selected
             ? "border-accent shadow-md ring-2 ring-accent/20"
             : "border-border hover:border-accent/40 hover:shadow-md"
-        }`}
+        } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2`}
       >
         <div className="aspect-[3/4] overflow-hidden rounded-lg border border-border bg-white">
           <TemplateThumbnail layout={template.layout} color={primary} />
@@ -292,7 +296,7 @@ export function TemplateCard({
                 onClick={() => onColorSelect(template.id, color)}
                 className={`h-5 w-5 rounded-full border shadow-sm transition-transform hover:scale-110 ${
                   colorActive ? "border-foreground ring-2 ring-accent/40" : "border-border"
-                }`}
+                } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2`}
                 aria-label={`Use ${color} for ${template.name}`}
                 style={{ backgroundColor: color }}
               />

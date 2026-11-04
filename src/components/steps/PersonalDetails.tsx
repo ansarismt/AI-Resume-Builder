@@ -37,7 +37,7 @@ export default function PersonalDetails({
 }: Props) {
   const hasCustomTarget =
     Boolean(data.job_title_target) &&
-    !JOB_CATEGORY_OPTIONS.some((category) => category === data.job_title_target);
+    !JOB_CATEGORY_OPTIONS.some((category) => category.value === data.job_title_target);
 
   return (
     <div className="space-y-6">
@@ -81,6 +81,17 @@ export default function PersonalDetails({
               className="transition-shadow focus-visible:ring-accent"
             />
           </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="headline">Resume headline (optional)</Label>
+            <Input
+              id="headline"
+              maxLength={120}
+              value={data.headline ?? ""}
+              onChange={(event) => onUpdate("headline", event.target.value)}
+              placeholder="Data analyst | Python and reporting"
+              className="transition-shadow focus-visible:ring-accent"
+            />
+          </div>
         </div>
       </div>
 
@@ -90,12 +101,12 @@ export default function PersonalDetails({
         </h4>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label>Highest education</Label>
+            <Label htmlFor="highest_education">Highest education</Label>
             <Select
               value={data.highest_education}
               onValueChange={(value) => onUpdate("highest_education", value)}
             >
-              <SelectTrigger>
+              <SelectTrigger id="highest_education">
                 <SelectValue placeholder="Select highest education" />
               </SelectTrigger>
               <SelectContent>
@@ -149,12 +160,12 @@ export default function PersonalDetails({
         </div>
 
         <div className="mt-4 space-y-2">
-          <Label>Manual override</Label>
+          <Label htmlFor="user_type">Manual override</Label>
           <Select
             value={data.user_type}
             onValueChange={(value) => onUserTypeChange(value as UserType)}
           >
-            <SelectTrigger>
+            <SelectTrigger id="user_type">
               <SelectValue placeholder="Choose a user type" />
             </SelectTrigger>
             <SelectContent>
@@ -173,12 +184,12 @@ export default function PersonalDetails({
         </div>
 
         <div className="mt-4 space-y-2">
-          <Label>Target job category (optional)</Label>
+          <Label htmlFor="job_title_target">Target job category (optional)</Label>
           <Select
             value={hasCustomTarget ? data.job_title_target : data.job_title_target || "none"}
             onValueChange={(value) => onUpdate("job_title_target", value === "none" ? "" : value)}
           >
-            <SelectTrigger>
+            <SelectTrigger id="job_title_target">
               <SelectValue placeholder="Choose a target job category" />
             </SelectTrigger>
             <SelectContent>
@@ -187,8 +198,8 @@ export default function PersonalDetails({
                 <SelectItem value={data.job_title_target}>{data.job_title_target}</SelectItem>
               )}
               {JOB_CATEGORY_OPTIONS.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
+                <SelectItem key={category.value} value={category.value}>
+                  {category.label}
                 </SelectItem>
               ))}
             </SelectContent>

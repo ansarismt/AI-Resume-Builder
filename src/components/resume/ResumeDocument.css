@@ -88,7 +88,7 @@
 }
 
 .rd__placeholder {
-  color: #8a94a3;
+  color: #6b7686;
   font-style: italic;
 }
 
@@ -496,5 +496,12 @@
   .rd--framed .rd__contact {
     align-items: flex-start;
     text-align: left;
+  }
+}
+
+@media print {
+  .rd__section--empty,
+  .rd__contact .rd__placeholder {
+    display: none !important;
   }
 }

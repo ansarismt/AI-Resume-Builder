@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { getCurrentUser, logoutApi } from "@/lib/resumeApi";
+import { toast } from "sonner";
+import { getApiErrorMessage, getCurrentUser, logoutApi } from "@/lib/resumeApi";
 
 interface AuthContextValue {
   token: string | null;
@@ -16,46 +17,51 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+function readStoredValue(key: string) {
+  return typeof window === "undefined" ? null : window.localStorage.getItem(key);
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
-  const [email, setEmail] = useState<string | null>(null);
-  const [loginAt, setLoginAt] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(() => readStoredValue("token"));
+  const [username, setUsername] = useState<string | null>(() => readStoredValue("username"));
+  const [email, setEmail] = useState<string | null>(() => readStoredValue("email"));
+  const [loginAt, setLoginAt] = useState<string | null>(() => readStoredValue("loginAt"));
   const [isStaff, setIsStaff] = useState(false);
 
   useEffect(() => {
-    const t = localStorage.getItem("token");
-    const u = localStorage.getItem("username");
-    const e = localStorage.getItem("email");
-    const started = localStorage.getItem("loginAt");
-    if (t) setToken(t);
-    if (u) setUsername(u);
-    if (e) setEmail(e);
-    if (started) setLoginAt(started);
-    if (t) {
-      getCurrentUser()
-        .then((user) => {
-          setUsername(user.username);
-          setEmail(user.email);
-          setIsStaff(user.is_staff);
-        })
-        .catch((error: unknown) => {
-          if (axios.isAxiosError(error) && error.response?.status === 401) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("username");
-            localStorage.removeItem("email");
-            localStorage.removeItem("loginAt");
-            setToken(null);
-            setUsername(null);
-            setEmail(null);
-            setLoginAt(null);
-            setIsStaff(false);
-            return;
-          }
-          console.error("Could not verify the saved session.", error);
-        });
-    }
-  }, []);
+    if (!token) return;
+
+    let active = true;
+    getCurrentUser()
+      .then((user) => {
+        if (!active) return;
+        setUsername(user.username);
+        setEmail(user.email);
+        setIsStaff(user.is_staff);
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          window.localStorage.removeItem("token");
+          window.localStorage.removeItem("username");
+          window.localStorage.removeItem("email");
+          window.localStorage.removeItem("loginAt");
+          setToken(null);
+          setUsername(null);
+          setEmail(null);
+          setLoginAt(null);
+          setIsStaff(false);
+          return;
+        }
+        toast.error(
+          getApiErrorMessage(error, "Could not verify the saved session. Check your connection."),
+        );
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [token]);
 
   const login = (u: string, t: string, e = "", staff = false) => {
     const started = new Date().toISOString();

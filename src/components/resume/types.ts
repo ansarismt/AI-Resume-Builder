@@ -1,3 +1,5 @@
+import categoryData from "../../../shared/categories.json";
+
 export const TEMPLATE_IDS = [
   "template1",
   "template2",
@@ -25,32 +27,7 @@ export type TemplateId = (typeof TEMPLATE_IDS)[number];
 
 export type UserType = "school" | "college" | "professional";
 
-export const JOB_CATEGORY_OPTIONS = [
-  "Accountant",
-  "Advocate",
-  "Agriculture",
-  "Apparel",
-  "Arts",
-  "Automobile",
-  "Aviation",
-  "Banking",
-  "BPO",
-  "Business Development",
-  "Chef",
-  "Construction",
-  "Consultant",
-  "Designer",
-  "Digital Media",
-  "Engineering",
-  "Finance",
-  "Fitness",
-  "Healthcare",
-  "Human Resources",
-  "Information Technology",
-  "Public Relations",
-  "Sales",
-  "Teacher",
-] as const;
+export const JOB_CATEGORY_OPTIONS = categoryData.categories;
 
 export const USER_TYPE_OPTIONS: Array<{ value: UserType; label: string; description: string }> = [
   {
@@ -99,6 +76,7 @@ export interface ResumeData {
   template: TemplateId;
   accent_color?: string;
   title?: string;
+  headline?: string;
   job_title_target?: string;
   links?: { linkedin?: string; github?: string; portfolio?: string };
   location?: string;
@@ -132,6 +110,7 @@ export const emptyResume: ResumeData = {
   template: "template1",
   accent_color: "",
   title: "",
+  headline: "",
   job_title_target: "",
   links: {},
   location: "",

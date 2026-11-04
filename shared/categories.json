@@ -1,0 +1,28 @@
+{
+  "categories": [
+    { "label": "Accountant", "value": "ACCOUNTANT" },
+    { "label": "Advocate", "value": "ADVOCATE" },
+    { "label": "Agriculture", "value": "AGRICULTURE" },
+    { "label": "Apparel", "value": "APPAREL" },
+    { "label": "Arts", "value": "ARTS" },
+    { "label": "Automobile", "value": "AUTOMOBILE" },
+    { "label": "Aviation", "value": "AVIATION" },
+    { "label": "Banking", "value": "BANKING" },
+    { "label": "BPO", "value": "BPO" },
+    { "label": "Business Development", "value": "BUSINESS-DEVELOPMENT" },
+    { "label": "Chef", "value": "CHEF" },
+    { "label": "Construction", "value": "CONSTRUCTION" },
+    { "label": "Consultant", "value": "CONSULTANT" },
+    { "label": "Designer", "value": "DESIGNER" },
+    { "label": "Digital Media", "value": "DIGITAL-MEDIA" },
+    { "label": "Engineering", "value": "ENGINEERING" },
+    { "label": "Finance", "value": "FINANCE" },
+    { "label": "Fitness", "value": "FITNESS" },
+    { "label": "Healthcare", "value": "HEALTHCARE" },
+    { "label": "Human Resources", "value": "HR" },
+    { "label": "Information Technology", "value": "INFORMATION-TECHNOLOGY" },
+    { "label": "Public Relations", "value": "PUBLIC-RELATIONS" },
+    { "label": "Sales", "value": "SALES" },
+    { "label": "Teacher", "value": "TEACHER" }
+  ]
+}
