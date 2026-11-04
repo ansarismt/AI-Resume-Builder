@@ -67,3 +67,8 @@ Desktop.ini
 # Personal resume files
 /ra.pdf
 /test_resume.docx
+
+# Agent briefs and uploads
+FINAL_AGENT_PROMPT.md
+/uploads/
+*.tmp
