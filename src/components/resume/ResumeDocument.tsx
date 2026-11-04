@@ -1,6 +1,7 @@
 import "./ResumeDocument.css";
 import { getTemplateMeta } from "./templateCatalog";
 import type { ResumeData, UserType } from "./types";
+import type { CSSProperties } from "react";
 
 type SectionKey =
   | "summary"
@@ -122,11 +123,32 @@ function Contact({ items }: { items: string[] }) {
   );
 }
 
-export function ResumeDocument({ data }: { data: ResumeData }) {
+function getReadableTextColor(color: string) {
+  const hex = color.replace("#", "");
+  if (hex.length !== 6) return "#ffffff";
+  const red = Number.parseInt(hex.slice(0, 2), 16);
+  const green = Number.parseInt(hex.slice(2, 4), 16);
+  const blue = Number.parseInt(hex.slice(4, 6), 16);
+  return (red * 299 + green * 587 + blue * 114) / 1000 > 150 ? "#111827" : "#ffffff";
+}
+
+export function ResumeDocument({ data, accentColor }: { data: ResumeData; accentColor?: string }) {
   const meta = getTemplateMeta(data.template);
   const sections = SECTION_SETS[data.user_type] ?? SECTION_SETS.college;
   const contact = contactItems(data);
   const headline = (data.job_title_target ?? "").trim();
+  const style = accentColor
+    ? ({
+        "--accent": accentColor,
+        "--primary": accentColor,
+        "--ink": "#172033",
+        "--paper": "#ffffff",
+        "--rule": "#d8dee8",
+        "--resume-primary": accentColor,
+        "--resume-primary-foreground": getReadableTextColor(accentColor),
+        "--resume-soft": `${accentColor}18`,
+      } as CSSProperties)
+    : undefined;
 
   const isSidebar = meta.layout === "sidebar-left" || meta.layout === "sidebar-right";
   const isSplit = meta.layout === "split";
@@ -185,7 +207,7 @@ export function ResumeDocument({ data }: { data: ResumeData }) {
   }
 
   return (
-    <div className="rd-wrap">
+    <div className="rd-wrap" style={style}>
       <article className={`rd rd--${meta.layout} rd--${meta.font}`}>{body}</article>
     </div>
   );

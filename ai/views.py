@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 
 from resumes.models import Resume
 from resumes.exports import safe_filename
+from resumes.export_styles import UnsupportedPdfLanguageError
 from resumes.serializers import ResumeSerializer
 
 from .models import AIUsage
@@ -499,7 +500,13 @@ class CoverLetterExportView(AIAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         name = payload["name"]
-        buffer = render_cover_letter(name, payload["content"], extension)
+        try:
+            buffer = render_cover_letter(name, payload["content"], extension)
+        except UnsupportedPdfLanguageError as error:
+            return Response(
+                {"error": str(error)},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
         content_type = (
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             if extension == "docx"

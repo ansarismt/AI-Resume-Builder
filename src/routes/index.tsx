@@ -224,102 +224,22 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
   );
 }
 
-async function downloadPreviewPdf(name: string) {
-  const preview = document.querySelector<HTMLElement>("#resume-print .rd-wrap");
-  if (!preview) {
-    throw new Error("The resume preview is not ready to export.");
+function openResumePrintDialog(name: string) {
+  if (!document.querySelector("#resume-print .rd-wrap")) {
+    throw new Error("The resume preview is not ready to print.");
   }
-
-  await document.fonts.ready;
-  const { default: html2pdf } = await import("html2pdf.js");
-  const { jsPDF } = await import("jspdf");
-  const previewWidth = preview.getBoundingClientRect().width;
-  if (!previewWidth) {
-    throw new Error("The resume preview has no visible width.");
-  }
+  const previousTitle = document.title;
+  const restoreTitle = () => {
+    document.title = previousTitle;
+    window.removeEventListener("afterprint", restoreTitle);
+  };
+  window.addEventListener("afterprint", restoreTitle, { once: true });
+  document.title = `${name.trim().replace(/\s+/g, "_") || "Resume"}_Resume`;
   try {
-    const worker = html2pdf()
-      .set({
-        margin: 0,
-        html2canvas: {
-          backgroundColor: "#ffffff",
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          onclone: (clonedDocument: Document) => {
-            clonedDocument.documentElement.style.backgroundColor = "#ffffff";
-            if (clonedDocument.body) clonedDocument.body.style.backgroundColor = "#ffffff";
-            const container = clonedDocument.querySelector<HTMLElement>(".html2pdf__container");
-            if (!container) return;
-            container.style.setProperty("width", `${previewWidth}px`, "important");
-
-            const unsupportedColor = /\b(?:oklch|oklab|lch|lab|color|color-mix)\(/i;
-            for (const element of [container, ...container.querySelectorAll<HTMLElement>("*")]) {
-              const styles = clonedDocument.defaultView?.getComputedStyle(element);
-              if (!styles) continue;
-
-              for (let index = 0; index < styles.length; index += 1) {
-                const property = styles[index];
-                if (!unsupportedColor.test(styles.getPropertyValue(property))) continue;
-
-                if (property.includes("shadow") || property.includes("image")) {
-                  element.style.setProperty(property, "none");
-                } else if (property.includes("background")) {
-                  element.style.setProperty(property, "#ffffff");
-                } else if (property.includes("border") || property.includes("outline")) {
-                  element.style.setProperty(property, "#d6dbe2");
-                } else {
-                  element.style.setProperty(property, "#1a202c");
-                }
-              }
-            }
-          },
-        },
-      })
-      .from(preview)
-      .toCanvas();
-    const canvasValue: unknown = await worker.get("canvas");
-    if (!(canvasValue instanceof HTMLCanvasElement) || !canvasValue.width || !canvasValue.height) {
-      throw new Error("The PDF renderer did not produce a usable preview image.");
-    }
-
-    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const pageMargin = 8;
-    const imageScale = (pageWidth - pageMargin * 2) / canvasValue.width;
-    const imageWidth = canvasValue.width * imageScale;
-    const imageHeight = canvasValue.height * imageScale;
-    const image = canvasValue.toDataURL("image/jpeg", 0.98);
-    const pageContentHeight = pageHeight - pageMargin * 2;
-    const pageCount = Math.ceil(imageHeight / pageContentHeight);
-    for (let pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
-      if (pageIndex > 0) pdf.addPage();
-      pdf.addImage(
-        image,
-        "JPEG",
-        pageMargin,
-        pageMargin - pageIndex * pageContentHeight,
-        imageWidth,
-        imageHeight,
-        undefined,
-        "FAST",
-      );
-    }
-    const pdfBlob = pdf.output("blob");
-    const url = window.URL.createObjectURL(pdfBlob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${name.replace(/\s+/g, "_")}_Resume.pdf`;
-    document.body.appendChild(anchor);
-    try {
-      anchor.click();
-    } finally {
-      anchor.remove();
-      window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-    }
-  } finally {
-    document.querySelectorAll(".html2pdf__overlay").forEach((overlay) => overlay.remove());
+    window.print();
+  } catch (error) {
+    restoreTitle();
+    throw error;
   }
 }
 
@@ -426,7 +346,7 @@ function Index() {
 
   const handleSaveResume = async () => Boolean(await saveResumeAndGetId());
 
-  const downloadExport = async (format: "pdf" | "docx" | "json" | "txt") => {
+  const downloadExport = async (format: "docx" | "json" | "txt") => {
     const id = await saveResumeAndGetId();
     if (!id) return;
     try {
@@ -447,11 +367,12 @@ function Index() {
 
   const handleExportPdf = async () => {
     try {
-      await downloadPreviewPdf(data.name);
-      toast.success("Resume downloaded as PDF");
+      const id = await saveResumeAndGetId();
+      if (!id) return;
+      openResumePrintDialog(data.name);
+      toast.info("Choose Save as PDF in the print dialog.");
     } catch (error) {
-      console.error("Could not create PDF from preview", error);
-      toast.error(error instanceof Error ? error.message : "Could not create PDF from preview");
+      toast.error(error instanceof Error ? error.message : "Could not open the print dialog");
     }
   };
   const handleExportDocx = () => downloadExport("docx");
@@ -464,8 +385,6 @@ function Index() {
     const id = await saveResumeAndGetId();
     if (!id) return;
     try {
-      await downloadPreviewPdf(data.name);
-
       for (const format of ["docx", "json", "txt"] as const) {
         const blob = await downloadResumeExport(id, format, selectedTemplateColor);
         const url = window.URL.createObjectURL(blob);
@@ -477,7 +396,8 @@ function Index() {
         anchor.remove();
         window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
       }
-      toast.success("Downloaded preview PDF, DOCX, JSON, and TXT");
+      openResumePrintDialog(data.name);
+      toast.info("DOCX, JSON, and TXT saved. Choose Save as PDF in the print dialog.");
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Could not download all formats"));
     }

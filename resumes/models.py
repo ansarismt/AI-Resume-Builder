@@ -1,6 +1,9 @@
 from django.conf import settings
 from django.db import models
 
+from .export_styles import TEMPLATE_CATALOG
+
+
 class Resume(models.Model):
     USER_TYPE_CHOICES = [
         ('school', 'School Student'),
@@ -8,7 +11,10 @@ class Resume(models.Model):
         ('professional', 'Working Professional'),
     ]
 
-    TEMPLATE_CHOICES = [(f'template{number}', f'Template {number}') for number in range(1, 21)]
+    TEMPLATE_CHOICES = [
+        (template["id"], template["name"])
+        for template in TEMPLATE_CATALOG
+    ]
     
     name = models.CharField(max_length=100)
     email = models.EmailField()

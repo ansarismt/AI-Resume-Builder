@@ -70,7 +70,7 @@ export function ExportButtons({
           disabled={busy}
         >
           <Download className="mr-2 h-4 w-4" />
-          Download PDF
+          Save as PDF
         </Button>
         <Button
           type="button"
@@ -79,7 +79,7 @@ export function ExportButtons({
           disabled={busy}
         >
           <FileText className="mr-2 h-4 w-4" />
-          Download DOCX
+          Editable Word version (simplified)
         </Button>
         <Button
           type="button"
