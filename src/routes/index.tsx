@@ -356,13 +356,14 @@ function Index() {
       certifications: r.certifications,
       summary: r.summary,
       template: r.template,
+      accent_color: r.accent_color ?? "",
       title: r.title ?? "",
       job_title_target: r.job_title_target ?? "",
       links: r.links ?? {},
       location: r.location ?? "",
     });
     setCurrentId(r.id);
-    setSelectedTemplateColor(getTemplateDefaultColor(r.template));
+    setSelectedTemplateColor(r.accent_color || getTemplateDefaultColor(r.template));
     setFlowStage("preview");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -402,13 +403,14 @@ function Index() {
 
     setSaving(true);
     try {
+      const resumeData = { ...data, accent_color: selectedTemplateColor };
       let id = currentId;
       if (currentId) {
-        await updateResume(currentId, data);
+        await updateResume(currentId, resumeData);
         toast.success("Resume updated");
         await handleSaved(currentId);
       } else {
-        const created = await createResume(data);
+        const created = await createResume(resumeData);
         id = created.id;
         toast.success("Resume saved");
         await handleSaved(created.id);
@@ -841,11 +843,12 @@ function Index() {
               selectedTemplate={data.template}
               selectedColor={selectedTemplateColor}
               onSelectTemplate={(template) => {
-                setData((prev) => ({ ...prev, template }));
-                setSelectedTemplateColor(getTemplateDefaultColor(template));
+                const color = getTemplateDefaultColor(template);
+                setData((prev) => ({ ...prev, template, accent_color: color }));
+                setSelectedTemplateColor(color);
               }}
               onSelectColor={(template, color) => {
-                setData((prev) => ({ ...prev, template }));
+                setData((prev) => ({ ...prev, template, accent_color: color }));
                 setSelectedTemplateColor(color);
               }}
               onBack={() => goToStage("preview")}

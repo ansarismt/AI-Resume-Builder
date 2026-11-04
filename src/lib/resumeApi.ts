@@ -96,8 +96,13 @@ export async function getCurrentUser() {
   return response.data;
 }
 
-export async function endSession() {
-  await api.post("/api/auth/logout/");
+export async function logoutApi() {
+  try {
+    await api.post("/api/auth/logout/");
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) return;
+    throw error;
+  }
 }
 
 export async function updateAccount(payload: { username: string; password: string }) {
@@ -169,6 +174,7 @@ function normalizeResume(record: ResumeApiRecord): SavedResume {
     is_studying: Boolean(record.is_studying),
     years_of_experience: Number(record.years_of_experience ?? 0),
     template: normalizeTemplate(record.template),
+    accent_color: record.accent_color ?? "",
   };
 }
 
@@ -190,6 +196,7 @@ function toResumePayload(data: ResumeData) {
     achievements: data.achievements,
     summary: data.summary,
     template: data.template,
+    accent_color: data.accent_color ?? "",
     title: data.title ?? "",
     job_title_target: data.job_title_target ?? "",
     links: data.links ?? {},
@@ -216,8 +223,8 @@ export async function getResume(id: string) {
 }
 
 export async function listResumes() {
-  const response = await api.get<ResumeApiRecord[]>("/api/resumes/");
-  return response.data.map(normalizeResume);
+  const response = await api.get<{ results: ResumeApiRecord[] }>("/api/resumes/");
+  return response.data.results.map(normalizeResume);
 }
 
 export async function updateResume(id: string, data: ResumeData) {

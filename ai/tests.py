@@ -169,6 +169,18 @@ class AIEndpointTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Dear hiring team", response.data["cover_letter"])
 
+    @patch("ai.views.render_cover_letter", return_value=BytesIO(b"document"))
+    def test_cover_letter_export_uses_a_sanitized_filename(self, mock_render):
+        response = self.client.post(
+            "/api/ai/cover-letter/export/docx/",
+            {"name": "தமிழ்", "content": "Dear hiring team.", "format": "docx"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("resume_Cover_Letter.docx", response["Content-Disposition"])
+        mock_render.assert_called_once_with("தமிழ்", "Dear hiring team.", "docx")
+
     @patch("ai.ml.predict.category_skills")
     @patch("ai.views.generate_json")
     def test_skills_falls_back_to_mocked_llm_without_dataset(self, mock_generate, mock_skills):

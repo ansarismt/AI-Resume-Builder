@@ -36,6 +36,9 @@ if not DEBUG and (
         "DJANGO_SECRET_KEY must be set to a secure value when DJANGO_DEBUG is False."
     )
 
+TOKEN_TTL_DAYS = max(1, int(os.getenv("TOKEN_TTL_DAYS", "14")))
+
+
 def env_bool(name, default):
     return os.getenv(name, str(default)).lower() == "true"
 
@@ -45,8 +48,8 @@ SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000" if not DEB
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", not DEBUG)
 SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", not DEBUG)
 CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", not DEBUG)
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = "DENY"
+SECURE_CONTENT_TYPE_NOSNIFF = env_bool("SECURE_CONTENT_TYPE_NOSNIFF", True)
+X_FRAME_OPTIONS = os.getenv("X_FRAME_OPTIONS", "DENY").strip() or "DENY"
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -59,7 +62,6 @@ ALLOWED_HOSTS = [
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "").strip().lower()
 LLM_API_KEY = os.getenv("LLM_API_KEY", "").strip()
 LLM_MODEL = os.getenv("LLM_MODEL", "").strip()
-TOKEN_TTL_DAYS = max(1, int(os.getenv("TOKEN_TTL_DAYS", "14")))
 
 
 # Application definition
