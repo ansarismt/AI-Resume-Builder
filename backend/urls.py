@@ -17,7 +17,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.http import JsonResponse
-from resumes.api_views import ResumeCreateView, ResumeDetailView, DetectResumeTypeView
 
 
 def home_view(request):
@@ -34,9 +33,6 @@ def home_view(request):
 urlpatterns = [
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),
-    path('resume/create/', ResumeCreateView.as_view(), name='root-resume-create'),
-    path('resume/<int:pk>/', ResumeDetailView.as_view(), name='root-resume-detail'),
-    path('resume/detect-type/', DetectResumeTypeView.as_view(), name='root-resume-detect-type'),
     path('api/', include('resumes.urls')),
     path('api/ai/', include('ai.urls')),
 ]

@@ -1,8 +1,13 @@
 from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.test import override_settings
+from django.utils import timezone
 import json
+from datetime import timedelta
 from io import BytesIO
 from docx import Document
 from pypdf import PdfReader
+from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from .exports import TEMPLATE_COLORS
@@ -251,3 +256,157 @@ class ResumeTemplateTests(APITestCase):
                     if export == "export_pdf":
                         pdf = b"".join(response.streaming_content)
                         self.assertEqual(len(PdfReader(BytesIO(pdf)).pages), 1)
+
+
+class AuthenticationSecurityTests(APITestCase):
+    def setUp(self):
+        cache.clear()
+
+    def test_login_is_rate_limited(self):
+        with override_settings(
+            REST_FRAMEWORK={
+                "DEFAULT_AUTHENTICATION_CLASSES": [
+                    "backend.authentication.ExpiringTokenAuthentication"
+                ],
+                "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+                "DEFAULT_THROTTLE_RATES": {"auth_login": "10/hour"},
+            }
+        ):
+            responses = [
+                self.client.post(
+                    "/api/auth/login/",
+                    {"username": "missing-user", "password": "wrong"},
+                    format="json",
+                )
+                for _ in range(11)
+            ]
+
+        self.assertEqual(responses[-1].status_code, 429)
+
+    def test_signup_rejects_weak_password_and_invalid_email(self):
+        weak_password = self.client.post(
+            "/api/auth/signup/",
+            {"username": "new-user", "email": "new@example.com", "password": "weak"},
+            format="json",
+        )
+        invalid_email = self.client.post(
+            "/api/auth/signup/",
+            {
+                "username": "new-user",
+                "email": "not-an-email",
+                "password": "Strong-Password-928!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(weak_password.status_code, 400)
+        self.assertEqual(invalid_email.status_code, 400)
+
+    def test_signup_rejects_case_insensitive_duplicate_email(self):
+        User.objects.create_user(
+            username="existing-user",
+            email="person@example.com",
+            password="P@ssword-2231",
+        )
+
+        response = self.client.post(
+            "/api/auth/signup/",
+            {
+                "username": "new-user",
+                "email": "PERSON@EXAMPLE.COM",
+                "password": "Strong-Password-928!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_signup_trims_username_and_normalizes_email(self):
+        response = self.client.post(
+            "/api/auth/signup/",
+            {
+                "username": " new-user ",
+                "email": " New.User@Example.COM ",
+                "password": "Strong-Password-928!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        user = User.objects.get(pk=response.data["user_id"])
+        self.assertEqual(user.username, "new-user")
+        self.assertEqual(user.email, "new.user@example.com")
+
+    def test_login_issues_new_token_after_password_change(self):
+        user = User.objects.create_user(username="account-user", password="Initial-Password-123!")
+        old_token = Token.objects.create(user=user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {old_token.key}")
+
+        response = self.client.put(
+            "/api/auth/account/",
+            {"password": "Different-Password-928!"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.data["token"], old_token.key)
+        self.assertFalse(Token.objects.filter(key=old_token.key).exists())
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {old_token.key}")
+        self.assertEqual(self.client.get("/api/auth/me/").status_code, 401)
+
+    def test_logout_invalidates_token(self):
+        user = User.objects.create_user(username="logout-user", password="P@ssword-2231")
+        token = Token.objects.create(user=user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+
+        response = self.client.post("/api/auth/logout/")
+
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(Token.objects.filter(pk=token.pk).exists())
+        self.assertEqual(self.client.get("/api/auth/me/").status_code, 401)
+
+    def test_expired_token_is_rejected_and_deleted(self):
+        user = User.objects.create_user(username="expired-user", password="P@ssword-2231")
+        token = Token.objects.create(user=user)
+        Token.objects.filter(pk=token.pk).update(created=timezone.now() - timedelta(days=15))
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+
+        response = self.client.get("/api/auth/me/")
+
+        self.assertEqual(response.status_code, 401)
+        self.assertFalse(Token.objects.filter(pk=token.pk).exists())
+
+    def test_deleting_user_deletes_resumes(self):
+        user = User.objects.create_user(username="delete-user", password="P@ssword-2231")
+        resume = Resume.objects.create(user=user, name="Private", email="private@example.com")
+
+        user.delete()
+
+        self.assertFalse(Resume.objects.filter(pk=resume.pk).exists())
+
+
+class DetectResumeTypeInputTests(APITestCase):
+    def test_invalid_detect_type_payloads_return_400(self):
+        for payload in (
+            {"highest_education": []},
+            {"highest_education": {"degree": "BSc"}},
+            {"years_of_experience": "3"},
+            {"years_of_experience": 81},
+            {"years_of_experience": -1},
+        ):
+            with self.subTest(payload=payload):
+                response = self.client.post(
+                    "/api/resume/detect-type/",
+                    payload,
+                    format="json",
+                )
+                self.assertEqual(response.status_code, 400)
+
+    def test_detect_type_accepts_valid_payload_without_authentication(self):
+        response = self.client.post(
+            "/api/resume/detect-type/",
+            {"highest_education": "Bachelor's degree", "years_of_experience": 0},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)

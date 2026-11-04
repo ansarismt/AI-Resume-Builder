@@ -12,7 +12,7 @@ class ResumeSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if parent and request and parent.user_id != request.user.pk:
             raise serializers.ValidationError(
-                "The parent resume must belong to the signed-in user."
+                "The selected parent resume is unavailable."
             )
         return parent
 

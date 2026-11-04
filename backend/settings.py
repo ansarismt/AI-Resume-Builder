@@ -36,6 +36,18 @@ if not DEBUG and (
         "DJANGO_SECRET_KEY must be set to a secure value when DJANGO_DEBUG is False."
     )
 
+def env_bool(name, default):
+    return os.getenv(name, str(default)).lower() == "true"
+
+
+SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", not DEBUG)
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000" if not DEBUG else "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", not DEBUG)
+SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", not DEBUG)
+CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", not DEBUG)
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.getenv(
@@ -47,6 +59,7 @@ ALLOWED_HOSTS = [
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "").strip().lower()
 LLM_API_KEY = os.getenv("LLM_API_KEY", "").strip()
 LLM_MODEL = os.getenv("LLM_MODEL", "").strip()
+TOKEN_TTL_DAYS = max(1, int(os.getenv("TOKEN_TTL_DAYS", "14")))
 
 
 # Application definition
@@ -164,7 +177,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 # REST Framework Authentication
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'backend.authentication.ExpiringTokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -173,18 +186,6 @@ REST_FRAMEWORK = {
         'ai': '20/hour',
         'auth_login': '10/hour',
         'auth_signup': '5/hour',
+        'detect': '60/hour',
     },
 }
-
-# Email settings (development)
-# By default use the console backend which prints emails to the server console.
-# To send real emails (e.g. Gmail SMTP), replace with SMTP backend and provide credentials.
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# Example SMTP settings for Gmail (use app password, DO NOT commit real credentials):
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'your@gmail.com'
-# EMAIL_HOST_PASSWORD = 'your-app-password'

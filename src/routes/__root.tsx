@@ -12,6 +12,7 @@ import {
 import { BrainCircuit, LogOut, Plus, Timer } from "lucide-react";
 
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 function NotFoundComponent() {
   return (
@@ -151,7 +152,16 @@ function AuthHeader() {
               Usage time: {usageTime}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              onClick={() => {
+                void logout().catch(() => {
+                  toast.error(
+                    "Your browser session ended, but the server could not invalidate its token.",
+                  );
+                });
+              }}
+              className="text-destructive focus:text-destructive"
+            >
               <LogOut className="h-4 w-4" />
               Log out
             </DropdownMenuItem>

@@ -2,6 +2,9 @@
 from django.http import FileResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets, status, permissions
@@ -87,6 +90,9 @@ class ResumeViewSet(viewsets.ModelViewSet):
 class LoginView(APIView):
     """User login endpoint"""
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth_login"
+
     def post(self, request):
         username = (request.data.get('username') or '').strip()
         password = request.data.get('password') or ''
@@ -117,29 +123,56 @@ class LoginView(APIView):
 class SignupView(APIView):
     """User signup endpoint"""
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth_signup"
+
     def post(self, request):
         username = request.data.get('username')
         email = request.data.get('email')
         password = request.data.get('password')
         
-        if not username or not email or not password:
+        if not all(isinstance(value, str) for value in (username, email, password)):
             return Response(
                 {'error': 'Username, email and password required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        username = username.strip()
+        email = email.strip().lower()
+        if not username or not email or not password:
+            return Response(
+                {'error': 'Username, email and password required'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         
-        if User.objects.filter(username=username).exists():
+        if User.objects.filter(username__iexact=username).exists():
             return Response(
                 {'error': 'Username already exists'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        if User.objects.filter(email=email).exists():
+        if User.objects.filter(email__iexact=email).exists():
             return Response(
                 {'error': 'Email already exists'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        candidate = User(username=username, email=email)
+        validation_errors = []
+        try:
+            validate_email(email)
+        except ValidationError as error:
+            validation_errors.extend(error.messages)
+        try:
+            validate_password(password, user=candidate)
+        except ValidationError as error:
+            validation_errors.extend(error.messages)
+        if validation_errors:
+            return Response(
+                {'error': " ".join(validation_errors)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         user = User.objects.create_user(
             username=username,
             email=email,
@@ -172,7 +205,7 @@ class AccountUpdateView(APIView):
             )
 
         if username and username != user.username:
-            if User.objects.filter(username=username).exclude(pk=user.pk).exists():
+            if User.objects.filter(username__iexact=username).exclude(pk=user.pk).exists():
                 return Response(
                     {'error': 'Username already exists'},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -180,14 +213,23 @@ class AccountUpdateView(APIView):
             user.username = username
 
         if password:
-            if len(password) < 6:
+            if not isinstance(password, str):
                 return Response(
-                    {'error': 'Password must be at least 6 characters'},
+                    {'error': 'Password must be a string.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            try:
+                validate_password(password, user=user)
+            except ValidationError as error:
+                return Response(
+                    {'error': " ".join(error.messages)},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             user.set_password(password)
 
         user.save()
+        if password:
+            Token.objects.filter(user=user).delete()
         token, _ = Token.objects.get_or_create(user=user)
 
         return Response({
@@ -211,11 +253,9 @@ class CurrentUserView(APIView):
         })
 
 
-class VerifyView(APIView):
-    """Legacy verification endpoint no longer required"""
-    permission_classes = [permissions.AllowAny]
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
-        return Response(
-            {'message': 'Verification is no longer required. Please sign in directly.'},
-            status=status.HTTP_410_GONE,
-        )
+        Token.objects.filter(user=request.user).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
