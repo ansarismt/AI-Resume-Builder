@@ -6,20 +6,17 @@ from .export_styles import TEMPLATE_CATALOG
 
 class Resume(models.Model):
     USER_TYPE_CHOICES = [
-        ('school', 'School Student'),
-        ('college', 'College Student'),
-        ('professional', 'Working Professional'),
+        ("school", "School Student"),
+        ("college", "College Student"),
+        ("professional", "Working Professional"),
     ]
 
-    TEMPLATE_CHOICES = [
-        (template["id"], template["name"])
-        for template in TEMPLATE_CATALOG
-    ]
-    
+    TEMPLATE_CHOICES = [(template["id"], template["name"]) for template in TEMPLATE_CATALOG]
+
     name = models.CharField(max_length=100)
     email = models.EmailField()
     phone = models.CharField(max_length=20, blank=True, default="")
-    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='college')
+    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default="college")
     highest_education = models.CharField(max_length=100, blank=True, default="")
     is_studying = models.BooleanField(default=True)
     years_of_experience = models.PositiveIntegerField(default=0)
@@ -31,7 +28,7 @@ class Resume(models.Model):
     projects = models.TextField(blank=True, default="")
     certifications = models.TextField(blank=True, default="")
     summary = models.TextField(blank=True, default="")
-    template = models.CharField(max_length=10, choices=TEMPLATE_CHOICES, default='template1')
+    template = models.CharField(max_length=10, choices=TEMPLATE_CHOICES, default="template1")
     title = models.CharField(max_length=150, blank=True, default="")
     headline = models.CharField(max_length=120, blank=True, default="")
     job_title_target = models.CharField(max_length=150, blank=True, default="")
@@ -58,6 +55,6 @@ class Resume(models.Model):
 
     class Meta:
         ordering = ["-updated_at"]
-    
+
     def __str__(self):
         return f"{self.name}'s Resume"

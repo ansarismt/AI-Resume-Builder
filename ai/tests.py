@@ -168,9 +168,7 @@ class AIEndpointTests(APITestCase):
     @patch("ai.views.generate_json")
     def test_improve_bullets_prompt_separates_optional_role_guidance(self, mock_generate):
         mock_generate.return_value = {
-            "suggestions": [
-                {"before": "Built tools", "after": "Developed tools"}
-            ]
+            "suggestions": [{"before": "Built tools", "after": "Developed tools"}]
         }
 
         response = self.client.post(

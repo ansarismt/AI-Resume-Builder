@@ -4,50 +4,49 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('resumes', '0001_initial'),
+        ("resumes", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='resume',
-            name='achievements',
-            field=models.TextField(blank=True, default=''),
+            model_name="resume",
+            name="achievements",
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AddField(
-            model_name='resume',
-            name='certifications',
-            field=models.TextField(blank=True, default=''),
+            model_name="resume",
+            name="certifications",
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AddField(
-            model_name='resume',
-            name='internships',
-            field=models.TextField(blank=True, default=''),
+            model_name="resume",
+            name="internships",
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AddField(
-            model_name='resume',
-            name='projects',
-            field=models.TextField(blank=True, default=''),
+            model_name="resume",
+            name="projects",
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AlterField(
-            model_name='resume',
-            name='education',
-            field=models.TextField(blank=True, default=''),
+            model_name="resume",
+            name="education",
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AlterField(
-            model_name='resume',
-            name='experience',
-            field=models.TextField(blank=True, default=''),
+            model_name="resume",
+            name="experience",
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AlterField(
-            model_name='resume',
-            name='skills',
-            field=models.TextField(blank=True, default=''),
+            model_name="resume",
+            name="skills",
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AlterField(
-            model_name='resume',
-            name='summary',
-            field=models.TextField(blank=True, default=''),
+            model_name="resume",
+            name="summary",
+            field=models.TextField(blank=True, default=""),
         ),
     ]

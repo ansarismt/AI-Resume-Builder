@@ -13,7 +13,6 @@ class Command(BaseCommand):
             raise CommandError(str(error)) from error
         self.stdout.write(
             self.style.SUCCESS(
-                f"Trained {metrics['selected_model']} with macro-F1 "
-                f"{metrics['test_macro_f1']:.4f}."
+                f"Trained {metrics['selected_model']} with macro-F1 {metrics['test_macro_f1']:.4f}."
             )
         )

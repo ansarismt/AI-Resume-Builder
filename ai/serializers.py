@@ -153,8 +153,12 @@ class ATSOutputSerializer(serializers.Serializer):
 
 class TailorOutputSerializer(serializers.Serializer):
     tailored_summary = serializers.CharField(max_length=3000)
-    emphasized_bullets = serializers.ListField(child=serializers.CharField(max_length=2000), max_length=20)
-    emphasized_skills = serializers.ListField(child=serializers.CharField(max_length=100), max_length=40)
+    emphasized_bullets = serializers.ListField(
+        child=serializers.CharField(max_length=2000), max_length=20
+    )
+    emphasized_skills = serializers.ListField(
+        child=serializers.CharField(max_length=100), max_length=40
+    )
 
 
 class CoverLetterOutputSerializer(serializers.Serializer):

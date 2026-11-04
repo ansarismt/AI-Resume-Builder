@@ -6,7 +6,6 @@ from xml.sax.saxutils import escape
 
 from django.forms.models import model_to_dict
 from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
@@ -71,10 +70,7 @@ def _sections(resume):
 def _contact_items(resume):
     values = [resume.email, resume.phone, resume.location]
     if isinstance(resume.links, dict):
-        values.extend(
-            resume.links.get(key, "")
-            for key in ("linkedin", "github", "portfolio")
-        )
+        values.extend(resume.links.get(key, "") for key in ("linkedin", "github", "portfolio"))
     return [_clean(value) for value in values if _clean(value)]
 
 
@@ -289,9 +285,7 @@ def export_json(resume, accent_color=None):
     data["created_at"] = resume.created_at.isoformat()
     data["updated_at"] = resume.updated_at.isoformat()
     data["accent_color"] = f"#{_accent(resume, accent_color)}"
-    return BytesIO(
-        json.dumps(data, ensure_ascii=False, indent=2, default=_clean).encode("utf-8")
-    )
+    return BytesIO(json.dumps(data, ensure_ascii=False, indent=2, default=_clean).encode("utf-8"))
 
 
 def export_txt(resume):

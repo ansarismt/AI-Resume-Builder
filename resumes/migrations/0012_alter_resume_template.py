@@ -4,15 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('resumes', '0011_resume_accent_color'),
+        ("resumes", "0011_resume_accent_color"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='resume',
-            name='template',
-            field=models.CharField(choices=[('template1', 'Executive'), ('template2', 'Corporate'), ('template3', 'Professional'), ('template4', 'Heritage'), ('template5', 'Navy Sidebar'), ('template6', 'Charcoal Sidebar'), ('template7', 'Slate Aside'), ('template8', 'Refined Aside'), ('template9', 'Banner'), ('template10', 'Banner Serif'), ('template11', 'Split'), ('template12', 'Split Serif'), ('template13', 'Compact'), ('template14', 'Compact Serif'), ('template15', 'Timeline'), ('template16', 'Timeline Serif'), ('template17', 'ATS Plain'), ('template18', 'ATS Classic'), ('template19', 'Framed'), ('template20', 'Framed Serif')], default='template1', max_length=10),
+            model_name="resume",
+            name="template",
+            field=models.CharField(
+                choices=[
+                    ("template1", "Executive"),
+                    ("template2", "Corporate"),
+                    ("template3", "Professional"),
+                    ("template4", "Heritage"),
+                    ("template5", "Navy Sidebar"),
+                    ("template6", "Charcoal Sidebar"),
+                    ("template7", "Slate Aside"),
+                    ("template8", "Refined Aside"),
+                    ("template9", "Banner"),
+                    ("template10", "Banner Serif"),
+                    ("template11", "Split"),
+                    ("template12", "Split Serif"),
+                    ("template13", "Compact"),
+                    ("template14", "Compact Serif"),
+                    ("template15", "Timeline"),
+                    ("template16", "Timeline Serif"),
+                    ("template17", "ATS Plain"),
+                    ("template18", "ATS Classic"),
+                    ("template19", "Framed"),
+                    ("template20", "Framed Serif"),
+                ],
+                default="template1",
+                max_length=10,
+            ),
         ),
     ]

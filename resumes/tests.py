@@ -349,15 +349,12 @@ class ResumeOwnershipTests(APITestCase):
 
         for export in ("export_pdf", "export_docx", "export_txt", "export_json"):
             with self.subTest(export=export):
-                response = self.client.get(
-                    f"/api/resumes/{self.owned_resume.pk}/{export}/"
-                )
+                response = self.client.get(f"/api/resumes/{self.owned_resume.pk}/{export}/")
                 content = b"".join(response.streaming_content)
                 self.assertEqual(response.status_code, 200)
                 if export == "export_pdf":
                     text = "\n".join(
-                        page.extract_text() or ""
-                        for page in PdfReader(BytesIO(content)).pages
+                        page.extract_text() or "" for page in PdfReader(BytesIO(content)).pages
                     )
                     self.assertIn("Lead data analyst", text)
                     self.assertNotIn("INFORMATION-TECHNOLOGY", text)
@@ -449,18 +446,14 @@ class ResumeTemplateTests(APITestCase):
                         user_type=user_type,
                         export=export,
                     ):
-                        response = self.client.get(
-                            f"/api/resumes/{resume.pk}/{export}/"
-                        )
+                        response = self.client.get(f"/api/resumes/{resume.pk}/{export}/")
 
                         self.assertEqual(response.status_code, 200)
                         content = b"".join(response.streaming_content)
                         if export == "export_pdf":
                             pages = PdfReader(BytesIO(content)).pages
                             self.assertGreaterEqual(len(pages), 1)
-                            text = "\n".join(
-                                page.extract_text() or "" for page in pages
-                            )
+                            text = "\n".join(page.extract_text() or "" for page in pages)
                             self.assertIn("Template Test", text)
                         elif export == "export_docx":
                             document = Document(BytesIO(content))
@@ -484,12 +477,10 @@ class ResumeTemplateTests(APITestCase):
             template="template5",
             summary="Special < & > characters.",
             experience="\n\n".join(
-                f"Delivered verified outcome {index} for a team."
-                for index in range(40)
+                f"Delivered verified outcome {index} for a team." for index in range(40)
             ),
             education="\n\n".join(
-                f"Education record {index} with complete details."
-                for index in range(40)
+                f"Education record {index} with complete details." for index in range(40)
             ),
             skills=", ".join(f"Skill-{index}" for index in range(150)),
             links={"github": 123, "linkedin": None},
@@ -497,16 +488,13 @@ class ResumeTemplateTests(APITestCase):
 
         for export in ("export_pdf", "export_docx", "export_txt", "export_json"):
             with self.subTest(export=export):
-                response = self.client.get(
-                    f"/api/resumes/{resume.pk}/{export}/"
-                )
+                response = self.client.get(f"/api/resumes/{resume.pk}/{export}/")
                 content = b"".join(response.streaming_content)
                 self.assertEqual(response.status_code, 200)
                 self.assertTrue(content)
                 if export == "export_pdf":
                     pdf_text = "\n".join(
-                        page.extract_text() or ""
-                        for page in PdfReader(BytesIO(content)).pages
+                        page.extract_text() or "" for page in PdfReader(BytesIO(content)).pages
                     )
                     self.assertGreater(len(PdfReader(BytesIO(content)).pages), 1)
                     self.assertIn(name[:4], pdf_text)

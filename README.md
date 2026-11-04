@@ -1,158 +1,227 @@
 # AI Resume Builder
 
-AI Resume Builder is a full-stack resume builder with a React, TypeScript, and Vite frontend and a Django REST API. It supports a guided resume editor, live previews, 20 templates, private saved resumes, resume exports, local dataset-based career analysis, and optional generative-AI writing tools.
+[![CI](https://github.com/sroshans025/vdartintern/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/sroshans025/vdartintern/actions/workflows/ci.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
+[![Node 20.19+](https://img.shields.io/badge/node-20.19%2B-green.svg)](https://nodejs.org/)
 
-> **Important:** The dataset-trained model and generative AI are different systems. The local model can analyze and classify resume content, but it does not generate or parse text. Generative tools require a configured AI provider and API key.
+Create a polished, editable resume with a guided React editor, private saved versions, 20 templates,
+and optional local analysis and AI writing tools.
+
+![Twenty resume templates](docs/screenshots/templates.png)
+
+![Resume editor preview](docs/screenshots/editor.png)
 
 ## Features
 
-- Guided resume editor with a live preview and 20 templates.
-- User accounts and private saved resumes, with resume versions.
-- PDF, DOCX, JSON, and plain-text TXT exports.
-- PDF/DOCX resume import and AI-assisted field extraction.
-- Dataset-powered AI Studio for resume-strength feedback, career-category matches, skills to explore, and job-description comparisons.
-- Optional AI writing tools for summaries, bullet improvements, resume tailoring, cover letters, grammar checks, interview preparation, and LinkedIn headlines.
+- Guided resume editor and live preview for school, college, and professional resumes.
+- 20 professional templates, saved resumes, and version history.
+- Vector, selectable-text PDF through the browser print dialog; editable DOCX, JSON, and TXT
+  downloads.
+- PDF and DOCX import with AI-assisted field extraction.
+- Dataset-powered AI Studio for resume-strength feedback, role matches, skills, and job-description
+  comparison.
+- Optional provider-backed writing tools, including summaries, bullet rewrites, tailoring, and
+  cover letters.
 
-PDF exports use the selected template and accent color directly, without relying on the browser
-print dialog. DOCX remains editable, though Word may render some spacing differently.
+## Architecture
 
-## Which AI features need an API key?
+```mermaid
+flowchart LR
+  B[Browser: React and Vite] -- REST and token --> D[Django REST API]
+  D --> DB[(SQLite)]
+  D --> ML[Local scikit-learn model]
+  D -. optional .-> L[OpenAI-compatible provider or local Ollama]
+```
 
-| Tool                                                                                         | Model used                              | Needs provider credentials?                                                       |
-| -------------------------------------------------------------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------- |
-| Resume strength and career-category matches                                                  | Local scikit-learn model                | No, if the model has been trained.                                                |
-| Job-description comparison                                                                   | Local scikit-learn model                | No, if the model has been trained.                                                |
-| Role skills                                                                                  | Local dataset statistics when available | Usually no; may use the generative provider if local suggestions are unavailable. |
-| Resume parsing/import, summaries, and bullet rewrites                                        | Configured generative AI provider       | Yes.                                                                              |
-| Resume tailoring, cover letters, grammar checks, interview questions, and LinkedIn headlines | Configured generative AI provider       | Yes.                                                                              |
-
-The **Improve with AI** control is available beside the field label for Education, Skills, Projects, Internships, Achievements, Certifications, and Work Experience. Career Objective and Professional Summary have their own AI drafting control in the same position. Suggestions are shown for review before you accept them.
-
-The training dataset is mostly professional resumes, so recommendations for students or underrepresented career categories can be less reliable. Treat scores and career matches as guidance, not hiring predictions. Review AI-generated content and correct it before using it; the tools should not invent your qualifications or accomplishments.
-
-**Privacy:** Dataset analysis runs on the Django backend using the local model. When you use a generative tool, the submitted resume content is sent from the backend to the AI provider configured by the project owner. Do not send information you are not comfortable sharing with that provider.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for boundaries and data flow.
 
 ## Requirements
 
 - Python 3.11 or newer.
-- Node.js 20.19+ or 22.12+, with npm (required by Vite 7).
+- Node.js 20.19+ and npm (Vite 7 requirement).
 - Windows, macOS, or Linux.
 
-## Setup on Windows
+## Quick start
 
-Open PowerShell in the `AI-Resume-Builder` project directory:
+### Windows
 
 ```powershell
+git clone https://github.com/sroshans025/vdartintern.git AI-Resume-Builder
+cd AI-Resume-Builder
 .\start-dev.bat
 ```
 
-
-The launcher creates `.env` from `.env.example` only when needed, creates the Python
-virtual environment, installs missing dependencies, applies database migrations, and
-opens the Django API and Vite frontend in separate terminal windows. Review `.env`
-for local configuration; do not overwrite an existing file. Replace the example
-`DJANGO_SECRET_KEY` before deploying, and keep `DJANGO_DEBUG=True` for local
-development only. Open <http://127.0.0.1:8080>. The API is at
-<http://127.0.0.1:8000/api/> and the Django staff admin is at
-<http://127.0.0.1:8000/admin/>.
-
-Alternatively, run each server in its own terminal:
-
-```powershell
-# Terminal 1: Django backend
-.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
-```
-
-```powershell
-# Terminal 2: Vite frontend
-npm run dev
-```
-
-Create a staff account with `.\.venv\Scripts\python.exe manage.py createsuperuser`. There are no default admin credentials.
+The launcher creates `.env` from `.env.example` only when needed, creates the virtual environment,
+installs dependencies when their lock files change, migrates the local database, then opens the
+backend and frontend in separate terminal windows. Review `.env`; keep the example secret only for
+local development. Open <http://127.0.0.1:8080>.
 
 ### macOS and Linux
 
-Create and activate a virtual environment, install dependencies, copy `.env.example` to `.env` if needed, then migrate and install frontend packages:
-
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-test -f .env || cp .env.example .env
-python manage.py migrate
-npm install
+git clone https://github.com/sroshans025/vdartintern.git AI-Resume-Builder
+cd AI-Resume-Builder
+chmod +x scripts/dev.sh && ./scripts/dev.sh
 ```
 
-Start `python manage.py runserver` and `npm run dev` in separate terminals.
+The script performs the same setup, then runs Django and Vite in the current terminal. Press
+Ctrl+C to stop both servers.
 
-## Configure generative AI (OpenAI)
+### Manual two-terminal setup
 
-The local dataset model does **not** require an OpenAI key. Resume parsing and writing tools do. To enable them:
+If you prefer separate shells, create a virtual environment and install dependencies first:
 
-1. Open the project’s local `.env` file.
-2. Set `LLM_PROVIDER=openai`.
-3. Set `LLM_API_KEY` to your own OpenAI API key.
-4. Set `LLM_MODEL` to a model available to your OpenAI account.
-5. Save `.env` and restart the Django backend.
-
-For example, the configuration has this shape—replace the placeholders locally:
-
-```dotenv
-LLM_PROVIDER=openai
-LLM_API_KEY=your-private-api-key
-LLM_MODEL=your-available-model
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
+npm ci
+.\.venv\Scripts\python.exe manage.py migrate
 ```
 
-Never put an API key in frontend code, a `VITE_` variable, source control, screenshots, or chat. Keep `.env` private. Provider access or usage charges may apply to your account.
+Run `.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000` in one terminal and
+`npm run dev` in another. On macOS/Linux, activate `.venv`, use `python` instead, and run
+`cp .env.example .env`.
 
-If a generative feature says **“AI not configured,”** confirm all three settings are present in `.env` and restart Django. A missing provider key does not prevent the independently trained local analysis tools from working.
+## Configuration
 
-An OpenAI-compatible provider can also be used by setting `LLM_PROVIDER=openai-compatible`, `LLM_API_KEY`, `LLM_MODEL`, and `LLM_BASE_URL` to that provider’s values.
+Copy `.env.example` to `.env` for local development. Blank LLM values disable provider-backed
+writing tools; the local dataset model works independently.
 
-## Dataset model
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `DJANGO_SECRET_KEY` | `generate-a-random-secret-key` | Django signing key; replace with a unique secret for deployment. |
+| `DJANGO_DEBUG` | `True` in example; `False` in code | Local debug mode; must be false in deployment. |
+| `DJANGO_ALLOWED_HOSTS` | `localhost,127.0.0.1` | Comma-separated Django hosts. |
+| `DJANGO_DB_NAME` | `db.sqlite3` in example | SQLite database path. |
+| `CORS_ALLOWED_ORIGINS` | `http://127.0.0.1:8080,http://localhost:8080` | Browser origins allowed to call the API. |
+| `TOKEN_TTL_DAYS` | `14` | Authentication token lifetime in days. |
+| `LLM_PROVIDER` | blank | `openai`, `openai-compatible`, or the supported local provider. |
+| `LLM_API_KEY` | blank | Provider credential; backend only. |
+| `LLM_MODEL` | blank | Provider model name. |
+| `LLM_BASE_URL` | blank | Optional base URL for compatible providers. |
+| `LLM_TEMPERATURE` | provider default | Optional generation temperature. |
+| `LLM_MAX_TOKENS` | `2048` | Maximum provider output tokens. |
+| `VITE_API_URL` | `http://127.0.0.1:8000/api` | Frontend API base URL. |
+| `SECURE_SSL_REDIRECT` | enabled when debug is false | Force HTTPS in production. |
+| `SECURE_HSTS_SECONDS` | `31536000` in production | HTTP Strict Transport Security lifetime. |
+| `SECURE_HSTS_INCLUDE_SUBDOMAINS` | enabled in production | Include subdomains in HSTS. |
+| `SESSION_COOKIE_SECURE` | enabled in production | Send session cookies only over HTTPS. |
+| `CSRF_COOKIE_SECURE` | enabled in production | Send CSRF cookies only over HTTPS. |
+| `SECURE_CONTENT_TYPE_NOSNIFF` | `True` | Add the content-type nosniff protection. |
+| `X_FRAME_OPTIONS` | `DENY` | Prevent framing by other sites. |
 
-Training is optional. The training command expects the supplied CSV at `data/Resume.csv`:
+Production security settings are overridable for deployment-specific infrastructure. Use a valid
+HTTPS origin and never commit `.env`.
+
+## AI features and privacy
+
+| Feature | System | API key |
+| --- | --- | --- |
+| Resume strength and career-category matches | Local scikit-learn model | No, if trained artifacts exist. |
+| Job-description comparison | Local scikit-learn model | No, if trained artifacts exist. |
+| Skills suggestions | Local dataset statistics, with provider fallback | Usually no. |
+| Resume import/parsing and writing suggestions | Configured generative provider | Yes. |
+| Tailoring, cover letters, grammar, interview questions, LinkedIn headline | Configured generative provider | Yes. |
+
+Dataset analysis runs on the Django backend. When a generative tool is used, the submitted content
+is sent by the backend to the configured provider. Review its privacy and retention terms. AI output
+may be inaccurate; verify every claim and never accept invented qualifications. See
+[docs/AI.md](docs/AI.md) and [SECURITY.md](SECURITY.md).
+
+Training is optional. Put an appropriately licensed CSV with `Resume_str` and `Category` columns at
+`data/Resume.csv`, then run:
 
 ```powershell
 .\.venv\Scripts\python.exe manage.py train_model
 ```
 
-The CSV must include `Resume_str` and `Category` columns. Training writes the classifier, category statistics, and evaluation metrics to `ai/ml/artifacts/`. These artifacts and the private training data are local and gitignored. The AI Studio displays the trained model’s current metrics and reports when the local model is unavailable.
+Training data and generated files under `ai/ml/artifacts/` are local and gitignored.
 
-Do not copy raw resume text into frontend assets, public endpoints, fixtures, or logs.
+## Templates
 
-## Troubleshooting
+| Template | Layout | Font |
+| --- | --- | --- |
+| Executive | Classic | Serif |
+| Corporate | Classic | Sans |
+| Professional | Modern | Sans |
+| Heritage | Modern | Serif |
+| Navy Sidebar | Sidebar | Sans |
+| Charcoal Sidebar | Sidebar | Serif |
+| Slate Aside | Sidebar | Sans |
+| Refined Aside | Sidebar | Serif |
+| Banner | Header band | Sans |
+| Banner Serif | Header band | Serif |
+| Split | Two column | Sans |
+| Split Serif | Two column | Serif |
+| Compact | Space saving | Sans |
+| Compact Serif | Space saving | Serif |
+| Timeline | Structured | Sans |
+| Timeline Serif | Structured | Serif |
+| ATS Plain | ATS friendly | Sans |
+| ATS Classic | ATS friendly | Serif |
+| Framed | Formal | Sans |
+| Framed Serif | Formal | Serif |
 
-- **The page is blank or the Vite development server does not respond:** check the Vite terminal for startup errors. This project’s Vite watcher excludes the large `.venv/`, `data/`, model-artifact, build, and generated-router directories.
-- **“AI not configured”:** add the provider, API key, and model to `.env`, then restart Django. The dataset model cannot replace these credentials for text generation.
-- **AI Studio reports the dataset model is unavailable:** place the CSV at `data/Resume.csv` and run the training command above.
-- **Saved resumes show a sign-in/session error:** sign in again; saved resumes require an authenticated account and a running Django API.
-- **Ports 8000 or 8080 are already in use:** stop the application already using that port or change the corresponding local server configuration.
+Templates use the restrained palette in `shared/templates.json`. To add a template, update that
+catalog; add layout CSS only when introducing a new layout.
 
-## Checks and tests
+## Exports
 
-Run these commands from the project directory:
-
-```powershell
-# Django checks and backend tests
-.\.venv\Scripts\python.exe manage.py check
-.\.venv\Scripts\python.exe manage.py test resumes ai
-
-# Frontend checks
-npm run typecheck
-npm run lint
-npm run build
-```
+- **PDF:** use the browser print dialog and choose **Save as PDF**. This creates a vector,
+  selectable-text PDF from the preview.
+- **DOCX:** editable Word document in a clean, simplified single-column layout.
+- **JSON and TXT:** server-generated formats for portability and plain-text use.
 
 ## Project structure
 
-| Path                   | Contents                                                               |
-| ---------------------- | ---------------------------------------------------------------------- |
-| `src/`                 | React app, routes, resume editor, templates, and API client.           |
-| `src/lib/resumeApi.ts` | Typed frontend API client and API error handling.                      |
-| `resumes/`             | Django authentication, resume, versioning, and export APIs.            |
-| `ai/`                  | Authenticated AI API, provider integration, and local ML pipeline.     |
-| `backend/`             | Django settings and URL routing.                                       |
-| `data/`                | Local training data; gitignored.                                       |
-| `ai/ml/artifacts/`     | Locally generated model, metrics, and category statistics; gitignored. |
-| `start-dev.bat`        | Windows development launcher.                                          |
+```text
+backend/              Django settings, security, and routes
+resumes/              Accounts, resume data, versions, and exports
+ai/                   AI endpoints, local ML, and provider integration
+shared/               Shared template and category catalogs
+src/                  React routes, editor, templates, and API client
+docs/                 Architecture, API, AI, and screenshots
+samples/              Fictional sample resume
+scripts/              Cross-platform development and screenshot scripts
+.github/              CI, Dependabot, and contribution templates
+```
+
+## Testing and CI
+
+```powershell
+npm run check
+$env:DJANGO_DEBUG = "True"
+$env:DJANGO_SECRET_KEY = "local-test-key"
+$env:DJANGO_DB_NAME = "$env:TEMP\resume-builder-tests.sqlite3"
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python.exe manage.py check
+.\.venv\Scripts\python.exe manage.py makemigrations --check --dry-run
+.\.venv\Scripts\python.exe manage.py test resumes ai
+.\.venv\Scripts\python.exe -m ruff check .
+```
+
+GitHub Actions runs the frontend checks and backend checks on Python 3.11 and 3.12. More API
+details are in [docs/API.md](docs/API.md).
+
+## Troubleshooting
+
+- **The page is blank or Vite does not respond:** check the terminal for errors; the watcher
+  excludes `.venv/`, `data/`, model artifacts, build output, and generated router files.
+- **“AI not configured”:** configure the backend provider, key, and model, then restart Django.
+- **Local model unavailable:** add the training CSV and run `train_model`; otherwise local
+  analysis features will report that the model is unavailable.
+- **Saved-resume session error:** sign in again and confirm that the Django API is running.
+- **Print preview shows two pages:** select A4 paper, disable browser headers/footers, and use
+  the print preview to confirm page breaks before saving.
+- **Port 8000 or 8080 is occupied:** stop the process already using it or adjust local server
+  configuration.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for tests and pull-request guidance. Report vulnerabilities
+privately as described in [SECURITY.md](SECURITY.md).
+
+## License
+
+VDart
