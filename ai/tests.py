@@ -588,3 +588,16 @@ class ModelInfoTests(APITestCase):
 
         self.assertEqual(response.status_code, 503)
         self.assertFalse(response.data["available"])
+
+
+class ParsePlaceholderNormalizationTests(APITestCase):
+    def test_filler_values_from_small_models_become_blank(self):
+        from ai.views import _normalize_resume_parse_output
+
+        out = _normalize_resume_parse_output(
+            {"name": "Jordan Example", "experience": "0", "projects": " N/A ", "skills": "SQL"}
+        )
+        self.assertEqual(out["experience"], "")
+        self.assertEqual(out["projects"], "")
+        self.assertEqual(out["skills"], "SQL")
+        self.assertEqual(out["name"], "Jordan Example")

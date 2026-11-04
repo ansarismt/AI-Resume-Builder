@@ -140,6 +140,10 @@ class ParseResumeView(AIAPIView):
         return result
 
 
+# Small local models fill missing sections with filler instead of leaving them blank.
+_PLACEHOLDER_VALUES = {"0", "n/a", "na", "none", "null", "-", "--", "not provided", "not available"}
+
+
 def _normalize_resume_parse_output(output):
     normalized = output.copy()
     string_field_limits = {
@@ -176,6 +180,8 @@ def _normalize_resume_parse_output(output):
             )
         elif value is not None and not isinstance(value, str):
             value = str(value) if isinstance(value, (int, float)) else None
+        if value is not None and value.strip().lower() in _PLACEHOLDER_VALUES:
+            value = ""
         if value is None:
             normalized.pop(field, None)
             continue
