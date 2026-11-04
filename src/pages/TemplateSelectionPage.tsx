@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-import { ResumePreview } from "@/components/preview/ResumePreview";
+import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { TemplateCard } from "@/components/TemplateCard";
 import { Button } from "@/components/ui/button";
 import type { ResumeData, TemplateId } from "@/components/resume/types";
@@ -83,7 +83,7 @@ export function TemplateSelectionPage({
             id="resume-print"
             className="overflow-hidden rounded-lg border border-border bg-secondary/30 p-1.5 shadow-inner"
           >
-            <ResumePreview data={data} accentColor={selectedColor} sticky={false} />
+            <ResumeDocument data={data} accentColor={selectedColor} />
           </div>
         </aside>
       </div>

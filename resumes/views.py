@@ -14,6 +14,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from .exports import export_docx, export_json, export_pdf, export_txt, safe_filename
+from .export_styles import UnsupportedPdfLanguageError
 from .models import Resume
 from .serializers import ResumeSerializer
 
@@ -51,8 +52,15 @@ class ResumeViewSet(viewsets.ModelViewSet):
     def export_pdf(self, request, pk=None):
         resume = self.get_object()
         filename = f"{safe_filename(resume.name, 'Resume')}.pdf"
+        try:
+            pdf = export_pdf(resume, request.query_params.get("accent_color"))
+        except UnsupportedPdfLanguageError as error:
+            return Response(
+                {"error": str(error)},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
         return FileResponse(
-            export_pdf(resume, request.query_params.get("accent_color")),
+            pdf,
             as_attachment=True,
             filename=filename,
             content_type="application/pdf",

@@ -1,7 +1,7 @@
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 
 import { ExportButtons } from "@/components/ExportButtons";
-import { ResumePreview } from "@/components/preview/ResumePreview";
+import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { Button } from "@/components/ui/button";
 import type { ResumeData } from "@/components/resume/types";
 
@@ -45,8 +45,8 @@ export function FinalizeResumePage({
             Ready for export
           </div>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            Download PDF, editable DOCX, structured JSON, or plain-text TXT. The PDF uses the
-            selected template without opening the browser print dialog.
+            Download an editable Word version with a simplified layout, structured JSON, or plain
+            text. Choose <strong>Save as PDF</strong> in the print dialog for a selectable PDF.
           </p>
         </div>
 
@@ -72,7 +72,7 @@ export function FinalizeResumePage({
         id="resume-print"
         className="rounded-xl border border-border bg-card p-3 shadow-sm sm:p-4"
       >
-        <ResumePreview data={data} accentColor={selectedColor} />
+        <ResumeDocument data={data} accentColor={selectedColor} />
       </section>
     </div>
   );

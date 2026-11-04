@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-import { ResumePreview } from "@/components/preview/ResumePreview";
+import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { Button } from "@/components/ui/button";
 import type { ResumeData } from "@/components/resume/types";
 
@@ -37,7 +37,7 @@ export function ResumePreviewPage({ data, selectedColor, onEdit, onContinue }: P
         id="resume-print"
         className="rounded-xl border border-border bg-card p-3 shadow-sm sm:p-4"
       >
-        <ResumePreview data={data} accentColor={selectedColor} />
+        <ResumeDocument data={data} accentColor={selectedColor} />
       </section>
     </div>
   );

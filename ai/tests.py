@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.cache import cache
 from rest_framework.test import APITestCase
 from docx import Document
+from docx.oxml.ns import qn
 
 from resumes.models import Resume
 
@@ -282,6 +283,30 @@ class AIEndpointTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("resume_Cover_Letter.docx", response["Content-Disposition"])
         mock_render.assert_called_once_with("தமிழ்", "Dear hiring team.", "docx")
+
+    def test_cover_letter_pdf_rejects_non_latin_text_with_print_guidance(self):
+        response = self.client.post(
+            "/api/ai/cover-letter/export/pdf/",
+            {"name": "தமிழ்", "content": "Dear தமிழ்", "format": "pdf"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertIn("Use the Download PDF button", response.data["error"])
+
+    def test_cover_letter_docx_configures_unicode_font_fallbacks(self):
+        response = self.client.post(
+            "/api/ai/cover-letter/export/docx/",
+            {"name": "தமிழ்", "content": "Dear தமிழ்", "format": "docx"},
+            format="json",
+        )
+
+        document = Document(BytesIO(b"".join(response.streaming_content)))
+        run = document.paragraphs[0].runs[0]
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(run.font.name, "Georgia")
+        self.assertEqual(run._element.rPr.rFonts.get(qn("w:eastAsia")), "Georgia")
+        self.assertEqual(run._element.rPr.rFonts.get(qn("w:cs")), "Georgia")
 
     @patch.dict(
         "rest_framework.throttling.ScopedRateThrottle.THROTTLE_RATES",

@@ -2,12 +2,12 @@ import re
 
 from rest_framework import serializers
 
-from .exports import TEMPLATE_COLORS
+from .export_styles import ALLOWED_COLORS
 from .models import Resume
 from .utils import detect_user_type
 
 
-ALLOWED_ACCENT_COLORS = {f"#{color.upper()}" for color in TEMPLATE_COLORS.values()} | {"#2F5D8A"}
+ALLOWED_ACCENT_COLORS = {f"#{color}" for color in ALLOWED_COLORS}
 
 
 class ResumeSerializer(serializers.ModelSerializer):

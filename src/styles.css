@@ -186,40 +186,36 @@
   .border-rule { border-color: var(--rule); }
 }
 
-/* Print: only the resume preview is rendered, full page, no chrome. */
+/* Print the same semantic resume document shown in the preview. */
 @media print {
   @page { size: A4; margin: 0; }
-  html, body { width: 210mm; height: 297mm; background: white !important; }
-  body { background: white !important; color: black !important; }
+  html, body { background: #fff !important; }
   body * { visibility: hidden !important; }
   #resume-print, #resume-print * { visibility: visible !important; }
   #resume-print {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    min-height: 100% !important;
-    background: white !important;
-    padding: 12mm !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-  }
-  #resume-print > div {
-    border: none !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 210mm;
     box-shadow: none !important;
-    border-radius: 0 !important;
-    background: white !important;
-    color: black !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
-  #resume-print .rd-wrap,
-  #resume-print .rd {
-    width: 100% !important;
-    min-height: 0 !important;
+  #resume-print .rd-wrap {
+    width: 210mm !important;
+    min-height: 297mm !important;
     overflow: visible !important;
   }
   #resume-print .rd {
-    min-height: 141cqw !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   .no-print { display: none !important; }
 }

@@ -7,10 +7,13 @@ from datetime import timedelta
 import json
 from io import BytesIO
 from docx import Document
+from docx.oxml.ns import qn
+from docx.shared import RGBColor
 from pypdf import PdfReader
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
+from .export_styles import ALLOWED_COLORS, TEMPLATE_CATALOG
 from .exports import TEMPLATE_COLORS, _accent, safe_filename
 from .models import Resume
 
@@ -144,6 +147,17 @@ class ResumeOwnershipTests(APITestCase):
             Resume.objects.get(pk=response.data["id"]).accent_color,
             "#2F5D8A",
         )
+        catalog_color = self.client.post(
+            "/api/resumes/",
+            {
+                "name": "Catalog color",
+                "email": "catalog-color@example.com",
+                "accent_color": "#111111",
+            },
+            format="json",
+        )
+        self.assertEqual(catalog_color.status_code, 201)
+        self.assertEqual(catalog_color.data["accent_color"], "#111111")
         resume = Resume.objects.get(pk=response.data["id"])
         self.assertEqual(_accent(resume), "2F5D8A")
         invalid = self.client.post(
@@ -197,7 +211,7 @@ class ResumeOwnershipTests(APITestCase):
 
     def test_resume_export_uses_a_sanitized_filename(self):
         self.client.force_authenticate(self.owner)
-        self.owned_resume.name = "தமிழ்/../Candidate"
+        self.owned_resume.name = "Róshan/../Candidate"
         self.owned_resume.save()
 
         response = self.client.get(f"/api/resumes/{self.owned_resume.pk}/export_pdf/")
@@ -275,44 +289,27 @@ class ResumeOwnershipTests(APITestCase):
 
         document = Document(BytesIO(b"".join(response.streaming_content)))
         text = "\n".join(paragraph.text for paragraph in document.paragraphs)
-        text += "\n" + "\n".join(
-            paragraph.text
-            for table in document.tables
-            for row in table.rows
-            for cell in row.cells
-            for paragraph in cell.paragraphs
-        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Owner", text)
         self.assertIn("Finance", text)
         self.assertIn("CAREER OBJECTIVE", text)
         self.assertIn("A dependable analyst.", text)
-        self.assertEqual(len(document.tables), 2)
-        self.assertNotIn("owner@example.com", "\n".join(
-            paragraph.text for paragraph in document.tables[1].cell(0, 0).paragraphs
-        ))
-        self.assertEqual(document.tables[1].cell(0, 0).paragraphs[0].text, "Owner")
-        self.assertIn("owner@example.com", "\n".join(
-            paragraph.text for paragraph in document.tables[1].cell(0, 1).paragraphs
-        ))
+        self.assertEqual(document.tables, [])
+        name_run = document.paragraphs[0].runs[0]
+        self.assertEqual(name_run.font.name, "Georgia")
+        self.assertEqual(name_run.font.color.rgb, RGBColor.from_string("2F5D8A"))
+        self.assertEqual(name_run._element.rPr.rFonts.get(qn("w:eastAsia")), "Georgia")
+        self.assertEqual(name_run._element.rPr.rFonts.get(qn("w:cs")), "Georgia")
 
-    def test_docx_sidebar_and_split_layouts_keep_main_column_wider(self):
+    def test_backend_pdf_rejects_non_latin_text_with_print_guidance(self):
         self.client.force_authenticate(self.owner)
-        for template in ("template7", "template11"):
-            resume = Resume.objects.create(
-                user=self.owner,
-                name="Template Test",
-                email="t@example.com",
-                template=template,
-                summary="Dependable analyst.",
-            )
-            with self.subTest(template=template):
-                response = self.client.get(f"/api/resumes/{resume.pk}/export_docx/")
-                document = Document(BytesIO(b"".join(response.streaming_content)))
-                widths = [column.width for column in document.tables[0].columns]
+        self.owned_resume.name = "தமிழ்"
+        self.owned_resume.save()
 
-                self.assertEqual(response.status_code, 200)
-                self.assertGreater(widths[0], widths[1])
+        response = self.client.get(f"/api/resumes/{self.owned_resume.pk}/export_pdf/")
+
+        self.assertEqual(response.status_code, 422)
+        self.assertIn("Use the Download PDF button", response.data["error"])
 
     def test_json_export_excludes_the_user_relation(self):
         self.client.force_authenticate(self.owner)
@@ -343,7 +340,7 @@ class ResumeOwnershipTests(APITestCase):
 
 
 class ResumeTemplateTests(APITestCase):
-    TEMPLATE_IDS = [f"template{number}" for number in range(1, 21)]
+    TEMPLATE_IDS = [template["id"] for template in TEMPLATE_CATALOG]
 
     def setUp(self):
         self.user = User.objects.create_user(username="template-user", password="test-pass-123")
@@ -352,7 +349,19 @@ class ResumeTemplateTests(APITestCase):
     def test_model_offers_exactly_twenty_templates(self):
         choices = [value for value, _label in Resume.TEMPLATE_CHOICES]
 
+        self.assertEqual(len(self.TEMPLATE_IDS), 20)
+        self.assertEqual(len(set(self.TEMPLATE_IDS)), 20)
         self.assertEqual(choices, self.TEMPLATE_IDS)
+
+    def test_shared_catalog_uses_only_allowed_palette_colors(self):
+        colors = {
+            color.upper().removeprefix("#")
+            for template in TEMPLATE_CATALOG
+            for color in template["colors"]
+        }
+
+        self.assertTrue(colors)
+        self.assertTrue(colors.issubset(ALLOWED_COLORS))
 
     def test_every_template_has_an_export_accent_colour(self):
         self.assertEqual(sorted(TEMPLATE_COLORS), sorted(self.TEMPLATE_IDS))
@@ -378,23 +387,96 @@ class ResumeTemplateTests(APITestCase):
 
         self.assertEqual(response.status_code, 400)
 
-    def test_pdf_and_docx_exports_work_for_every_template(self):
+    def test_all_exports_work_for_each_template_and_user_type(self):
+        exports = ("export_pdf", "export_docx", "export_txt", "export_json")
         for template in self.TEMPLATE_IDS:
-            resume = Resume.objects.create(
-                user=self.user,
-                name="Template Test",
-                email="t@example.com",
-                template=template,
-                summary="Dependable analyst.",
-            )
-            for export in ("export_pdf", "export_docx"):
-                with self.subTest(template=template, export=export):
-                    response = self.client.get(f"/api/resumes/{resume.pk}/{export}/")
+            for user_type in ("school", "college", "professional"):
+                resume = Resume.objects.create(
+                    user=self.user,
+                    name="Template Test",
+                    email="t@example.com",
+                    user_type=user_type,
+                    template=template,
+                    summary="Dependable analyst.",
+                    experience="Built documented tools.",
+                    education="Bachelor of Science.",
+                    skills="Python, SQL.",
+                    internships="Supported a student project.",
+                    projects="Created a sample application.",
+                    achievements="Recognized for dependable work.",
+                    certifications="First aid certificate.",
+                )
+                for export in exports:
+                    with self.subTest(
+                        template=template,
+                        user_type=user_type,
+                        export=export,
+                    ):
+                        response = self.client.get(
+                            f"/api/resumes/{resume.pk}/{export}/"
+                        )
 
-                    self.assertEqual(response.status_code, 200)
-                    if export == "export_pdf":
-                        pdf = b"".join(response.streaming_content)
-                        self.assertEqual(len(PdfReader(BytesIO(pdf)).pages), 1)
+                        self.assertEqual(response.status_code, 200)
+                        content = b"".join(response.streaming_content)
+                        if export == "export_pdf":
+                            pages = PdfReader(BytesIO(content)).pages
+                            self.assertGreaterEqual(len(pages), 1)
+                            text = "\n".join(
+                                page.extract_text() or "" for page in pages
+                            )
+                            self.assertIn("Template Test", text)
+                        elif export == "export_docx":
+                            document = Document(BytesIO(content))
+                            self.assertEqual(document.tables, [])
+                            self.assertIn(
+                                "Template Test",
+                                "\n".join(p.text for p in document.paragraphs),
+                            )
+                        elif export == "export_txt":
+                            self.assertIn(b"Template Test", content)
+                        else:
+                            self.assertEqual(json.loads(content)["name"], "Template Test")
+
+    def test_stress_content_exports_without_layout_errors(self):
+        name = "A<&>" * 30
+        resume = Resume.objects.create(
+            user=self.user,
+            name=name,
+            email="stress@example.com",
+            user_type="professional",
+            template="template5",
+            summary="Special < & > characters.",
+            experience="\n\n".join(
+                f"Delivered verified outcome {index} for a team."
+                for index in range(40)
+            ),
+            education="\n\n".join(
+                f"Education record {index} with complete details."
+                for index in range(40)
+            ),
+            skills=", ".join(f"Skill-{index}" for index in range(150)),
+            links={"github": 123, "linkedin": None},
+        )
+
+        for export in ("export_pdf", "export_docx", "export_txt", "export_json"):
+            with self.subTest(export=export):
+                response = self.client.get(
+                    f"/api/resumes/{resume.pk}/{export}/"
+                )
+                content = b"".join(response.streaming_content)
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(content)
+                if export == "export_pdf":
+                    pdf_text = "\n".join(
+                        page.extract_text() or ""
+                        for page in PdfReader(BytesIO(content)).pages
+                    )
+                    self.assertGreater(len(PdfReader(BytesIO(content)).pages), 1)
+                    self.assertIn(name[:4], pdf_text)
+                elif export == "export_docx":
+                    document = Document(BytesIO(content))
+                    self.assertEqual(document.tables, [])
+                    self.assertIn(name, "\n".join(p.text for p in document.paragraphs))
 
 
 class AuthenticationSecurityTests(APITestCase):
