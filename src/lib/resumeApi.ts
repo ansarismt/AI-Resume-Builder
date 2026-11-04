@@ -158,7 +158,7 @@ function normalizeUserType(userType: string | undefined): UserType {
     : "college";
 }
 
-export function normalizeResume(record: ResumeApiRecord): SavedResume {
+function normalizeResume(record: ResumeApiRecord): SavedResume {
   return {
     ...record,
     id: record.id.toString(),
@@ -172,7 +172,7 @@ export function normalizeResume(record: ResumeApiRecord): SavedResume {
   };
 }
 
-export function toResumePayload(data: ResumeData) {
+function toResumePayload(data: ResumeData) {
   return {
     name: data.name,
     email: data.email,

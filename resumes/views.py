@@ -30,17 +30,6 @@ class ResumeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    @action(
-        detail=False,
-        methods=['post'],
-        throttle_classes=[ScopedRateThrottle],
-        throttle_scope="ai",
-    )
-    def parse_resume(self, request):
-        from ai.views import ParseResumeView
-
-        return ParseResumeView().post(request)
-
     @action(detail=True, methods=['get'])
     def export_docx(self, request, pk=None):
         resume = self.get_object()
