@@ -29,23 +29,39 @@ class ModelUnavailableError(Exception):
 
 
 @lru_cache(maxsize=1)
+def _load_pipeline(modified_at):
+    model_path = ARTIFACTS_DIR / "resume_classifier.joblib"
+    return joblib.load(model_path)
+
+
 def load_pipeline():
     model_path = ARTIFACTS_DIR / "resume_classifier.joblib"
     if not model_path.is_file():
         raise ModelUnavailableError(
             "The resume ML model is not trained. Run `python manage.py train_model`."
         )
-    return joblib.load(model_path)
+    return _load_pipeline(model_path.stat().st_mtime_ns)
+
+
+load_pipeline.cache_clear = _load_pipeline.cache_clear
 
 
 @lru_cache(maxsize=1)
+def _load_category_stats(modified_at):
+    path = ARTIFACTS_DIR / "category_stats.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def load_category_stats():
     path = ARTIFACTS_DIR / "category_stats.json"
     if not path.is_file():
         raise ModelUnavailableError(
             "Resume category statistics are unavailable. Run `python manage.py train_model`."
         )
-    return json.loads(path.read_text(encoding="utf-8"))
+    return _load_category_stats(path.stat().st_mtime_ns)
+
+
+load_category_stats.cache_clear = _load_category_stats.cache_clear
 
 
 def load_model_info():
@@ -78,8 +94,8 @@ def _probabilities(pipeline, text):
     else:
         raw_scores = classifier.decision_function(vector)
         if raw_scores.ndim == 1:
-            raw_scores = [-raw_scores[0], raw_scores[0]]
-        raw_scores = raw_scores[0]
+            raw_scores = np.column_stack((-raw_scores, raw_scores))
+        raw_scores = np.asarray(raw_scores)[0]
         shifted = raw_scores - raw_scores.max()
         exponentials = np.exp(shifted)
         scores = exponentials / exponentials.sum()
@@ -119,8 +135,10 @@ def job_role_matches(resume, user_type="professional"):
 
 def category_skills(target_role):
     matches = predict_categories(target_role)
-    if not matches:
-        return []
+    if not matches or matches[0]["confidence"] < CONFIDENCE_THRESHOLD:
+        raise ModelUnavailableError(
+            "The target role did not match a resume category with sufficient confidence."
+        )
     stats = load_category_stats()
     category = matches[0]["category"]
     return stats.get(category, {}).get("common_skills", [])
@@ -143,7 +161,29 @@ def _keyword_match(resume_text, job_description, vectorizer):
         str(feature_names[index])
         for index in ranked_indices
         if weights[index] > 0
-    ][:20]
+    ]
+    domain_terms = re.findall(
+        r"(?<!\w)(?:\.NET|[A-Za-z][A-Za-z0-9]*(?:[.+#/-][A-Za-z0-9+#.-]*)*)(?!\w)",
+        job_description,
+        re.IGNORECASE,
+    )
+    seen = {keyword.casefold() for keyword in keywords}
+    for term in domain_terms:
+        normalized = term.casefold().strip(".")
+        if (
+            len(normalized) < 2
+            or normalized in ENGLISH_STOP_WORDS
+            or not (
+                term.isupper()
+                or term[0].isupper()
+                or re.search(r"\d|[.+#/-]", term)
+            )
+            or normalized in seen
+        ):
+            continue
+        keywords.append(term)
+        seen.add(normalized)
+    keywords = keywords[:20]
     resume_lower = resume_text.lower()
     matched = []
     for keyword in keywords:
@@ -202,10 +242,11 @@ _ACTION_VERBS = {
     "directed", "improved", "implemented", "increased", "launched", "led", "managed",
     "optimized", "organized", "reduced", "resolved", "streamlined",
 }
-_FIRST_PERSON = re.compile(r"\b(i|me|my|mine|we|our|ours|us)\b", re.I)
+_FIRST_PERSON = re.compile(
+    r"\bI\b|(?i:\b(?:me|my|mine|we|our|ours)\b)"
+)
 _DATE_PATTERN = re.compile(
-    r"\b(?:19|20)\d{2}\b|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(?:19|20)\d{2}\b",
-    re.I,
+    r"\b(?:19|20)\d{2}\b",
 )
 
 
@@ -251,10 +292,21 @@ def resume_strength(resume, pipeline=None, category_stats=None):
         length_score = 0
     has_contact = bool(resume.get("email") or resume.get("phone"))
     contact_score = 10 if has_contact else 0
-    no_first_person = not _FIRST_PERSON.search(resume_text)
+    voice_text = resume_to_text(
+        {
+            key: value
+            for key, value in resume.items()
+            if key not in {"name", "email", "phone", "location", "links"}
+        }
+    )
+    no_first_person = not _FIRST_PERSON.search(voice_text)
     pronoun_score = 10 if no_first_person else 0
-    dates = _DATE_PATTERN.findall(resume_text)
-    consistent_dates = len(dates) < 2 or dates == sorted(dates)
+    dates = [int(year) for year in _DATE_PATTERN.findall(resume_text)]
+    consistent_dates = (
+        len(dates) < 2
+        or dates == sorted(dates)
+        or dates == sorted(dates, reverse=True)
+    )
     date_score = 10 if consistent_dates else 0
 
     rules = [

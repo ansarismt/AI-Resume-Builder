@@ -1,4 +1,6 @@
 import re
+from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator
 from django.http import FileResponse
 from rest_framework import permissions, status
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
@@ -42,7 +44,7 @@ from .services.resume_import import extract_resume_text
 class AIAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "ai"
+    throttle_scope = "ai_llm"
     parser_classes = [JSONParser, FormParser, MultiPartParser]
 
     def run_llm(
@@ -53,6 +55,7 @@ class AIAPIView(APIView):
         prompt,
         output_serializer,
         response_schema=None,
+        normalize_output=None,
     ):
         previous_validation_errors = None
         for attempt in range(2):
@@ -69,11 +72,13 @@ class AIAPIView(APIView):
                     payload,
                     response_schema=response_schema,
                 )
+                if normalize_output:
+                    output = normalize_output(output)
                 result_serializer = output_serializer(data=output)
                 if result_serializer.is_valid():
                     break
                 previous_validation_errors = result_serializer.errors
-                if response_schema and not attempt:
+                if not attempt:
                     continue
                 return Response(
                     {"error": "The AI provider returned data in an unexpected format."},
@@ -129,8 +134,102 @@ class ParseResumeView(AIAPIView):
                 "years_of_experience as a nonnegative integer, and links as an object."
             ),
             ResumeParseOutputSerializer,
+            normalize_output=_normalize_resume_parse_output,
         )
         return result
+
+
+def _normalize_resume_parse_output(output):
+    normalized = output.copy()
+    string_field_limits = {
+        "name": 100,
+        "phone": 20,
+        "highest_education": 100,
+        "title": 150,
+        "job_title_target": 150,
+        "location": 150,
+    }
+    string_fields = {
+        "name",
+        "phone",
+        "highest_education",
+        "skills",
+        "experience",
+        "education",
+        "internships",
+        "achievements",
+        "projects",
+        "certifications",
+        "summary",
+        "title",
+        "job_title_target",
+        "location",
+    }
+    for field in string_fields:
+        value = normalized.get(field)
+        if isinstance(value, list):
+            value = " ".join(
+                str(item)
+                for item in value
+                if isinstance(item, (str, int, float)) and not isinstance(item, bool)
+            )
+        elif value is not None and not isinstance(value, str):
+            value = str(value) if isinstance(value, (int, float)) else None
+        if value is None:
+            normalized.pop(field, None)
+            continue
+        limit = string_field_limits.get(field)
+        if field == "phone" and limit and len(value) > limit:
+            normalized.pop(field, None)
+        else:
+            normalized[field] = value[:limit] if limit else value
+
+    email = normalized.get("email")
+    if email is not None:
+        if not isinstance(email, str) or len(email) > 254:
+            normalized.pop("email")
+        else:
+            try:
+                EmailValidator()(email)
+            except ValidationError:
+                normalized.pop("email")
+
+    if not isinstance(normalized.get("links"), dict):
+        normalized.pop("links", None)
+    user_type = normalized.get("user_type")
+    if not isinstance(user_type, str) or user_type not in {
+        "school",
+        "college",
+        "professional",
+    }:
+        normalized.pop("user_type", None)
+    studying = normalized.get("is_studying")
+    if isinstance(studying, str):
+        if studying.strip().lower() in {"true", "false"}:
+            normalized["is_studying"] = studying.strip().lower() == "true"
+        else:
+            normalized.pop("is_studying", None)
+    elif studying is not None and not isinstance(studying, bool):
+        normalized.pop("is_studying", None)
+
+    years = normalized.get("years_of_experience")
+    if isinstance(years, str):
+        match = re.fullmatch(
+            r"\s*(\d{1,2})(?:\s*(?:\+|years?|yrs?))?\s*",
+            years,
+            re.IGNORECASE,
+        )
+        if match:
+            normalized["years_of_experience"] = int(match.group(1))
+        else:
+            normalized.pop("years_of_experience", None)
+    elif isinstance(years, bool) or (
+        years is not None and not isinstance(years, int)
+    ):
+        normalized.pop("years_of_experience", None)
+    elif years is not None and not 0 <= years <= 80:
+        normalized.pop("years_of_experience", None)
+    return normalized
 
 
 class SummaryView(AIAPIView):
@@ -168,8 +267,8 @@ class ImproveBulletsView(AIAPIView):
         }
         section = payload["section"]
         target_role = payload.get("target_role", "").strip()
-        role_guidance = (
-            f"Use {target_role!r} only to guide emphasis; do not add skills or experience. "
+        role_instruction = (
+            f" Use {target_role!r} only to guide emphasis; never add skills or experience."
             if target_role
             else ""
         )
@@ -199,9 +298,8 @@ class ImproveBulletsView(AIAPIView):
             "improve-bullets",
             payload,
             (
-                f"Improve each supplied line from the {section_labels[section]} section for "
-                f"{role_guidance}"
-                "clarity and professional presentation. Preserve every fact and meaning exactly; "
+                f"Improve each line from the {section_labels[section]} section for clarity "
+                f"and professional presentation.{role_instruction} Preserve every fact and meaning exactly; "
                 "never add, infer, remove, or change names, dates, qualifications, skills, "
                 "certificates, project titles, employers, accomplishments, or numbers. Do not "
                 "invent metrics or credentials. Keep skill names and certification titles "
@@ -225,7 +323,6 @@ class ImproveBulletsView(AIAPIView):
             for suggestion in suggestions:
                 before_numbers = set(re.findall(r"\d+(?:[.,]\d+)?%?", suggestion["before"]))
                 after_numbers = set(re.findall(r"\d+(?:[.,]\d+)?%?", suggestion["after"]))
-                after_numbers.discard("add %")
                 if after_numbers - before_numbers:
                     return Response(
                         {
@@ -240,6 +337,8 @@ class ImproveBulletsView(AIAPIView):
 
 
 class ATSScoreView(AIAPIView):
+    throttle_scope = "ai_local"
+
     def post(self, request):
         from .ml.predict import ModelUnavailableError, ats_analysis
 
@@ -262,6 +361,8 @@ class ATSScoreView(AIAPIView):
 
 
 class JobRoleMatchView(AIAPIView):
+    throttle_scope = "ai_local"
+
     def post(self, request):
         from .ml.predict import ModelUnavailableError, job_role_matches
 
@@ -280,6 +381,8 @@ class JobRoleMatchView(AIAPIView):
 
 
 class ResumeStrengthView(AIAPIView):
+    throttle_scope = "ai_local"
+
     def post(self, request):
         from .ml.predict import ModelUnavailableError, resume_strength
 
@@ -384,7 +487,7 @@ class CoverLetterView(AIAPIView):
 
 
 class CoverLetterExportView(AIAPIView):
-    throttle_scope = "ai"
+    throttle_classes = []
 
     def post(self, request, extension):
         serializer = CoverLetterExportInputSerializer(data=request.data)
@@ -411,6 +514,8 @@ class CoverLetterExportView(AIAPIView):
 
 
 class SkillsSuggestView(AIAPIView):
+    throttle_scope = "ai_local"
+
     def post(self, request):
         serializer = SkillsInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -494,6 +599,7 @@ class LinkedInHeadlineView(AIAPIView):
 
 class ModelInfoView(APIView):
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    throttle_classes = []
 
     def get(self, request):
         from .ml.predict import ModelUnavailableError, load_model_info
@@ -509,6 +615,7 @@ class ModelInfoView(APIView):
 
 class ModelStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = []
 
     def get(self, request):
         from .ml.predict import ModelUnavailableError, load_model_info

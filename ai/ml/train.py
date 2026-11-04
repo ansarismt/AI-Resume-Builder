@@ -85,6 +85,19 @@ def _category_statistics(texts, labels, vectorizer, matrix):
     skill_statistics = {}
     section_statistics = {}
     length_statistics = {}
+    skill_frequency_statistics = {}
+    skill_lift_statistics = {}
+    total_text_count = len(texts)
+    global_skill_counts = {}
+    for term in SKILL_TERMS:
+        escaped_term = re.escape(term).replace(" ", r"\s+")
+        pattern = re.compile(
+            r"(?<![A-Za-z0-9])" + escaped_term + r"(?![A-Za-z0-9])",
+            re.I,
+        )
+        global_skill_counts[term] = sum(
+            bool(pattern.search(text)) for text in texts
+        )
 
     for category in sorted(set(labels)):
         category_mask = np.asarray(labels) == category
@@ -94,14 +107,34 @@ def _category_statistics(texts, labels, vectorizer, matrix):
         all_keywords[category] = [str(feature_names[index]) for index in top_indices]
 
         category_text = [texts[index] for index, included in enumerate(category_mask) if included]
-        counts = Counter(
-            {
-                term: sum(1 for text in category_text if term in text)
-                for term in SKILL_TERMS
-                if any(term in text for text in category_text)
-            }
-        )
-        skill_statistics[category] = [term for term, _ in counts.most_common(20)]
+        counts = Counter()
+        for term in SKILL_TERMS:
+            escaped_term = re.escape(term).replace(" ", r"\s+")
+            pattern = re.compile(
+                r"(?<![A-Za-z0-9])" + escaped_term + r"(?![A-Za-z0-9])",
+                re.I,
+            )
+            count = sum(bool(pattern.search(text)) for text in category_text)
+            if count and count / len(category_text) >= 0.05:
+                counts[term] = count
+        lifts = {
+            term: (count / len(category_text))
+            / (global_skill_counts[term] / total_text_count)
+            for term, count in counts.items()
+            if global_skill_counts[term]
+        }
+        ranked_skills = sorted(
+            counts,
+            key=lambda term: (lifts[term], counts[term], term),
+            reverse=True,
+        )[:20]
+        skill_statistics[category] = ranked_skills
+        skill_frequency_statistics[category] = {
+            term: counts[term] for term in ranked_skills
+        }
+        skill_lift_statistics[category] = {
+            term: round(lifts[term], 4) for term in ranked_skills
+        }
 
         orders = Counter(
             tuple(order)
@@ -115,10 +148,23 @@ def _category_statistics(texts, labels, vectorizer, matrix):
         category: {
             "top_keywords": all_keywords[category],
             "common_skills": skill_statistics[category],
+            "common_skill_counts": skill_frequency_statistics[category],
+            "common_skill_lifts": skill_lift_statistics[category],
             "typical_section_order": section_statistics[category],
             "typical_resume_length": length_statistics[category],
         }
         for category in sorted(all_keywords)
+    }
+
+
+def _small_class_recall(test_labels, report):
+    smallest_categories = sorted(
+        Counter(test_labels).items(),
+        key=lambda item: (item[1], item[0]),
+    )[:2]
+    return {
+        category: report.get(category, {}).get("recall", 0.0)
+        for category, _ in smallest_categories
     }
 
 
@@ -229,10 +275,7 @@ def train_model(data_path=DATA_PATH, artifacts_dir=ARTIFACTS_DIR):
         "test_accuracy": float(accuracy_score(test_labels, predicted)),
         "test_macro_f1": float(f1_score(test_labels, predicted, average="macro")),
         "classification_report": report,
-        "small_class_recall": {
-            category: report.get(category, {}).get("recall", 0.0)
-            for category in ("AUTOMOBILE", "BPO")
-        },
+        "small_class_recall": _small_class_recall(test_labels, report),
     }
 
     stats_vectorizer = best_pipeline.named_steps["tfidf"]
