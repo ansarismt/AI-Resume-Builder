@@ -62,6 +62,8 @@ ALLOWED_HOSTS = [
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "").strip().lower()
 LLM_API_KEY = os.getenv("LLM_API_KEY", "").strip()
 LLM_MODEL = os.getenv("LLM_MODEL", "").strip()
+LLM_TEMPERATURE = os.getenv("LLM_TEMPERATURE", "").strip()
+LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "2048"))
 
 
 # Application definition
@@ -185,7 +187,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'ai': '20/hour',
+        'ai_llm': '20/hour',
+        'ai_local': '120/hour',
         'auth_login': '10/hour',
         'auth_signup': '5/hour',
         'detect': '60/hour',

@@ -3,6 +3,7 @@ from io import BytesIO
 
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.cache import cache
 from rest_framework.test import APITestCase
 from docx import Document
 
@@ -34,6 +35,58 @@ class AIEndpointTests(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["name"], "Candidate")
+
+    @patch("ai.views.generate_json")
+    def test_parse_resume_normalizes_years_of_experience_safely(self, mock_generate):
+        mock_generate.return_value = {
+            "name": "Candidate",
+            "years_of_experience": "5 years",
+        }
+
+        response = self.client.post(
+            "/api/ai/parse-resume/",
+            {"text": "Candidate has five years of experience."},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["years_of_experience"], 5)
+
+    @patch("ai.views.generate_json")
+    def test_parse_resume_omits_unparseable_years_without_failing(self, mock_generate):
+        mock_generate.return_value = {"years_of_experience": "several years"}
+
+        response = self.client.post(
+            "/api/ai/parse-resume/",
+            {"text": "Candidate has several years of experience."},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("years_of_experience", response.data)
+
+    @patch("ai.views.generate_json")
+    def test_parse_resume_discards_bad_fields_and_normalizes_string_lists(self, mock_generate):
+        mock_generate.return_value = {
+            "email": "N/A",
+            "phone": "123456789012345678901",
+            "skills": ["Python", "SQL"],
+            "summary": ["Experienced", "analyst"],
+            "links": ["not", "an", "object"],
+        }
+
+        response = self.client.post(
+            "/api/ai/parse-resume/",
+            {"text": "Candidate resume"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("email", response.data)
+        self.assertNotIn("phone", response.data)
+        self.assertNotIn("links", response.data)
+        self.assertEqual(response.data["skills"], "Python SQL")
+        self.assertEqual(response.data["summary"], "Experienced analyst")
 
     @patch("ai.views.generate_json")
     def test_summary_returns_three_variants(self, mock_generate):
@@ -111,6 +164,55 @@ class AIEndpointTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(mock_generate.call_count, 2)
 
+    @patch("ai.views.generate_json")
+    def test_improve_bullets_prompt_separates_optional_role_guidance(self, mock_generate):
+        mock_generate.return_value = {
+            "suggestions": [
+                {"before": "Built tools", "after": "Developed tools"}
+            ]
+        }
+
+        response = self.client.post(
+            "/api/ai/improve-bullets/",
+            {
+                "section": "experience",
+                "bullets": ["Built tools"],
+                "target_role": "Data analyst",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        prompt = mock_generate.call_args.args[0]
+        self.assertIn(
+            "Improve each line from the Work Experience section for clarity and professional presentation.",
+            prompt,
+        )
+        self.assertIn(
+            "Use 'Data analyst' only to guide emphasis; never add skills or experience.",
+            prompt,
+        )
+
+    @patch("ai.views.generate_json")
+    def test_llm_output_validation_retries_even_without_a_response_schema(self, mock_generate):
+        mock_generate.side_effect = [
+            {"summary": "wrong output shape"},
+            {"variants": ["one", "two", "three"]},
+        ]
+
+        response = self.client.post(
+            "/api/ai/summary/",
+            {"resume": self.resume_data, "user_type": "professional"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(mock_generate.call_count, 2)
+        self.assertIn(
+            "previous response failed schema validation",
+            mock_generate.call_args_list[1].args[0],
+        )
+
     @patch("ai.ml.predict.ats_analysis")
     def test_ats_score_returns_validated_non_llm_report(self, mock_analysis):
         mock_analysis.return_value = {
@@ -181,10 +283,84 @@ class AIEndpointTests(APITestCase):
         self.assertIn("resume_Cover_Letter.docx", response["Content-Disposition"])
         mock_render.assert_called_once_with("தமிழ்", "Dear hiring team.", "docx")
 
+    @patch.dict(
+        "rest_framework.throttling.ScopedRateThrottle.THROTTLE_RATES",
+        {"ai_llm": "20/hour", "ai_local": "25/hour"},
+    )
+    def test_local_llm_and_export_endpoints_use_independent_throttling(self):
+        cache.clear()
+        self.addCleanup(cache.clear)
+        report = {
+            "overall_score": 72,
+            "keyword_match_percent": 60,
+            "matched_keywords": ["python"],
+            "missing_keywords": ["planning"],
+            "section_completeness": {"skills": True},
+            "formatting_warnings": [],
+        }
+        with (
+            patch("ai.ml.predict.ats_analysis", return_value=report),
+            patch(
+                "ai.views.generate_json",
+                return_value={"variants": ["one", "two", "three"]},
+            ),
+            patch(
+                "ai.views.render_cover_letter",
+                side_effect=lambda *args: BytesIO(b"document"),
+            ),
+        ):
+            for _ in range(25):
+                local_response = self.client.post(
+                    "/api/ai/ats-score/",
+                    {
+                        "resume": self.resume_data,
+                        "job_description": "Python planning role",
+                    },
+                    format="json",
+                )
+                self.assertEqual(local_response.status_code, 200)
+            self.assertEqual(
+                self.client.post(
+                    "/api/ai/ats-score/",
+                    {
+                        "resume": self.resume_data,
+                        "job_description": "Python planning role",
+                    },
+                    format="json",
+                ).status_code,
+                429,
+            )
+
+            for _ in range(20):
+                llm_response = self.client.post(
+                    "/api/ai/summary/",
+                    {"resume": self.resume_data, "user_type": "professional"},
+                    format="json",
+                )
+                self.assertEqual(llm_response.status_code, 200)
+            self.assertEqual(
+                self.client.post(
+                    "/api/ai/summary/",
+                    {"resume": self.resume_data, "user_type": "professional"},
+                    format="json",
+                ).status_code,
+                429,
+            )
+
+            for _ in range(30):
+                export_response = self.client.post(
+                    "/api/ai/cover-letter/export/docx/",
+                    {"name": "Candidate", "content": "Letter", "format": "docx"},
+                    format="json",
+                )
+                self.assertEqual(export_response.status_code, 200)
+
     @patch("ai.ml.predict.category_skills")
     @patch("ai.views.generate_json")
     def test_skills_falls_back_to_mocked_llm_without_dataset(self, mock_generate, mock_skills):
-        mock_skills.return_value = []
+        from ai.ml.predict import ModelUnavailableError
+
+        mock_skills.side_effect = ModelUnavailableError("No confident category match.")
         mock_generate.return_value = {"skills": ["Python"], "source": "ai"}
 
         response = self.client.post(
