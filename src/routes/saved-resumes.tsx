@@ -1,29 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { SavedResumes } from "@/components/resume/SavedResumes";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// The saved-resumes list lives on the home page, where opening a resume loads it into the editor.
 export const Route = createFileRoute("/saved-resumes")({
-  component: SavedResumesPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/", hash: "saved-resumes" });
+  },
 });
-
-function SavedResumesPage() {
-  // Minimal page wrapper to show the saved resumes list standalone
-  return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="font-display text-2xl font-bold mb-4">Saved resumes</h1>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <SavedResumes
-            refreshKey={0}
-            onLoad={() => {
-              /* noop - open in-place via existing UI */
-            }}
-            currentId={null}
-            onDeleted={() => {
-              /* noop */
-            }}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}

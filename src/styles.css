@@ -231,4 +231,7 @@
     print-color-adjust: exact !important;
   }
   .no-print { display: none !important; }
+  /* Hidden app UI still takes up space and adds blank pages; remove it from the print layout. */
+  body *:not(:has(#resume-print)):not(#resume-print):not(#resume-print *) { display: none !important; }
+  body :has(#resume-print) { margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
 }
