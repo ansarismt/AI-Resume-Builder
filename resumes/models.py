@@ -33,7 +33,7 @@ class Resume(models.Model):
     is_archived = models.BooleanField(default=False)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name="resumes",
         null=True,
         blank=True,
@@ -51,13 +51,3 @@ class Resume(models.Model):
     def __str__(self):
         return f"{self.name}'s Resume"
 
-
-class EmailVerification(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
-    code = models.CharField(max_length=10)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
-    used = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Verification for {self.user.username}: {self.code}"

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { getCurrentUser } from "@/lib/resumeApi";
+import { endSession, getCurrentUser } from "@/lib/resumeApi";
 
 interface AuthContextValue {
   token: string | null;
@@ -10,29 +10,29 @@ interface AuthContextValue {
   isStaff: boolean;
   login: (username: string, token: string, email?: string, isStaff?: boolean) => void;
   updateAccount: (username: string, token: string, email?: string, isStaff?: boolean) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
-  const [email, setEmail] = useState<string | null>(null);
-  const [loginAt, setLoginAt] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : localStorage.getItem("token"),
+  );
+  const [username, setUsername] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : localStorage.getItem("username"),
+  );
+  const [email, setEmail] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : localStorage.getItem("email"),
+  );
+  const [loginAt, setLoginAt] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : localStorage.getItem("loginAt"),
+  );
   const [isStaff, setIsStaff] = useState(false);
 
   useEffect(() => {
-    const t = localStorage.getItem("token");
-    const u = localStorage.getItem("username");
-    const e = localStorage.getItem("email");
-    const started = localStorage.getItem("loginAt");
-    if (t) setToken(t);
-    if (u) setUsername(u);
-    if (e) setEmail(e);
-    if (started) setLoginAt(started);
-    if (t) {
+    if (token) {
       getCurrentUser()
         .then((user) => {
           setUsername(user.username);
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error("Could not verify the saved session.", error);
         });
     }
-  }, []);
+  }, [token]);
 
   const login = (u: string, t: string, e = "", staff = false) => {
     const started = new Date().toISOString();
@@ -82,17 +82,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsStaff(staff);
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("email");
-    localStorage.removeItem("loginAt");
-    setToken(null);
-    setUsername(null);
-    setEmail(null);
-    setLoginAt(null);
-    setIsStaff(false);
-    window.location.href = "/";
+  const logout = async () => {
+    try {
+      await endSession();
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("username");
+      localStorage.removeItem("email");
+      localStorage.removeItem("loginAt");
+      setToken(null);
+      setUsername(null);
+      setEmail(null);
+      setLoginAt(null);
+      setIsStaff(false);
+      window.location.href = "/";
+    }
   };
 
   return (

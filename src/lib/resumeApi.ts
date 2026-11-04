@@ -96,6 +96,10 @@ export async function getCurrentUser() {
   return response.data;
 }
 
+export async function endSession() {
+  await api.post("/api/auth/logout/");
+}
+
 export async function updateAccount(payload: { username: string; password: string }) {
   const response = await api.put<AuthResponse>("/api/auth/account/", payload);
   return response.data;
@@ -194,7 +198,7 @@ export function toResumePayload(data: ResumeData) {
 }
 
 export async function detectResumeUserType(highestEducation: string, yearsOfExperience: number) {
-  const response = await api.post<{ user_type: UserType }>("/resume/detect-type/", {
+  const response = await api.post<{ user_type: UserType }>("/api/resume/detect-type/", {
     highest_education: highestEducation,
     years_of_experience: yearsOfExperience,
   });
