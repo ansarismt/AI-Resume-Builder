@@ -1,6 +1,6 @@
 # AI Resume Builder
 
-[![CI](https://github.com/sroshans025/vdartintern/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/sroshans025/vdartintern/actions/workflows/ci.yml)
+[![CI](https://github.com/ansarismt/AI-Resume-Builder/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ansarismt/AI-Resume-Builder/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Node 20.19+](https://img.shields.io/badge/node-20.19%2B-green.svg)](https://nodejs.org/)
 
@@ -46,7 +46,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for boundaries and data flow.
 ### Windows
 
 ```powershell
-git clone https://github.com/sroshans025/vdartintern.git AI-Resume-Builder
+git clone https://github.com/ansarismt/AI-Resume-Builder.git AI-Resume-Builder
 cd AI-Resume-Builder
 .\start-dev.bat
 ```
@@ -59,7 +59,7 @@ local development. Open <http://127.0.0.1:8080>.
 ### macOS and Linux
 
 ```bash
-git clone https://github.com/sroshans025/vdartintern.git AI-Resume-Builder
+git clone https://github.com/ansarismt/AI-Resume-Builder.git AI-Resume-Builder
 cd AI-Resume-Builder
 chmod +x scripts/dev.sh && ./scripts/dev.sh
 ```
@@ -224,4 +224,4 @@ privately as described in [SECURITY.md](SECURITY.md).
 
 ## License
 
-VDart
+Released under the [MIT License](LICENSE). Copyright (c) 2026 VDart.
