@@ -1,10 +1,8 @@
-from rest_framework import generics, permissions, serializers
+from rest_framework import permissions, serializers
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
-from .models import Resume
-from .serializers import ResumeSerializer
 from .utils import detect_user_type
 
 
@@ -22,24 +20,6 @@ class DetectResumeTypeInputSerializer(serializers.Serializer):
         if type(raw_value) is not int:
             raise serializers.ValidationError("A whole number between 0 and 80 is required.")
         return value
-
-
-class ResumeCreateView(generics.CreateAPIView):
-    queryset = Resume.objects.all()
-    serializer_class = ResumeSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class ResumeDetailView(generics.RetrieveAPIView):
-    queryset = Resume.objects.all()
-    serializer_class = ResumeSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return Resume.objects.filter(user=self.request.user)
 
 
 class DetectResumeTypeView(APIView):

@@ -20,7 +20,7 @@ export type TemplateLayout =
   | "ats"
   | "framed";
 
-export type TemplateFont = "sans" | "serif";
+type TemplateFont = "sans" | "serif";
 
 export const PROFESSIONAL_COLORS = {
   navy: "#1f3a5f",

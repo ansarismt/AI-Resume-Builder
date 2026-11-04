@@ -1,9 +1,7 @@
 import { type CSSProperties, memo, useMemo } from "react";
 
 import type { ResumeData } from "@/components/resume/types";
-import { CollegePreview } from "./CollegePreview";
-import { ProfessionalPreview } from "./ProfessionalPreview";
-import { SchoolPreview } from "./SchoolPreview";
+import { ResumePreview as ExistingResumePreview } from "@/components/resume/ResumePreview";
 import "./templateTheme.css";
 
 interface Props {
@@ -27,12 +25,6 @@ export const ResumePreview = memo(function ResumePreview({
   accentColor = "#1f3a5f",
   sticky = true,
 }: Props) {
-  const preview = useMemo(() => {
-    if (data.user_type === "school") return <SchoolPreview data={data} />;
-    if (data.user_type === "professional") return <ProfessionalPreview data={data} />;
-    return <CollegePreview data={data} />;
-  }, [data]);
-
   const style = useMemo(
     () =>
       ({
@@ -50,7 +42,7 @@ export const ResumePreview = memo(function ResumePreview({
 
   return (
     <div className={`resume-theme${sticky ? " lg:sticky lg:top-24" : ""}`} style={style}>
-      {preview}
+      <ExistingResumePreview data={data} />
     </div>
   );
 });

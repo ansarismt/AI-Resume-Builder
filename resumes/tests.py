@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.test import override_settings
+from django.test import SimpleTestCase, override_settings
+from django.urls import Resolver404, resolve
 from django.utils import timezone
 import json
 from datetime import timedelta
@@ -12,6 +13,26 @@ from rest_framework.test import APITestCase
 
 from .exports import TEMPLATE_COLORS
 from .models import Resume
+
+
+class CanonicalResumeRouteTests(SimpleTestCase):
+    def test_removed_duplicate_resume_routes_are_unresolvable(self):
+        for path in (
+            "/resume/create/",
+            "/resume/1/",
+            "/resume/detect-type/",
+            "/api/resume/create/",
+            "/api/resume/1/",
+            "/api/resumes/1/parse_resume/",
+        ):
+            with self.subTest(path=path):
+                with self.assertRaises(Resolver404):
+                    resolve(path)
+
+    def test_detect_type_uses_the_canonical_api_route(self):
+        match = resolve("/api/resume/detect-type/")
+
+        self.assertEqual(match.url_name, "resume-detect-type")
 
 
 class ResumeOwnershipTests(APITestCase):
