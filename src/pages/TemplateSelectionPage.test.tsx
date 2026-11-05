@@ -44,7 +44,7 @@ describe("TemplateSelectionPage", () => {
     );
 
     expect(screen.queryByText("Preview Person")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open resume preview" }));
     expect(screen.getByRole("dialog", { name: "Resume preview" })).toBeInTheDocument();
     expect(screen.getByText("Preview Person")).toBeInTheDocument();
 
