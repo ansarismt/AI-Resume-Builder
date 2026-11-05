@@ -111,3 +111,46 @@ export function GlowSection({ children, className }: { children: ReactNode; clas
     </section>
   );
 }
+
+/** Number that counts up the first time it scrolls into view. */
+export function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const reduced = usePrefersReducedMotion();
+  const [shown, setShown] = useState(reduced ? value : 0);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    if (reduced || typeof IntersectionObserver === "undefined") {
+      setShown(value);
+      return;
+    }
+    let frame = 0;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        const start = performance.now();
+        const tick = (now: number) => {
+          const progress = Math.min(1, (now - start) / 1200);
+          setShown(Math.round(value * (1 - Math.pow(1 - progress, 3))));
+          if (progress < 1) frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+      },
+      { threshold: 0.4 },
+    );
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [value, reduced]);
+
+  return (
+    <span ref={ref}>
+      {shown}
+      {suffix}
+    </span>
+  );
+}
