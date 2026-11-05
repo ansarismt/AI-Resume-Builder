@@ -18,6 +18,25 @@ from .exports import TEMPLATE_COLORS, _accent, safe_filename
 from .models import Resume
 
 
+
+TABLE_LAYOUTS = {"sidebar-left", "sidebar-right", "split", "banner", "framed"}
+
+
+def _docx_paragraphs(document):
+    """All paragraphs in reading order, including those inside layout tables."""
+    found = list(document.paragraphs)
+    for table in document.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                found.extend(cell.paragraphs)
+    return found
+
+
+def _docx_text(document):
+    return "\n".join(p.text for p in _docx_paragraphs(document))
+
+
+
 class CanonicalResumeRouteTests(SimpleTestCase):
     def test_removed_duplicate_resume_routes_are_unresolvable(self):
         for path in (
@@ -290,14 +309,13 @@ class ResumeOwnershipTests(APITestCase):
         )
 
         document = Document(BytesIO(b"".join(response.streaming_content)))
-        text = "\n".join(paragraph.text for paragraph in document.paragraphs)
+        text = _docx_text(document)
         self.assertEqual(response.status_code, 200)
         self.assertIn("Owner", text)
         self.assertIn("Finance", text)
         self.assertIn("CAREER OBJECTIVE", text)
         self.assertIn("A dependable analyst.", text)
-        self.assertEqual(document.tables, [])
-        name_run = document.paragraphs[0].runs[0]
+        name_run = next(p for p in _docx_paragraphs(document) if p.text == "Owner").runs[0]
         self.assertEqual(name_run.font.name, "Georgia")
         self.assertEqual(name_run.font.color.rgb, RGBColor.from_string("2F5D8A"))
         self.assertEqual(name_run._element.rPr.rFonts.get(qn("w:eastAsia")), "Georgia")
@@ -359,9 +377,7 @@ class ResumeOwnershipTests(APITestCase):
                     self.assertIn("Lead data analyst", text)
                     self.assertNotIn("INFORMATION-TECHNOLOGY", text)
                 elif export == "export_docx":
-                    text = "\n".join(
-                        paragraph.text for paragraph in Document(BytesIO(content)).paragraphs
-                    )
+                    text = _docx_text(Document(BytesIO(content)))
                     self.assertIn("Lead data analyst", text)
                     self.assertNotIn("INFORMATION-TECHNOLOGY", text)
                 elif export == "export_txt":
@@ -457,11 +473,10 @@ class ResumeTemplateTests(APITestCase):
                             self.assertIn("Template Test", text)
                         elif export == "export_docx":
                             document = Document(BytesIO(content))
-                            self.assertEqual(document.tables, [])
-                            self.assertIn(
-                                "Template Test",
-                                "\n".join(p.text for p in document.paragraphs),
-                            )
+                            layout = next(t["layout"] for t in TEMPLATE_CATALOG if t["id"] == template)
+                            # Word layout follows the preview: column/band layouts use a table.
+                            self.assertEqual(bool(document.tables), layout in TABLE_LAYOUTS)
+                            self.assertIn("Template Test", _docx_text(document))
                         elif export == "export_txt":
                             self.assertIn(b"Template Test", content)
                         else:
@@ -500,8 +515,7 @@ class ResumeTemplateTests(APITestCase):
                     self.assertIn(name[:4], pdf_text)
                 elif export == "export_docx":
                     document = Document(BytesIO(content))
-                    self.assertEqual(document.tables, [])
-                    self.assertIn(name, "\n".join(p.text for p in document.paragraphs))
+                    self.assertIn(name, _docx_text(document))
 
 
 class AuthenticationSecurityTests(APITestCase):
@@ -656,3 +670,69 @@ class DetectResumeTypeInputTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+
+
+class DocxMatchesPreviewTests(SimpleTestCase):
+    """The Word file must follow the same layout as the on-screen preview."""
+
+    def _doc(self, template, **extra):
+        from types import SimpleNamespace
+
+        from .exports import export_docx
+
+        fields = dict(
+            name="Preview Match", headline="Data Analyst", email="pm@example.test", phone="555",
+            location="", links={}, user_type="professional", template=template, accent_color="",
+            summary="Summary text.", experience="Analyst | Example Co", skills="SQL, Python (pandas), Excel",
+            certifications="Cert A", education="BSc", projects="Project A", achievements="", internships="",
+            title="",
+        )
+        fields.update(extra)
+        return Document(export_docx(SimpleNamespace(**fields)))
+
+    def test_skills_are_split_like_the_preview(self):
+        from .exports import split_skills
+
+        self.assertEqual(split_skills("SQL, Python (pandas, numpy); Excel\n• Git"),
+                         ["SQL", "Python (pandas, numpy)", "Excel", "Git"])
+
+    def test_classic_header_is_centered(self):
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+        name = next(p for p in self._doc("template1").paragraphs if p.text == "Preview Match")
+        self.assertEqual(name.alignment, WD_ALIGN_PARAGRAPH.CENTER)
+
+    def test_sidebar_puts_contact_and_skills_in_shaded_side_column(self):
+        for template in self._ids("sidebar-left"):
+            with self.subTest(template=template):
+                side = self._doc(template).tables[0].rows[0].cells[0]
+                self.assertIn("pm@example.test", side.text)
+                self.assertIn("• Python (pandas)", side.text)
+                self.assertNotIn("Summary text.", side.text)
+                self.assertIn("w:shd", side._tc.xml)
+
+    def test_sidebar_right_mirrors_the_column(self):
+        for template in self._ids("sidebar-right"):
+            with self.subTest(template=template):
+                cells = self._doc(template).tables[0].rows[0].cells
+                self.assertIn("Preview Match", cells[0].text)
+                self.assertIn("SKILLS", cells[1].text)
+
+    def test_split_layout_has_main_and_side_columns(self):
+        for template in self._ids("split"):
+            with self.subTest(template=template):
+                main, side = self._doc(template).tables[0].rows[0].cells
+                self.assertIn("EXPERIENCE", main.text)
+                self.assertIn("EDUCATION", side.text)
+
+    def test_ats_layout_is_black_text_only(self):
+        for template in self._ids("ats"):
+            with self.subTest(template=template):
+                xml = self._doc(template, accent_color="#2F5D8A").element.xml
+                self.assertNotIn("2F5D8A", xml)
+                self.assertEqual(self._doc(template).tables, [])
+
+    def _ids(self, layout):
+        ids = [t["id"] for t in TEMPLATE_CATALOG if t["layout"] == layout]
+        self.assertEqual(len(ids), 2)
+        return ids

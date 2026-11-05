@@ -45,8 +45,9 @@ export function FinalizeResumePage({
             Ready for export
           </div>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            Download an editable Word version with a simplified layout, structured JSON, or plain
-            text. Choose <strong>Save as PDF</strong> in the print dialog for a selectable PDF.
+            Download an editable Word file in the same layout as your preview, structured JSON, or
+            plain text. Choose <strong>Save as PDF</strong> in the print dialog for a selectable
+            PDF.
           </p>
         </div>
 

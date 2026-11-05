@@ -170,7 +170,7 @@ catalog; add layout CSS only when introducing a new layout.
 
 - **PDF:** use the browser print dialog and choose **Save as PDF**. This creates a vector,
   selectable-text PDF from the preview.
-- **DOCX:** editable Word document in a clean, simplified single-column layout.
+- **DOCX:** editable Word document that follows the selected template layout and colour, like the preview.
 - **JSON and TXT:** server-generated formats for portability and plain-text use.
 
 ## Project structure

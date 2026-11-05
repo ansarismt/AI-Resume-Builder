@@ -32,5 +32,5 @@ remain in ignored local paths (`ai/ml/artifacts/` and `data/`).
 ## Exports
 
 The browser print flow produces the primary PDF from the exact resume preview. The server produces
-editable simplified DOCX, JSON, and TXT files; its PDF endpoint remains for API and cover-letter
+editable DOCX that follows the preview layout, JSON, and TXT files; its PDF endpoint remains for API and cover-letter
 use cases and reports unsupported scripts rather than rendering broken glyphs.

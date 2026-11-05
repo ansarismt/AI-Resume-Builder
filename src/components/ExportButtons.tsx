@@ -79,7 +79,7 @@ export function ExportButtons({
           disabled={busy}
         >
           <FileText className="mr-2 h-4 w-4" />
-          Editable Word version (simplified)
+          Download Word
         </Button>
         <Button
           type="button"
