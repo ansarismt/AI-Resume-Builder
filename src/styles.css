@@ -61,51 +61,54 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* VDart theme: brand blue, near-black ink, white and cool light-grey surfaces. */
 :root {
-  --radius: 0.65rem;
-  --background: oklch(0.975 0.015 78);
-  --foreground: oklch(0.22 0.035 45);
-  --card: oklch(0.995 0.006 75);
-  --card-foreground: oklch(0.22 0.035 45);
-  --popover: oklch(0.995 0.006 75);
-  --popover-foreground: oklch(0.22 0.035 45);
-  --primary: oklch(0.27 0.035 45);
-  --primary-foreground: oklch(0.99 0.005 75);
-  --secondary: oklch(0.94 0.025 74);
-  --secondary-foreground: oklch(0.25 0.035 45);
-  --muted: oklch(0.95 0.015 75);
-  --muted-foreground: oklch(0.49 0.035 45);
-  --accent: oklch(0.62 0.2 32);
-  --accent-foreground: oklch(0.99 0.005 75);
+  --radius: 0.75rem;
+  --background: oklch(0.985 0.004 255);
+  --foreground: oklch(0.2 0.02 260);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.02 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.02 260);
+  --primary: oklch(0.47 0.19 259);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.96 0.012 255);
+  --secondary-foreground: oklch(0.25 0.03 260);
+  --muted: oklch(0.96 0.008 255);
+  --muted-foreground: oklch(0.46 0.02 260);
+  --accent: oklch(0.47 0.19 259);
+  --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.58 0.21 28);
   --destructive-foreground: oklch(0.99 0.005 75);
-  --border: oklch(0.86 0.028 72);
-  --input: oklch(0.86 0.028 72);
-  --ring: oklch(0.62 0.2 32);
+  --border: oklch(0.91 0.008 255);
+  --input: oklch(0.88 0.01 255);
+  --ring: oklch(0.55 0.19 259);
 
-  --ink: oklch(0.22 0.035 45);
-  --paper: oklch(0.995 0.006 75);
-  --rule: oklch(0.86 0.028 72);
+  --ink: oklch(0.2 0.02 260);
+  --paper: oklch(1 0 0);
+  --rule: oklch(0.91 0.008 255);
 
-  --font-display: Georgia, "Times New Roman", serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  --font-display: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --shadow-paper: 0 20px 50px -35px oklch(0.2 0.035 45 / 0.2), 0 4px 12px -8px oklch(0.2 0.035 45 / 0.12);
+  --shadow-paper:
+    0 20px 50px -30px oklch(0.3 0.12 259 / 0.35), 0 4px 12px -8px oklch(0.2 0.05 259 / 0.2);
+  --shadow-lift: 0 18px 40px -22px oklch(0.35 0.14 259 / 0.45);
 
-  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-1: oklch(0.55 0.19 259);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.21 0.03 255);
-  --sidebar-foreground: oklch(0.96 0.015 100);
-  --sidebar-primary: oklch(0.76 0.14 250);
-  --sidebar-primary-foreground: oklch(0.2 0.03 255);
-  --sidebar-accent: oklch(0.29 0.035 255);
-  --sidebar-accent-foreground: oklch(0.94 0.02 100);
-  --sidebar-border: oklch(0.36 0.035 255);
-  --sidebar-ring: oklch(0.76 0.14 250);
+  --sidebar: oklch(0.2 0.03 260);
+  --sidebar-foreground: oklch(0.97 0.005 255);
+  --sidebar-primary: oklch(0.7 0.15 255);
+  --sidebar-primary-foreground: oklch(0.2 0.03 260);
+  --sidebar-accent: oklch(0.28 0.035 260);
+  --sidebar-accent-foreground: oklch(0.95 0.01 255);
+  --sidebar-border: oklch(0.35 0.035 260);
+  --sidebar-ring: oklch(0.7 0.15 255);
 }
 
 .dark {
@@ -182,29 +185,162 @@
   }
 
   /* Keep narrow screens (360px) from scrolling sideways. */
-  html, body { overflow-x: clip; }
-  img, svg, video { max-width: 100%; }
-  :where(p, li, td, h1, h2, h3, h4, label) { overflow-wrap: anywhere; }
+  html,
+  body {
+    overflow-x: clip;
+  }
+  img,
+  svg,
+  video {
+    max-width: 100%;
+  }
+  :where(p, li, td, h1, h2, h3, h4, label) {
+    overflow-wrap: anywhere;
+  }
 
-  button:disabled, [aria-busy="true"] { cursor: not-allowed; }
+  button:disabled,
+  [aria-busy="true"] {
+    cursor: not-allowed;
+  }
+}
+
+/* Resume documents keep their own typography, independent of the app theme. */
+.rd {
+  --font-display: Georgia, "Times New Roman", serif;
 }
 
 @layer utilities {
-  .font-display { font-family: var(--font-display); }
-  .font-body { font-family: var(--font-body); }
-  .font-mono { font-family: var(--font-body); font-weight: 500; text-transform: none; letter-spacing: normal; }
-  .shadow-paper { box-shadow: var(--shadow-paper); }
-  .text-ink { color: var(--ink); }
-  .bg-paper { background-color: var(--paper); }
-  .border-rule { border-color: var(--rule); }
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-body {
+    font-family: var(--font-body);
+  }
+  .font-mono {
+    font-family: var(--font-body);
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .shadow-paper {
+    box-shadow: var(--shadow-paper);
+  }
+  .text-ink {
+    color: var(--ink);
+  }
+  .bg-paper {
+    background-color: var(--paper);
+  }
+  .border-rule {
+    border-color: var(--rule);
+  }
+  .shadow-lift {
+    box-shadow: var(--shadow-lift);
+  }
+
+  /* ---- motion ---- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hover-lift {
+    transition:
+      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.25s ease,
+      border-color 0.25s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+    border-color: color-mix(in oklch, var(--primary) 35%, var(--border));
+  }
+
+  .float-slow {
+    animation: float-slow 6s ease-in-out infinite;
+  }
+  .hero-glow {
+    background:
+      radial-gradient(60rem 28rem at 85% -10%, oklch(0.47 0.19 259 / 0.14), transparent 60%),
+      radial-gradient(40rem 22rem at -5% 110%, oklch(0.47 0.19 259 / 0.1), transparent 60%),
+      var(--background);
+  }
+  .text-gradient {
+    background: linear-gradient(100deg, oklch(0.4 0.2 262), oklch(0.62 0.17 245));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .stage-in {
+    animation: stage-in 0.35s ease both;
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .hover-lift,
+  .hover-lift:hover {
+    transition: none;
+    transform: none;
+  }
+  .float-slow,
+  .stage-in {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 /* Print the same semantic resume document shown in the preview. */
 @media print {
-  @page { size: A4; margin: 0; }
-  html, body { background: #fff !important; }
-  body * { visibility: hidden !important; }
-  #resume-print, #resume-print * { visibility: visible !important; }
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  #resume-print,
+  #resume-print * {
+    visibility: visible !important;
+  }
   #resume-print {
     position: absolute;
     left: 0;
@@ -230,8 +366,16 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  .no-print { display: none !important; }
+  .no-print {
+    display: none !important;
+  }
   /* Hidden app UI still takes up space and adds blank pages; remove it from the print layout. */
-  body *:not(:has(#resume-print)):not(#resume-print):not(#resume-print *) { display: none !important; }
-  body :has(#resume-print) { margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
+  body *:not(:has(#resume-print)):not(#resume-print):not(#resume-print *) {
+    display: none !important;
+  }
+  body :has(#resume-print) {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+  }
 }

@@ -174,12 +174,17 @@ function RootComponent() {
       <HeadContent />
       <AuthProvider>
         <div className="flex min-h-screen flex-col">
-          <nav className="flex flex-wrap items-center gap-4 px-4 sm:px-6 py-4 bg-background border-b border-border">
+          <nav className="sticky top-0 z-30 flex flex-wrap items-center gap-4 border-b border-border bg-background/85 px-4 py-3 backdrop-blur sm:px-6 no-print">
             <Link
               to="/"
-              className="flex items-center text-foreground transition-colors hover:text-accent"
+              className="group flex items-center gap-2.5 text-foreground transition-colors hover:text-primary"
             >
-              <span className="font-display text-lg font-bold">AI Resume Builder</span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-extrabold text-primary-foreground transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105">
+                V
+              </span>
+              <span className="font-display text-lg font-bold tracking-tight">
+                AI Resume Builder
+              </span>
             </Link>
             <AuthHeader />
           </nav>

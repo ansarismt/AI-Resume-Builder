@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Sparkles,
 } from "lucide-react";
+import { Reveal } from "@/components/ui/reveal";
 import { Button } from "@/components/ui/button";
 import { SavedResumes } from "@/components/resume/SavedResumes";
 import {
@@ -41,14 +42,15 @@ export const Route = createFileRoute("/")({
 function LandingPage({ isStaff }: { isStaff: boolean }) {
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
-      <section className="relative overflow-hidden border-b border-border bg-secondary/40 text-foreground">
+      <section className="relative overflow-hidden border-b border-border hero-glow text-foreground">
         <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <p className="mb-4 text-xs font-medium uppercase tracking-[0.24em] text-accent">
+            <p className="mb-4 inline-flex rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
               Resume builder for students and professionals
             </p>
-            <h1 className="max-w-3xl font-display text-4xl font-normal leading-[1.08] sm:text-6xl">
-              Create polished resumes, save versions, and export with confidence.
+            <h1 className="max-w-3xl font-display text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl">
+              Create <span className="text-gradient">polished resumes</span>, save versions, and
+              export with confidence.
             </h1>
             <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
               Start from a guided form, choose from 20 templates, preview instantly, and manage
@@ -74,7 +76,7 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
             </div>
           </div>
           <div className="lg:col-span-5">
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-paper">
+            <div className="float-slow rounded-2xl border border-border bg-card p-5 shadow-paper">
               <div className="mb-5 flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-accent">
                   <Sparkles className="h-5 w-5" />
@@ -94,7 +96,7 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
                 ].map(([number, text]) => (
                   <div
                     key={number}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-secondary/50 p-3"
+                    className="hover-lift flex items-center gap-3 rounded-xl border border-border bg-secondary/60 p-3"
                   >
                     <span className="font-mono text-xs text-accent">{number}</span>
                     <p className="text-sm text-foreground">{text}</p>
@@ -112,7 +114,7 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
 
       <section className="border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-          <h2 className="text-2xl font-bold">Built for every stage</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Built for every stage</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-3">
             {[
               [
@@ -127,11 +129,16 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
                 "Working professionals",
                 "Highlight experience, achievements, skills, and career-focused versions.",
               ],
-            ].map(([title, description]) => (
-              <article key={title} className="rounded-lg border border-border bg-card p-5">
+            ].map(([title, description], index) => (
+              <Reveal
+                as="article"
+                delay={index * 90}
+                key={title}
+                className="hover-lift rounded-xl border border-border bg-card p-5"
+              >
                 <h3 className="font-semibold">{title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-              </article>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -142,8 +149,14 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
           <h2 className="text-2xl font-bold">A simple four-step process</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {["Form", "Preview", "Templates", "Finalize"].map((step, index) => (
-              <div key={step} className="rounded-lg border border-border bg-card p-5">
-                <p className="text-sm font-semibold text-primary">Step {index + 1}</p>
+              <Reveal
+                key={step}
+                delay={index * 90}
+                className="hover-lift rounded-xl border border-border bg-card p-5"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                  {index + 1}
+                </span>
                 <h3 className="mt-2 font-semibold">{step}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {
@@ -155,7 +168,7 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
                     ][index]
                   }
                 </p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -169,11 +182,15 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
               "Build a resume for school, college, or professional roles.",
               "Get writing suggestions when you want a little help.",
               "Save versions and export PDF, DOCX, JSON, or TXT files.",
-            ].map((text) => (
-              <div key={text} className="rounded-lg border border-border bg-card p-5">
+            ].map((text, index) => (
+              <Reveal
+                key={text}
+                delay={index * 90}
+                className="hover-lift rounded-xl border border-border bg-card p-5"
+              >
                 <CheckCircle2 className="mb-3 h-5 w-5 text-primary" />
                 <p className="text-sm text-foreground">{text}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -183,25 +200,25 @@ function LandingPage({ isStaff }: { isStaff: boolean }) {
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
           <h2 className="text-2xl font-bold">Frequently asked questions</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <article className="rounded-lg border border-border bg-card p-5">
+            <article className="hover-lift rounded-xl border border-border bg-card p-5">
               <h3 className="font-semibold">Can I choose from different resume styles?</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 Yes. Preview and choose from 20 templates, and change your selection at any time.
               </p>
             </article>
-            <article className="rounded-lg border border-border bg-card p-5">
+            <article className="hover-lift rounded-xl border border-border bg-card p-5">
               <h3 className="font-semibold">Will suggestions change my resume automatically?</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 No. Suggestions are optional, and you decide whether to use them.
               </p>
             </article>
-            <article className="rounded-lg border border-border bg-card p-5">
+            <article className="hover-lift rounded-xl border border-border bg-card p-5">
               <h3 className="font-semibold">Which download formats are available?</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 Download PDF, DOCX, JSON, and TXT files from the resume workflow.
               </p>
             </article>
-            <article className="rounded-lg border border-border bg-card p-5">
+            <article className="hover-lift rounded-xl border border-border bg-card p-5">
               <h3 className="font-semibold">Can I save and edit a resume later?</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 Create an account to save resumes and return to update them later.
@@ -735,7 +752,7 @@ function Index() {
           </div>
         </section>
 
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div key={flowStage} className="stage-in">
           {flowStage === "wizard" && (
             <ResumeWizard
               data={data}

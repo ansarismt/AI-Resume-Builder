@@ -248,7 +248,7 @@ export function TemplateCard({
 
   return (
     <div
-      className={`group text-left transition-all duration-200 ${selected ? "scale-[1.01]" : "hover:-translate-y-0.5"}`}
+      className={`group text-left transition-all duration-200 ${selected ? "scale-[1.01]" : "hover:-translate-y-1"}`}
     >
       <button
         type="button"
@@ -260,7 +260,7 @@ export function TemplateCard({
         className={`relative w-full overflow-hidden rounded-xl border bg-card p-3 text-left shadow-sm transition-all duration-200 ${
           selected
             ? "border-accent shadow-md ring-2 ring-accent/20"
-            : "border-border hover:border-accent/40 hover:shadow-md"
+            : "border-border hover:border-accent/40 hover:shadow-lift"
         } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2`}
       >
         <div className="aspect-[3/4] overflow-hidden rounded-lg border border-border bg-white">
