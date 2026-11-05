@@ -1,16 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useState, useEffect, useRef } from "react";
-import {
-  Download,
-  Eye,
-  HelpCircle,
-  ChevronDown,
-  GraduationCap,
-  BriefcaseBusiness,
-  NotebookPen,
-  CheckCircle2,
-  Sparkles,
-} from "lucide-react";
+import { HelpCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SavedResumes } from "@/components/resume/SavedResumes";
 import {
@@ -357,173 +347,34 @@ function Index() {
         </div>
       )}
 
-      <section className="border-b border-border bg-secondary/40 text-foreground">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14 grid lg:grid-cols-12 gap-6 items-center">
-          <div className="lg:col-span-7">
-            <p className="mb-3 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-primary">
-              <Sparkles className="h-4 w-4" /> Resume builder for school, college, and career growth
+      <section className="border-b border-border bg-secondary/40">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-8 sm:px-6">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Your resumes</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Build, preview and export in four steps.
             </p>
-            <h2 className="max-w-3xl font-display text-4xl font-normal leading-[1.08] sm:text-5xl">
-              Build a resume that feels clear, polished, and ready to send.
-            </h2>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Build a polished resume for school, college, or your next role. Get real AI writing
-              help, preview 20 designs, and export the version that feels like you.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Button onClick={() => handleNew()} className="px-5">
-                Create Resume
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  document
-                    .getElementById("saved-resumes-section")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
-                className="px-5"
-              >
-                View Saved Resumes
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowKeyboardShortcuts((value) => !value)}
-                title="Keyboard shortcuts (Ctrl+/Cmd+?)"
-              >
-                <HelpCircle className="mr-2 h-4 w-4" />
-                Shortcuts
-              </Button>
-            </div>
           </div>
-          <div className="lg:col-span-5">
-            <div className="toon p-5 shadow-paper">
-              <div className="mb-4 flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-accent">
-                  <NotebookPen className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="font-semibold">Your career toolkit</p>
-                  <p className="text-xs text-muted-foreground">
-                    A better resume, one step at a time
-                  </p>
-                </div>
-              </div>
-              <div className="grid gap-3">
-                <div className="flex items-start gap-3 rounded-xl border border-border bg-secondary/50 p-3">
-                  <Sparkles className="mt-0.5 h-5 w-5 text-accent" />
-                  <div>
-                    <p className="text-sm font-semibold">AI writing suggestions</p>
-                    <p className="text-xs text-muted-foreground">
-                      Generate summaries and strengthen experience bullets.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 rounded-xl border border-border bg-secondary/50 p-3">
-                  <NotebookPen className="mt-0.5 h-5 w-5 text-accent" />
-                  <div>
-                    <p className="text-sm font-semibold">Start from your existing resume</p>
-                    <p className="text-xs text-muted-foreground">
-                      Import a PDF or DOCX and review extracted details.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 rounded-xl border border-border bg-secondary/50 p-3">
-                  <Eye className="mt-0.5 h-5 w-5 text-accent" />
-                  <div>
-                    <p className="text-sm font-semibold">Preview, choose, and export</p>
-                    <p className="text-xs text-muted-foreground">
-                      20 templates with PDF, DOCX, JSON, and TXT downloads.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                <Download className="h-4 w-4 text-accent" />
-                Your information stays yours; AI never adds facts for you.
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-border bg-background/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            <div className="text-center p-4 rounded-lg hover:bg-secondary/50 transition-colors duration-200">
-              <div className="text-2xl sm:text-3xl font-bold text-primary">20</div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground mt-1">
-                Templates
-              </p>
-            </div>
-            <div className="text-center p-4 rounded-lg hover:bg-secondary/50 transition-colors duration-200">
-              <div className="text-2xl sm:text-3xl font-bold text-primary">4</div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground mt-1">
-                Export Formats
-              </p>
-            </div>
-            <div className="text-center p-4 rounded-lg hover:bg-secondary/50 transition-colors duration-200">
-              <div className="text-2xl sm:text-3xl font-bold text-primary">24</div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground mt-1">
-                Job Categories
-              </p>
-            </div>
-            <div className="text-center p-4 rounded-lg hover:bg-secondary/50 transition-colors duration-200">
-              <div className="text-2xl sm:text-3xl font-bold text-primary">∞</div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground mt-1">Versions</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-border bg-secondary/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-          <h2 className="font-display text-2xl font-bold mb-6 sm:mb-8">Built For Every Stage</h2>
-          <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
-            <div className="toon p-4 sm:p-6 hover:shadow-lg hover:border-primary/50 transition-all">
-              <GraduationCap className="h-8 w-8 text-primary mb-3" />
-              <h3 className="font-display font-bold mb-2 text-sm sm:text-base">School Students</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Prepare resumes for scholarships, competitions, and first opportunities.
-              </p>
-            </div>
-            <div className="toon p-4 sm:p-6 hover:shadow-lg hover:border-primary/50 transition-all">
-              <NotebookPen className="h-8 w-8 text-primary mb-3" />
-              <h3 className="font-display font-bold mb-2 text-sm sm:text-base">
-                College & Freshers
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Show projects, internships, coursework, and certifications clearly.
-              </p>
-            </div>
-            <div className="toon p-4 sm:p-6 hover:shadow-lg hover:border-primary/50 transition-all">
-              <BriefcaseBusiness className="h-8 w-8 text-primary mb-3" />
-              <h3 className="font-display font-bold mb-2 text-sm sm:text-base">
-                Working Professionals
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Present experience, achievements, skills, and multiple career-focused versions.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-border bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-          <h2 className="font-display text-2xl font-bold mb-6">
-            A straightforward way to build your resume
-          </h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            {[
-              "Simple layout with clear resume sections",
-              "Instant preview while editing",
-              "Save, reopen, and export multiple versions",
-            ].map((item) => (
-              <div key={item} className="toon p-5">
-                <CheckCircle2 className="h-5 w-5 text-accent mb-3" />
-                <p className="text-sm text-foreground">{item}</p>
-              </div>
-            ))}
+          <div className="flex flex-wrap gap-3">
+            <Button onClick={() => handleNew()}>Create resume</Button>
+            <Button
+              variant="outline"
+              onClick={() =>
+                document
+                  .getElementById("saved-resumes-section")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
+            >
+              Saved resumes
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowKeyboardShortcuts((value) => !value)}
+              title="Keyboard shortcuts (Ctrl+/Cmd+?)"
+            >
+              <HelpCircle className="mr-2 h-4 w-4" />
+              Shortcuts
+            </Button>
           </div>
         </div>
       </section>

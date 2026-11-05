@@ -186,7 +186,7 @@ function RootComponent() {
                 height={39}
                 className="h-10 w-auto transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
               />
-              <span className="font-display text-2xl font-extrabold tracking-tight">
+              <span className="font-display text-2xl font-bold tracking-tight">
                 AI Resume Builder
               </span>
             </Link>
