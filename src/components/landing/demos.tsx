@@ -28,10 +28,7 @@ function Panel({ children, className }: { children: ReactNode; className?: strin
   return (
     <div
       aria-hidden="true"
-      className={cn(
-        "relative overflow-hidden rounded-2xl border border-border bg-secondary/70 p-5 sm:p-8",
-        className,
-      )}
+      className={cn("toon relative overflow-hidden bg-secondary p-5 sm:p-8", className)}
     >
       {children}
     </div>

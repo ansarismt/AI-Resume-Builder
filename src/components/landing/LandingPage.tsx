@@ -26,6 +26,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils";
 import { EditDemo, ExportDemo, PickDemo, SuggestDemo } from "./demos";
 import { Counter, Magnetic, ScrollProgress, SpotlightCard, Tilt } from "./motion";
+import { Mascot, Squiggle } from "./toon";
 
 const SWATCHES = ["#1f3a5f", "#2f5d8a", "#4a5568", "#2d3436", "#111111"];
 
@@ -42,7 +43,7 @@ function SectionHead({
 }) {
   return (
     <Reveal className={cn("max-w-2xl", center && "mx-auto text-center")}>
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{eyebrow}</p>
+      <p className="sticker">{eyebrow}</p>
       <h2 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>
       {text && <p className="mt-3 leading-7 text-muted-foreground">{text}</p>}
     </Reveal>
@@ -123,7 +124,7 @@ function HeroResume() {
   return (
     <div className="mx-auto w-full max-w-md">
       <Tilt>
-        <div className="rounded-2xl border border-border bg-white p-6 shadow-paper">
+        <div className="toon p-6">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xl font-extrabold" style={{ color: accent }}>
@@ -244,8 +245,8 @@ function ResumeTypes() {
     <div className="mt-10 grid gap-5 md:grid-cols-3">
       {RESUME_TYPES.map((type, index) => (
         <Reveal key={type.title} delay={index * 90}>
-          <SpotlightCard className="h-full rounded-2xl border border-border bg-card p-6">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <SpotlightCard className="toon toon-hover h-full p-6">
+            <span className="toon-icon">
               <type.icon className="h-5 w-5" />
             </span>
             <h3 className="mt-4 text-lg font-bold">{type.title}</h3>
@@ -290,12 +291,7 @@ function TemplateGallery() {
             type="button"
             aria-pressed={category === name}
             onClick={() => setCategory(name)}
-            className={cn(
-              "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all duration-200",
-              category === name
-                ? "border-primary bg-primary text-primary-foreground shadow-lift"
-                : "border-border bg-card hover:-translate-y-0.5 hover:border-primary/40",
-            )}
+            className={cn("toon-chip px-3.5 py-1.5 text-sm")}
           >
             {name}
           </button>
@@ -307,13 +303,7 @@ function TemplateGallery() {
             type="button"
             aria-pressed={fontFilter === font}
             onClick={() => setFontFilter(font)}
-            className={cn(
-              "rounded-full border px-3 py-1.5 text-sm transition-colors",
-              fontFilter === font
-                ? "border-foreground bg-foreground text-background"
-                : "border-border bg-card hover:border-foreground/40",
-              font === "serif" && "font-serif",
-            )}
+            className={cn("toon-chip px-3 py-1.5 text-sm", font === "serif" && "font-serif")}
           >
             {font === "all" ? "Any font" : font === "sans" ? "Sans" : "Serif"}
           </button>
@@ -322,31 +312,31 @@ function TemplateGallery() {
       <p className="mt-3 text-sm text-muted-foreground" aria-live="polite">
         Showing {visible.length} of {TEMPLATE_CATALOG.length} templates
       </p>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {visible.map((template, index) => (
           <article
             key={`${template.id}-${category}-${fontFilter}`}
-            className="pop-in hover-lift flex flex-col rounded-2xl border border-border bg-card p-3"
+            className="pop-in toon toon-hover flex flex-col p-2"
             style={{ animationDelay: `${index * 40}ms` }}
           >
-            <div className="aspect-[4/3] overflow-hidden rounded-lg border border-border bg-white">
+            <div className="aspect-[5/3] overflow-hidden rounded-md border border-border bg-white">
               <MiniTemplate layout={template.layout} color={template.colors[0]} />
             </div>
-            <div className="mt-3 flex items-center justify-between gap-2">
-              <h3 className="font-bold">{template.name}</h3>
-              <span className="rounded bg-secondary px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase text-muted-foreground">
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <h3 className="truncate text-sm font-bold">{template.name}</h3>
+              <span className="rounded bg-secondary px-1 py-0.5 text-[0.6rem] font-semibold uppercase text-muted-foreground">
                 {template.font}
               </span>
             </div>
-            <p className="text-xs font-medium text-primary">{template.category}</p>
-            <p className="mt-1 flex-1 text-xs leading-5 text-muted-foreground">
+            <p className="text-[0.7rem] font-medium text-primary">{template.category}</p>
+            <p className="mt-0.5 line-clamp-2 flex-1 text-[0.68rem] leading-4 text-muted-foreground">
               {template.description}
             </p>
-            <div className="mt-3 flex gap-1.5">
+            <div className="mt-2 flex gap-1">
               {template.colors.map((color) => (
                 <span
                   key={color}
-                  className="h-4 w-4 rounded-full border border-white shadow ring-1 ring-border"
+                  className="h-3 w-3 rounded-full ring-1 ring-border"
                   style={{ background: color }}
                 />
               ))}
@@ -385,7 +375,7 @@ function DemoRows() {
       {DEMO_ROWS.map((row, index) => (
         <div key={row.title} className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <Reveal className={index % 2 === 1 ? "lg:order-2" : ""}>
-            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <span className="toon-icon">
               <row.icon className="h-6 w-6" />
             </span>
             <h3 className="mt-4 text-3xl font-extrabold tracking-tight">{row.title}</h3>
@@ -416,9 +406,9 @@ function AiSection() {
   return (
     <div className="mt-10 grid gap-5 lg:grid-cols-2">
       <Reveal>
-        <SpotlightCard className="h-full rounded-2xl border border-border bg-card p-6">
+        <SpotlightCard className="toon toon-hover h-full p-6">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <span className="toon-icon">
               <BarChart3 className="h-5 w-5" />
             </span>
             <div>
@@ -443,9 +433,9 @@ function AiSection() {
         </SpotlightCard>
       </Reveal>
       <Reveal delay={100}>
-        <SpotlightCard className="h-full rounded-2xl border border-border bg-card p-6">
+        <SpotlightCard className="toon toon-hover h-full p-6">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <span className="toon-icon">
               <KeyRound className="h-5 w-5" />
             </span>
             <div>
@@ -505,7 +495,7 @@ function Formats() {
     <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {FORMATS.map((format, index) => (
         <Reveal key={format.name} delay={index * 80}>
-          <article className="hover-lift h-full rounded-2xl border border-border bg-card p-5">
+          <article className="toon toon-hover h-full p-5">
             <FileText className="h-6 w-6 text-primary" />
             <h3 className="mt-3 text-lg font-bold">{format.name}</h3>
             <p className="text-xs font-semibold uppercase tracking-wider text-primary">
@@ -544,8 +534,8 @@ function Tips() {
     <div className="mt-10 grid gap-5 sm:grid-cols-2">
       {TIPS.map(([title, text], index) => (
         <Reveal key={title} delay={index * 80}>
-          <div className="flex gap-4 rounded-2xl border border-border bg-card p-5">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+          <div className="toon toon-hover flex gap-4 p-5">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-foreground bg-primary text-sm font-bold text-primary-foreground shadow-[2px_2px_0_var(--ink)]">
               {index + 1}
             </span>
             <div>
@@ -586,7 +576,7 @@ function ThreeSteps() {
         <ol className="mt-8 space-y-6">
           {STEP_LIST.map(([title, text], index) => (
             <Reveal as="li" key={title} delay={index * 100} className="group flex gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-lg font-extrabold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-foreground bg-card text-lg font-extrabold text-primary shadow-[2px_3px_0_var(--ink)] transition-all group-hover:-translate-y-0.5 group-hover:rotate-6 group-hover:bg-primary group-hover:text-primary-foreground">
                 {index + 1}
               </span>
               <div>
@@ -652,10 +642,7 @@ function Faq() {
       {FAQS.map(([question, answer], index) => {
         const isOpen = open === index;
         return (
-          <div
-            key={question}
-            className="rounded-xl border border-border bg-card transition-shadow hover:shadow-md"
-          >
+          <div key={question} className="toon toon-hover">
             <button
               type="button"
               aria-expanded={isOpen}
@@ -692,14 +679,12 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
     <div className="min-h-screen overflow-x-clip bg-background">
       <ScrollProgress />
 
-      <section className="hero-glow border-b border-border">
+      <section className="toon-hero border-b-2 border-foreground">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <p className="stage-in mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              For school, college and professional resumes
-            </p>
+            <p className="sticker stage-in mb-5">For school, college and professional resumes</p>
             <h1 className="max-w-3xl font-display text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl">
-              Build a resume that is ready to send.
+              Build a resume that is <Squiggle>ready to send.</Squiggle>
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
               Fill in a guided form, choose from 20 designed templates, and download a clean PDF or
@@ -707,13 +692,13 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Magnetic>
-                <Button asChild size="lg" className="shine px-7">
+                <Button asChild size="lg" className="toon-btn px-7">
                   <Link to="/signup">
                     Create my resume <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
               </Magnetic>
-              <Button asChild size="lg" variant="outline" className="px-7">
+              <Button asChild size="lg" variant="outline" className="toon-btn px-7">
                 <Link to="/login">Log in</Link>
               </Button>
             </div>
@@ -731,13 +716,15 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
               ))}
             </ul>
           </div>
-          <div className="lg:col-span-5">
+          <div className="relative lg:col-span-5">
             <HeroResume />
+            <Mascot className="absolute -bottom-14 -left-2 z-10 hidden sm:block lg:-left-44" />
+            <Mascot className="mx-auto mt-6 flex flex-col items-center sm:hidden" />
           </div>
         </div>
       </section>
 
-      <section className="border-b border-border bg-card">
+      <section className="border-b-2 border-foreground bg-card">
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-8 px-4 py-10 sm:px-6 md:grid-cols-4">
           <Counter value={20} label="Templates" />
           <Counter value={3} label="Resume types" />
@@ -746,7 +733,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </section>
 
-      <section className="border-b border-border">
+      <section className="border-b-2 border-foreground">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <SectionHead
             eyebrow="Resume types"
@@ -757,8 +744,8 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </section>
 
-      <section className="border-b border-border bg-secondary/40">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <section className="border-b-2 border-foreground toon-dots">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
           <SectionHead
             eyebrow="Templates"
             title="20 templates, one set of content"
@@ -768,11 +755,11 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </section>
 
-      <section className="border-b border-border">
+      <section className="border-b-2 border-foreground">
         <DemoRows />
       </section>
 
-      <section className="border-b border-border bg-secondary/40">
+      <section className="border-b-2 border-foreground toon-dots">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <SectionHead
             eyebrow="AI tools"
@@ -783,7 +770,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </section>
 
-      <section className="border-b border-border">
+      <section className="border-b-2 border-foreground">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <SectionHead
             eyebrow="Downloads"
@@ -794,24 +781,24 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </section>
 
-      <section className="border-b border-border bg-secondary/40">
+      <section className="border-b-2 border-foreground toon-dots">
         <ThreeSteps />
       </section>
 
-      <section className="border-b border-border">
+      <section className="border-b-2 border-foreground">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <SectionHead eyebrow="Resume tips" title="Four habits of resumes that get read" />
           <Tips />
         </div>
       </section>
 
-      <section className="border-b border-border bg-secondary/40">
+      <section className="border-b-2 border-foreground toon-dots">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <SectionHead eyebrow="Privacy" title="Your information stays in your hands" />
           <div className="mt-8 grid gap-5 md:grid-cols-3">
             {PRIVACY.map(([title, text], index) => (
               <Reveal key={title} delay={index * 90}>
-                <div className="hover-lift h-full rounded-2xl border border-border bg-card p-5">
+                <div className="toon toon-hover h-full p-5">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
                   <h3 className="mt-3 font-bold">{title}</h3>
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">{text}</p>
@@ -822,7 +809,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </section>
 
-      <section className="border-b border-border">
+      <section className="border-b-2 border-foreground">
         <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
           <SectionHead eyebrow="FAQ" title="Questions, answered" center />
           <Faq />
@@ -839,7 +826,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
           </p>
           <div className="mt-8">
             <Magnetic>
-              <Button asChild size="lg" variant="secondary" className="shine px-8">
+              <Button asChild size="lg" variant="secondary" className="toon-btn px-8">
                 <Link to="/signup">
                   Get started <ArrowRight className="h-4 w-4" />
                 </Link>

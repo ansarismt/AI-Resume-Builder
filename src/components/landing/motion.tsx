@@ -50,7 +50,7 @@ export function SpotlightCard({
     return () => node.removeEventListener("pointermove", move);
   }, []);
   return (
-    <div ref={ref} className={cn("spotlight hover-lift", className)}>
+    <div ref={ref} className={cn("spotlight", className)}>
       {children}
     </div>
   );
@@ -128,7 +128,7 @@ export function Counter({
   const [ref, seen] = useInView<HTMLDivElement>();
   const shown = useCountUp(value, seen);
   return (
-    <div ref={ref} className="text-center">
+    <div ref={ref} className="toon toon-hover bg-card px-3 py-5 text-center">
       <p className="text-4xl font-extrabold tracking-tight text-primary sm:text-5xl">
         {shown}
         {suffix}

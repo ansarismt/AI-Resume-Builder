@@ -174,19 +174,19 @@ function RootComponent() {
       <HeadContent />
       <AuthProvider>
         <div className="flex min-h-screen flex-col">
-          <nav className="sticky top-0 z-30 flex flex-wrap items-center gap-4 border-b border-border bg-background/85 px-4 py-3 backdrop-blur sm:px-6 no-print">
+          <nav className="sticky top-0 z-30 flex flex-wrap items-center gap-4 border-b-2 border-foreground bg-background/85 px-4 py-3 backdrop-blur sm:px-6 no-print">
             <Link
               to="/"
-              className="group flex items-center gap-2.5 text-foreground transition-colors hover:text-primary"
+              className="group flex items-center gap-3 text-foreground transition-colors hover:text-primary"
             >
               <img
                 src="/logo.png"
                 alt=""
-                width={48}
-                height={41}
-                className="h-11 w-auto transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
+                width={60}
+                height={51}
+                className="h-14 w-auto transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
               />
-              <span className="font-display text-lg font-bold tracking-tight">
+              <span className="font-display text-2xl font-extrabold tracking-tight">
                 AI Resume Builder
               </span>
             </Link>
