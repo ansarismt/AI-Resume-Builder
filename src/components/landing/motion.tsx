@@ -139,19 +139,3 @@ export function Counter({
     </div>
   );
 }
-
-/** Cycles through words with a slide-in animation. */
-export function RotatingWord({ words }: { words: string[] }) {
-  const [index, setIndex] = useState(0);
-  const reduced = usePrefersReducedMotion();
-  useEffect(() => {
-    if (reduced) return;
-    const timer = window.setInterval(() => setIndex((i) => (i + 1) % words.length), 2400);
-    return () => window.clearInterval(timer);
-  }, [words.length, reduced]);
-  return (
-    <span key={index} className="word-in inline-block text-gradient">
-      {words[index]}
-    </span>
-  );
-}

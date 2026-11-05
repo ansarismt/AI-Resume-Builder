@@ -179,9 +179,13 @@ function RootComponent() {
               to="/"
               className="group flex items-center gap-2.5 text-foreground transition-colors hover:text-primary"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-extrabold text-primary-foreground transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105">
-                V
-              </span>
+              <img
+                src="/logo.png"
+                alt=""
+                width={48}
+                height={41}
+                className="h-11 w-auto transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
+              />
               <span className="font-display text-lg font-bold tracking-tight">
                 AI Resume Builder
               </span>
