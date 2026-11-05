@@ -29,4 +29,26 @@ describe("TemplateSelectionPage", () => {
     expect(radios()[1]).toHaveFocus();
     expect(onSelectTemplate).toHaveBeenCalledWith("template2");
   });
+
+  it("shows the resume only after the Preview button is clicked", () => {
+    render(
+      <TemplateSelectionPage
+        data={{ ...emptyResume, name: "Preview Person" }}
+        selectedTemplate="template1"
+        selectedColor="#1f3a5f"
+        onSelectTemplate={vi.fn()}
+        onSelectColor={vi.fn()}
+        onBack={vi.fn()}
+        onContinue={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText("Preview Person")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    expect(screen.getByRole("dialog", { name: "Resume preview" })).toBeInTheDocument();
+    expect(screen.getByText("Preview Person")).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
 });

@@ -1,5 +1,5 @@
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import type { KeyboardEvent } from "react";
+import { ArrowLeft, ArrowRight, Eye, X } from "lucide-react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { TemplateCard } from "@/components/TemplateCard";
@@ -26,6 +26,19 @@ export function TemplateSelectionPage({
   onBack,
   onContinue,
 }: Props) {
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!previewOpen) return;
+    closeRef.current?.focus();
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") setPreviewOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [previewOpen]);
+
   const handleTemplateKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     const directions: Record<string, number> = {
       ArrowDown: 1,
@@ -81,47 +94,72 @@ export function TemplateSelectionPage({
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
-        <div
-          role="radiogroup"
-          aria-label="Resume templates"
-          tabIndex={-1}
-          onKeyDown={handleTemplateKeyDown}
-          className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
-        >
-          {TEMPLATE_OPTIONS.map((template) => (
-            <TemplateCard
-              key={template.id}
-              template={template}
-              selected={template.id === selectedTemplate}
-              selectedColor={template.id === selectedTemplate ? selectedColor : template.colors[0]}
-              onSelect={onSelectTemplate}
-              onColorSelect={onSelectColor}
-            />
-          ))}
-        </div>
-
-        <aside className="self-start rounded-xl border border-border bg-card p-3 shadow-lg lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto">
-          <div className="mb-3 flex items-center justify-between gap-3 px-1">
-            <div>
-              <p className="text-xs font-mono uppercase tracking-widest text-accent">
-                Live Preview
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">Updates as you choose a design</p>
-            </div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/5 px-2.5 py-1 text-[0.65rem] font-medium text-accent">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-              Live
-            </span>
-          </div>
-          <div
-            id="resume-print"
-            className="overflow-hidden rounded-lg border border-border bg-secondary/30 p-1.5 shadow-inner"
-          >
-            <ResumeDocument data={data} accentColor={selectedColor} />
-          </div>
-        </aside>
+      <div
+        role="radiogroup"
+        aria-label="Resume templates"
+        tabIndex={-1}
+        onKeyDown={handleTemplateKeyDown}
+        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
+        {TEMPLATE_OPTIONS.map((template) => (
+          <TemplateCard
+            key={template.id}
+            template={template}
+            selected={template.id === selectedTemplate}
+            selectedColor={template.id === selectedTemplate ? selectedColor : template.colors[0]}
+            onSelect={onSelectTemplate}
+            onColorSelect={onSelectColor}
+          />
+        ))}
       </div>
+
+      <Button
+        type="button"
+        size="lg"
+        className="fixed bottom-6 right-6 z-40 rounded-full shadow-lg"
+        onClick={() => setPreviewOpen(true)}
+      >
+        <Eye className="mr-2 h-4 w-4" />
+        Preview
+      </Button>
+
+      {previewOpen && (
+        <div className="fixed inset-0 z-50">
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full cursor-default bg-black/50"
+            onClick={() => setPreviewOpen(false)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Resume preview"
+            className="absolute inset-y-0 right-0 flex w-full flex-col border-l border-border bg-card shadow-2xl sm:w-[min(48rem,92vw)]"
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+              <p className="text-xs font-mono uppercase tracking-widest text-accent">Preview</p>
+              <Button
+                ref={closeRef}
+                type="button"
+                variant="outline"
+                size="sm"
+                aria-label="Close preview"
+                onClick={() => setPreviewOpen(false)}
+              >
+                <X className="mr-1 h-4 w-4" />
+                Close
+              </Button>
+            </div>
+            <div className="flex-1 overflow-y-auto bg-secondary/30 p-3 sm:p-5">
+              <div className="overflow-hidden rounded-lg border border-border bg-white shadow-inner">
+                <ResumeDocument data={data} accentColor={selectedColor} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
