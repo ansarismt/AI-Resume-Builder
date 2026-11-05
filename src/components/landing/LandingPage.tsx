@@ -4,9 +4,8 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { GlowSection, Reveal, Tilt } from "./effects";
-
-const SWATCHES = ["#1f3a5f", "#2f5d8a", "#4a5568", "#2d3436", "#111111"];
+import { GlowSection, Reveal } from "./effects";
+import { HeroDemo } from "./HeroDemo";
 
 function Section({
   title,
@@ -29,82 +28,6 @@ function Section({
         <div className="mt-8">{children}</div>
       </div>
     </section>
-  );
-}
-
-function HeroResume() {
-  const [accent, setAccent] = useState(SWATCHES[1]);
-  return (
-    <div className="fade-up mx-auto w-full max-w-md" style={{ animationDelay: "200ms" }}>
-      <Tilt>
-        <div className="toon bg-white p-6">
-          <p className="text-xl font-bold transition-colors duration-300" style={{ color: accent }}>
-            Jordan Example
-          </p>
-          <p className="text-xs text-slate-500">Information Systems Student</p>
-          <p className="mt-1 text-[0.65rem] text-slate-400">
-            jordan.example@example.test · +1 555 010 2040
-          </p>
-          <div
-            className="mt-3 h-0.5 w-full transition-colors duration-300"
-            style={{ background: accent }}
-          />
-          {[
-            [
-              "Career objective",
-              "Curious information-systems student who turns complex data into clear tools.",
-            ],
-            ["Education", "BSc Information Systems · Example State University · 2023–2026"],
-            ["Projects", "Community Data Explorer: accessible interface for public datasets."],
-          ].map(([title, text], index) => (
-            <div
-              key={title}
-              className="fade-up mt-3"
-              style={{ animationDelay: `${500 + index * 180}ms` }}
-            >
-              <p
-                className="text-[0.6rem] font-semibold uppercase tracking-[0.18em] transition-colors duration-300"
-                style={{ color: accent }}
-              >
-                {title}
-              </p>
-              <p className="mt-1 text-[0.7rem] leading-4 text-slate-600">{text}</p>
-            </div>
-          ))}
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {["TypeScript", "React", "Python", "SQL"].map((skill) => (
-              <span
-                key={skill}
-                className="rounded border border-slate-200 px-2 py-0.5 text-[0.62rem] text-slate-600"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      </Tilt>
-      <div
-        className="mt-5 flex items-center justify-center gap-2"
-        role="group"
-        aria-label="Try a colour"
-      >
-        <span className="mr-1 text-xs text-muted-foreground">Try a colour</span>
-        {SWATCHES.map((color) => (
-          <button
-            key={color}
-            type="button"
-            aria-label={`Use colour ${color}`}
-            aria-pressed={accent === color}
-            onClick={() => setAccent(color)}
-            className={cn(
-              "h-6 w-6 rounded-full border-2 border-white shadow ring-1 ring-border transition-transform hover:scale-125",
-              accent === color && "scale-110 ring-2 ring-primary",
-            )}
-            style={{ background: color }}
-          />
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -229,7 +152,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
               </Button>
             </div>
           </div>
-          <HeroResume />
+          <HeroDemo />
         </div>
       </GlowSection>
 
