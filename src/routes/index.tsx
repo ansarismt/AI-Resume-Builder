@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useState, useEffect, useRef } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { lazy, Suspense, useCallback, useState, useEffect, useRef } from "react";
 import {
   Download,
   Eye,
@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   Sparkles,
 } from "lucide-react";
-import { Reveal } from "@/components/ui/reveal";
 import { Button } from "@/components/ui/button";
 import { SavedResumes } from "@/components/resume/SavedResumes";
 import {
@@ -35,211 +34,13 @@ import { TemplateSelectionPage } from "@/pages/TemplateSelectionPage";
 import { FinalizeResumePage } from "@/pages/FinalizeResumePage";
 import { FLOW_STEPS, getTemplateDefaultColor, type FlowStage } from "@/pages/resumeFlow";
 
+const LandingPage = lazy(() =>
+  import("@/components/landing/LandingPage").then((module) => ({ default: module.LandingPage })),
+);
+
 export const Route = createFileRoute("/")({
   component: Index,
 });
-
-function LandingPage({ isStaff }: { isStaff: boolean }) {
-  return (
-    <div className="min-h-screen overflow-x-clip bg-background">
-      <section className="relative overflow-hidden border-b border-border hero-glow text-foreground">
-        <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-12">
-          <div className="lg:col-span-7">
-            <p className="mb-4 inline-flex rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              Resume builder for students and professionals
-            </p>
-            <h1 className="max-w-3xl font-display text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl">
-              Create <span className="text-gradient">polished resumes</span>, save versions, and
-              export with confidence.
-            </h1>
-            <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-              Start from a guided form, choose from 20 templates, preview instantly, and manage
-              resumes from your dashboard after login.
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild className="px-5">
-                <Link to="/signup">Create account</Link>
-              </Button>
-              <Button asChild variant="outline" className="px-5">
-                <Link to="/login">Login</Link>
-              </Button>
-            </div>
-            <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-accent" />
-                20 professional templates
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-accent" />
-                You approve every AI suggestion
-              </span>
-            </div>
-          </div>
-          <div className="lg:col-span-5">
-            <div className="float-slow rounded-2xl border border-border bg-card p-5 shadow-paper">
-              <div className="mb-5 flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-accent">
-                  <Sparkles className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="font-semibold">Your AI writing partner</p>
-                  <p className="text-xs text-muted-foreground">
-                    Useful help, always in your control
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                {[
-                  ["01", "Turn your experience into stronger bullet points"],
-                  ["02", "Generate tailored professional summaries"],
-                  ["03", "Import a resume and extract its key details"],
-                ].map(([number, text]) => (
-                  <div
-                    key={number}
-                    className="hover-lift flex items-center gap-3 rounded-xl border border-border bg-secondary/60 p-3"
-                  >
-                    <span className="font-mono text-xs text-accent">{number}</span>
-                    <p className="text-sm text-foreground">{text}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-4 text-xs leading-5 text-muted-foreground">
-                AI writing needs a provider key configured on the backend. Your resume data and
-                provider credentials stay off the public frontend.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-          <h2 className="text-2xl font-bold tracking-tight">Built for every stage</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {[
-              [
-                "School students",
-                "Prepare resumes for scholarships, competitions, and first opportunities.",
-              ],
-              [
-                "College and freshers",
-                "Present projects, coursework, internships, and certifications clearly.",
-              ],
-              [
-                "Working professionals",
-                "Highlight experience, achievements, skills, and career-focused versions.",
-              ],
-            ].map(([title, description], index) => (
-              <Reveal
-                as="article"
-                delay={index * 90}
-                key={title}
-                className="hover-lift rounded-xl border border-border bg-card p-5"
-              >
-                <h3 className="font-semibold">{title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-          <h2 className="text-2xl font-bold">A simple four-step process</h2>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {["Form", "Preview", "Templates", "Finalize"].map((step, index) => (
-              <Reveal
-                key={step}
-                delay={index * 90}
-                className="hover-lift rounded-xl border border-border bg-card p-5"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                  {index + 1}
-                </span>
-                <h3 className="mt-2 font-semibold">{step}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {
-                    [
-                      "Add your contact details, education, skills, and experience.",
-                      "Review your content and make any edits.",
-                      "Select from 20 layouts to suit your needs.",
-                      "Save your resume and export it in your preferred format.",
-                    ][index]
-                  }
-                </p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-border bg-secondary/20">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-          <h2 className="text-2xl font-bold">A simpler way to build your resume</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {[
-              "Build a resume for school, college, or professional roles.",
-              "Get writing suggestions when you want a little help.",
-              "Save versions and export PDF, DOCX, JSON, or TXT files.",
-            ].map((text, index) => (
-              <Reveal
-                key={text}
-                delay={index * 90}
-                className="hover-lift rounded-xl border border-border bg-card p-5"
-              >
-                <CheckCircle2 className="mb-3 h-5 w-5 text-primary" />
-                <p className="text-sm text-foreground">{text}</p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-          <h2 className="text-2xl font-bold">Frequently asked questions</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <article className="hover-lift rounded-xl border border-border bg-card p-5">
-              <h3 className="font-semibold">Can I choose from different resume styles?</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Yes. Preview and choose from 20 templates, and change your selection at any time.
-              </p>
-            </article>
-            <article className="hover-lift rounded-xl border border-border bg-card p-5">
-              <h3 className="font-semibold">Will suggestions change my resume automatically?</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                No. Suggestions are optional, and you decide whether to use them.
-              </p>
-            </article>
-            <article className="hover-lift rounded-xl border border-border bg-card p-5">
-              <h3 className="font-semibold">Which download formats are available?</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Download PDF, DOCX, JSON, and TXT files from the resume workflow.
-              </p>
-            </article>
-            <article className="hover-lift rounded-xl border border-border bg-card p-5">
-              <h3 className="font-semibold">Can I save and edit a resume later?</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Create an account to save resumes and return to update them later.
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      {isStaff && (
-        <section className="border-b border-border">
-          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-            <Button asChild variant="outline">
-              <Link to="/admin-panel">Open Admin Panel</Link>
-            </Button>
-          </div>
-        </section>
-      )}
-    </div>
-  );
-}
 
 function openResumePrintDialog(name: string) {
   if (!document.querySelector("#resume-print .rd-wrap")) {
@@ -522,7 +323,11 @@ function Index() {
   ];
 
   if (!isAuthenticated) {
-    return <LandingPage isStaff={isStaff} />;
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-background" aria-busy="true" />}>
+        <LandingPage isStaff={isStaff} />
+      </Suspense>
+    );
   }
 
   return (
