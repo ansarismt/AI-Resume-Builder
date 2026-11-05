@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Check, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { GlowSection, Reveal, Tilt } from "./effects";
 
 const SWATCHES = ["#1f3a5f", "#2f5d8a", "#4a5568", "#2d3436", "#111111"];
 
@@ -21,8 +22,10 @@ function Section({
   return (
     <section className={cn("border-b border-border", muted && "bg-secondary/40")}>
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h2>
-        {text && <p className="mt-2 max-w-2xl text-muted-foreground">{text}</p>}
+        <Reveal>
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h2>
+          {text && <p className="mt-2 max-w-2xl text-muted-foreground">{text}</p>}
+        </Reveal>
         <div className="mt-8">{children}</div>
       </div>
     </section>
@@ -32,45 +35,54 @@ function Section({
 function HeroResume() {
   const [accent, setAccent] = useState(SWATCHES[1]);
   return (
-    <div className="mx-auto w-full max-w-md">
-      <div className="toon bg-white p-6">
-        <p className="text-xl font-bold" style={{ color: accent }}>
-          Jordan Example
-        </p>
-        <p className="text-xs text-slate-500">Information Systems Student</p>
-        <p className="mt-1 text-[0.65rem] text-slate-400">
-          jordan.example@example.test · +1 555 010 2040
-        </p>
-        <div className="mt-3 h-0.5 w-full" style={{ background: accent }} />
-        {[
-          [
-            "Career objective",
-            "Curious information-systems student who turns complex data into clear tools.",
-          ],
-          ["Education", "BSc Information Systems · Example State University · 2023–2026"],
-          ["Projects", "Community Data Explorer: accessible interface for public datasets."],
-        ].map(([title, text]) => (
-          <div key={title} className="mt-3">
-            <p
-              className="text-[0.6rem] font-semibold uppercase tracking-[0.18em]"
-              style={{ color: accent }}
+    <div className="fade-up mx-auto w-full max-w-md" style={{ animationDelay: "200ms" }}>
+      <Tilt>
+        <div className="toon bg-white p-6">
+          <p className="text-xl font-bold transition-colors duration-300" style={{ color: accent }}>
+            Jordan Example
+          </p>
+          <p className="text-xs text-slate-500">Information Systems Student</p>
+          <p className="mt-1 text-[0.65rem] text-slate-400">
+            jordan.example@example.test · +1 555 010 2040
+          </p>
+          <div
+            className="mt-3 h-0.5 w-full transition-colors duration-300"
+            style={{ background: accent }}
+          />
+          {[
+            [
+              "Career objective",
+              "Curious information-systems student who turns complex data into clear tools.",
+            ],
+            ["Education", "BSc Information Systems · Example State University · 2023–2026"],
+            ["Projects", "Community Data Explorer: accessible interface for public datasets."],
+          ].map(([title, text], index) => (
+            <div
+              key={title}
+              className="fade-up mt-3"
+              style={{ animationDelay: `${500 + index * 180}ms` }}
             >
-              {title}
-            </p>
-            <p className="mt-1 text-[0.7rem] leading-4 text-slate-600">{text}</p>
-          </div>
-        ))}
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {["TypeScript", "React", "Python", "SQL"].map((skill) => (
-            <span
-              key={skill}
-              className="rounded border border-slate-200 px-2 py-0.5 text-[0.62rem] text-slate-600"
-            >
-              {skill}
-            </span>
+              <p
+                className="text-[0.6rem] font-semibold uppercase tracking-[0.18em] transition-colors duration-300"
+                style={{ color: accent }}
+              >
+                {title}
+              </p>
+              <p className="mt-1 text-[0.7rem] leading-4 text-slate-600">{text}</p>
+            </div>
           ))}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {["TypeScript", "React", "Python", "SQL"].map((skill) => (
+              <span
+                key={skill}
+                className="rounded border border-slate-200 px-2 py-0.5 text-[0.62rem] text-slate-600"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      </Tilt>
       <div
         className="mt-5 flex items-center justify-center gap-2"
         role="group"
@@ -85,8 +97,8 @@ function HeroResume() {
             aria-pressed={accent === color}
             onClick={() => setAccent(color)}
             className={cn(
-              "h-6 w-6 rounded-full border-2 border-white shadow ring-1 ring-border transition-transform hover:scale-110",
-              accent === color && "ring-2 ring-primary",
+              "h-6 w-6 rounded-full border-2 border-white shadow ring-1 ring-border transition-transform hover:scale-125",
+              accent === color && "scale-110 ring-2 ring-primary",
             )}
             style={{ background: color }}
           />
@@ -157,7 +169,7 @@ function Faq() {
       {FAQS.map(([question, answer], index) => {
         const isOpen = open === index;
         return (
-          <div key={question} className="toon">
+          <div key={question} className="toon toon-hover">
             <button
               type="button"
               aria-expanded={isOpen}
@@ -167,14 +179,21 @@ function Faq() {
               {question}
               <ChevronDown
                 className={cn(
-                  "h-5 w-5 shrink-0 text-primary transition-transform",
+                  "h-5 w-5 shrink-0 text-primary transition-transform duration-300",
                   isOpen && "rotate-180",
                 )}
               />
             </button>
-            {isOpen && (
-              <p className="px-4 pb-4 text-sm leading-6 text-muted-foreground">{answer}</p>
-            )}
+            <div
+              className={cn(
+                "grid transition-all duration-300",
+                isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+              )}
+            >
+              <div className="overflow-hidden">
+                <p className="px-4 pb-4 text-sm leading-6 text-muted-foreground">{answer}</p>
+              </div>
+            </div>
           </div>
         );
       })}
@@ -185,54 +204,46 @@ function Faq() {
 export function LandingPage({ isStaff }: { isStaff: boolean }) {
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
-      <section className="border-b border-border bg-secondary/40">
+      <GlowSection className="overflow-hidden border-b border-border bg-secondary/40">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2">
           <div>
-            <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
+            <h1 className="fade-up text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
               Build a resume that is ready to send.
             </h1>
-            <p className="mt-5 max-w-lg text-base leading-7 text-muted-foreground">
+            <p
+              className="fade-up mt-5 max-w-lg text-base leading-7 text-muted-foreground"
+              style={{ animationDelay: "100ms" }}
+            >
               Fill in a guided form, choose from 20 templates, and download a clean PDF or Word
               file. Optional tools help with wording and show how your resume matches a job.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="px-6">
+            <div className="fade-up mt-8 flex flex-wrap gap-3" style={{ animationDelay: "200ms" }}>
+              <Button asChild size="lg" className="group px-6">
                 <Link to="/signup">
-                  Create my resume <ArrowRight className="h-4 w-4" />
+                  Create my resume
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="px-6">
                 <Link to="/login">Log in</Link>
               </Button>
             </div>
-            <ul className="mt-8 space-y-2 text-sm text-muted-foreground">
-              {[
-                "20 templates and 5 colours",
-                "School, college and professional resumes",
-                "PDF, Word, JSON and TXT downloads",
-              ].map((item) => (
-                <li key={item} className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary" />
-                  {item}
-                </li>
-              ))}
-            </ul>
           </div>
           <HeroResume />
         </div>
-      </section>
+      </GlowSection>
 
       <Section
         title="Sections that fit where you are"
         text="Pick your resume type and the form asks only for what belongs on it."
       >
         <div className="grid gap-5 md:grid-cols-3">
-          {RESUME_TYPES.map(([title, best, sections]) => (
-            <article key={title} className="toon p-6">
+          {RESUME_TYPES.map(([title, best, sections], index) => (
+            <Reveal as="article" delay={index * 90} key={title} className="toon toon-hover p-6">
               <h3 className="text-lg font-semibold">{title}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{best}</p>
               <p className="mt-4 text-sm">{sections}</p>
-            </article>
+            </Reveal>
           ))}
         </div>
       </Section>
@@ -240,13 +251,13 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
       <Section title="How it works" muted>
         <ol className="grid gap-5 md:grid-cols-3">
           {STEPS.map(([title, text], index) => (
-            <li key={title} className="toon p-6">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+            <Reveal as="li" delay={index * 90} key={title} className="toon toon-hover group p-6">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-transform duration-300 group-hover:scale-110">
                 {index + 1}
               </span>
               <h3 className="mt-4 text-lg font-semibold">{title}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{text}</p>
-            </li>
+            </Reveal>
           ))}
         </ol>
       </Section>
@@ -256,31 +267,31 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         text="Analysis runs on our own server. Writing tools use a language model if the site owner has set one up. Always check AI suggestions before using them."
       >
         <div className="grid gap-5 md:grid-cols-2">
-          <article className="toon p-6">
+          <Reveal as="article" className="toon toon-hover p-6">
             <h3 className="text-lg font-semibold">Resume analysis</h3>
             <p className="mt-1 text-sm text-muted-foreground">No API key needed.</p>
             <p className="mt-4 text-sm">
               Resume strength, career-category match, job-description match and skills to explore.
             </p>
-          </article>
-          <article className="toon p-6">
+          </Reveal>
+          <Reveal as="article" delay={100} className="toon toon-hover p-6">
             <h3 className="text-lg font-semibold">Writing tools</h3>
             <p className="mt-1 text-sm text-muted-foreground">Needs a language-model provider.</p>
             <p className="mt-4 text-sm">
               Import from PDF or DOCX, summaries, clearer bullet points, tailoring to a job, cover
               letters and more.
             </p>
-          </article>
+          </Reveal>
         </div>
       </Section>
 
       <Section title="Download in any format" muted>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {FORMATS.map(([name, text]) => (
-            <article key={name} className="toon p-5">
+          {FORMATS.map(([name, text], index) => (
+            <Reveal as="article" delay={index * 80} key={name} className="toon toon-hover p-5">
               <h3 className="font-semibold">{name}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{text}</p>
-            </article>
+            </Reveal>
           ))}
         </div>
       </Section>
@@ -292,17 +303,18 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
       </Section>
 
       <section className="bg-primary text-primary-foreground">
-        <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
+        <Reveal className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Ready to build yours?</h2>
           <p className="mx-auto mt-2 max-w-md text-primary-foreground/80">
             Create an account, fill in the form and download a finished resume.
           </p>
-          <Button asChild size="lg" variant="secondary" className="mt-6 px-6">
+          <Button asChild size="lg" variant="secondary" className="group mt-6 px-6">
             <Link to="/signup">
-              Get started <ArrowRight className="h-4 w-4" />
+              Get started
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
-        </div>
+        </Reveal>
       </section>
 
       {isStaff && (

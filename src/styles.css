@@ -376,3 +376,62 @@
     transform: none;
   }
 }
+
+/* ---------- landing page motion (kept light) ---------- */
+@layer utilities {
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+  .fade-up {
+    animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .tilt {
+    transition: transform 0.15s ease-out;
+    will-change: transform;
+  }
+  .glow-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      420px circle at var(--mx, 70%) var(--my, 30%),
+      oklch(0.47 0.19 259 / 0.12),
+      transparent 70%
+    );
+  }
+  .glow-section > * {
+    position: relative;
+  }
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .fade-up {
+    animation: none;
+  }
+  .tilt {
+    transition: none;
+  }
+}
