@@ -331,10 +331,10 @@ function Index() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-background">
+    <div className="hero-glow min-h-screen overflow-x-clip">
       {showKeyboardShortcuts && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full shadow-lg animate-in zoom-in-95">
+          <div className="toon p-6 max-w-md w-full animate-in zoom-in-95">
             <h2 className="font-display text-lg font-bold mb-4">Keyboard Shortcuts</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
@@ -360,7 +360,7 @@ function Index() {
       <section className="border-b border-border bg-secondary/40 text-foreground">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14 grid lg:grid-cols-12 gap-6 items-center">
           <div className="lg:col-span-7">
-            <p className="mb-3 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-accent">
+            <p className="mb-3 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-primary">
               <Sparkles className="h-4 w-4" /> Resume builder for school, college, and career growth
             </p>
             <h2 className="max-w-3xl font-display text-4xl font-normal leading-[1.08] sm:text-5xl">
@@ -396,7 +396,7 @@ function Index() {
             </div>
           </div>
           <div className="lg:col-span-5">
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-paper">
+            <div className="toon p-5 shadow-paper">
               <div className="mb-4 flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-accent">
                   <NotebookPen className="h-5 w-5" />
@@ -479,14 +479,14 @@ function Index() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
           <h2 className="font-display text-2xl font-bold mb-6 sm:mb-8">Built For Every Stage</h2>
           <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
-            <div className="p-4 sm:p-6 bg-card border border-border rounded-lg hover:shadow-lg hover:border-primary/50 transition-all duration-200">
+            <div className="toon p-4 sm:p-6 hover:shadow-lg hover:border-primary/50 transition-all">
               <GraduationCap className="h-8 w-8 text-primary mb-3" />
               <h3 className="font-display font-bold mb-2 text-sm sm:text-base">School Students</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 Prepare resumes for scholarships, competitions, and first opportunities.
               </p>
             </div>
-            <div className="p-4 sm:p-6 bg-card border border-border rounded-lg hover:shadow-lg hover:border-primary/50 transition-all duration-200">
+            <div className="toon p-4 sm:p-6 hover:shadow-lg hover:border-primary/50 transition-all">
               <NotebookPen className="h-8 w-8 text-primary mb-3" />
               <h3 className="font-display font-bold mb-2 text-sm sm:text-base">
                 College & Freshers
@@ -495,7 +495,7 @@ function Index() {
                 Show projects, internships, coursework, and certifications clearly.
               </p>
             </div>
-            <div className="p-4 sm:p-6 bg-card border border-border rounded-lg hover:shadow-lg hover:border-primary/50 transition-all duration-200">
+            <div className="toon p-4 sm:p-6 hover:shadow-lg hover:border-primary/50 transition-all">
               <BriefcaseBusiness className="h-8 w-8 text-primary mb-3" />
               <h3 className="font-display font-bold mb-2 text-sm sm:text-base">
                 Working Professionals
@@ -519,7 +519,7 @@ function Index() {
               "Instant preview while editing",
               "Save, reopen, and export multiple versions",
             ].map((item) => (
-              <div key={item} className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <div key={item} className="toon p-5">
                 <CheckCircle2 className="h-5 w-5 text-accent mb-3" />
                 <p className="text-sm text-foreground">{item}</p>
               </div>
@@ -529,7 +529,7 @@ function Index() {
       </section>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
-        <section className="rounded-xl border border-border bg-card p-3 shadow-sm no-print">
+        <section className="toon p-3 no-print">
           <div className="grid gap-2 sm:grid-cols-4">
             {FLOW_STEPS.map((step, index) => {
               const active = step.id === flowStage;
@@ -547,7 +547,7 @@ function Index() {
                         : "border-border bg-background/40 text-muted-foreground hover:bg-secondary/50"
                   }`}
                 >
-                  <span className="block text-[0.65rem] font-mono uppercase tracking-widest">
+                  <span className="block text-[0.65rem] font-semibold uppercase tracking-widest">
                     Step {index + 1}
                   </span>
                   <span className="mt-1 block text-sm font-semibold">{step.title}</span>
@@ -614,10 +614,7 @@ function Index() {
           )}
         </div>
 
-        <section
-          id="saved-resumes-section"
-          className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow duration-200 no-print"
-        >
+        <section id="saved-resumes-section" className="toon p-4 sm:p-6 no-print">
           <h3 className="font-display text-lg sm:text-xl font-bold mb-3">Saved resumes</h3>
           <SavedResumes
             refreshKey={savedKey}
@@ -633,7 +630,7 @@ function Index() {
           )}
         </section>
 
-        <section className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm no-print">
+        <section className="toon p-4 sm:p-6 no-print">
           <h3 className="font-display text-lg sm:text-xl font-bold mb-4">Frequently Asked</h3>
           <div className="space-y-3">
             {faqItems.map((item) => (

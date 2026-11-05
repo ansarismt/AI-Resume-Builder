@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Eye, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Eye, X } from "lucide-react";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
@@ -28,6 +28,18 @@ export function TemplateSelectionPage({
 }: Props) {
   const [previewOpen, setPreviewOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const currentIndex = Math.max(
+    0,
+    TEMPLATE_OPTIONS.findIndex((template) => template.id === selectedTemplate),
+  );
+  const currentTemplate = TEMPLATE_OPTIONS[currentIndex];
+  const stepTemplate = (direction: number) => {
+    const next =
+      TEMPLATE_OPTIONS[
+        (currentIndex + direction + TEMPLATE_OPTIONS.length) % TEMPLATE_OPTIONS.length
+      ];
+    onSelectTemplate(next.id);
+  };
 
   useEffect(() => {
     if (!previewOpen) return;
@@ -69,10 +81,10 @@ export function TemplateSelectionPage({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
+      <section className="toon p-4 sm:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-[0.65rem] font-mono uppercase tracking-[0.2em] text-accent">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-primary">
               Step 3
             </p>
             <h2 className="mt-2 font-display text-3xl font-bold">Pick a resume template</h2>
@@ -139,7 +151,9 @@ export function TemplateSelectionPage({
             className="absolute inset-y-0 right-0 flex w-full flex-col border-l border-border bg-card shadow-2xl sm:w-[min(48rem,92vw)]"
           >
             <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-              <p className="text-xs font-mono uppercase tracking-widest text-accent">Preview</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                Preview
+              </p>
               <Button
                 ref={closeRef}
                 type="button"
@@ -150,6 +164,51 @@ export function TemplateSelectionPage({
               >
                 <X className="mr-1 h-4 w-4" />
                 Close
+              </Button>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-2.5">
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Previous template"
+                  onClick={() => stepTemplate(-1)}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <p className="min-w-[8.5rem] text-center text-sm font-semibold" aria-live="polite">
+                  {currentTemplate.name}
+                  <span className="block text-[0.65rem] font-normal text-muted-foreground">
+                    {currentIndex + 1} of {TEMPLATE_OPTIONS.length}
+                  </span>
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Next template"
+                  onClick={() => stepTemplate(1)}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex items-center gap-2" role="group" aria-label="Template colour">
+                {currentTemplate.colors.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    aria-label={`Use colour ${color}`}
+                    aria-pressed={selectedColor.toLowerCase() === color.toLowerCase()}
+                    onClick={() => onSelectColor(currentTemplate.id, color)}
+                    className="h-6 w-6 rounded-full border-2 border-white shadow ring-1 ring-border transition-transform hover:scale-110 aria-pressed:ring-2 aria-pressed:ring-primary"
+                    style={{ background: color }}
+                  />
+                ))}
+              </div>
+              <Button type="button" size="sm" className="ml-auto" onClick={onContinue}>
+                Use this template
+                <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
             <div className="flex-1 overflow-y-auto bg-secondary/30 p-3 sm:p-5">

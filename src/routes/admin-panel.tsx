@@ -49,10 +49,10 @@ function AdminPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-background px-4 py-10 sm:px-6">
+    <div className="hero-glow min-h-screen px-4 py-10 sm:px-6">
       <div className="mx-auto max-w-5xl">
         {!isStaff ? (
-          <div className="rounded-lg border border-border bg-card p-6">
+          <div className="toon p-6">
             <h1 className="text-2xl font-bold">Staff access required</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               This page is available only to staff accounts.
@@ -63,7 +63,9 @@ function AdminPanel() {
           </div>
         ) : (
           <>
-            <p className="text-xs font-mono uppercase tracking-[0.2em] text-accent">Step 5</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              Administration
+            </p>
             <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h1 className="font-display text-3xl font-bold">Admin Panel</h1>
@@ -81,7 +83,7 @@ function AdminPanel() {
             </div>
 
             <div className="mt-8 grid gap-4 md:grid-cols-3">
-              <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+              <div className="toon p-5">
                 <Shield className="h-6 w-6 text-accent" />
                 <h2 className="mt-3 font-semibold">Access</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -90,14 +92,14 @@ function AdminPanel() {
                     : "Login before using account-level features."}
                 </p>
               </div>
-              <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+              <div className="toon p-5">
                 <Users className="h-6 w-6 text-accent" />
                 <h2 className="mt-3 font-semibold">Users</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
                   View and manage registered users in Django admin.
                 </p>
               </div>
-              <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+              <div className="toon p-5">
                 <FileText className="h-6 w-6 text-accent" />
                 <h2 className="mt-3 font-semibold">Resumes</h2>
                 <p className="mt-2 text-sm text-muted-foreground">

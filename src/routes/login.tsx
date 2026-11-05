@@ -38,12 +38,11 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-secondary/30 flex items-center justify-center p-4">
-      <form
-        onSubmit={submit}
-        className="max-w-md w-full bg-card border border-border rounded-xl p-6 shadow-sm"
-      >
-        <p className="text-xs font-mono uppercase tracking-[0.2em] text-accent">Step 3</p>
+    <div className="hero-glow flex min-h-screen items-center justify-center p-4">
+      <form onSubmit={submit} className="toon max-w-md w-full p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+          Welcome back
+        </p>
         <h2 className="text-2xl font-bold mt-2 mb-1">Login</h2>
         <p className="mb-5 text-sm text-muted-foreground">
           Access your home dashboard and saved resumes.

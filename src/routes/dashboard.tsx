@@ -19,8 +19,10 @@ function DashboardRoute() {
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <div className="max-w-md rounded-xl border border-border bg-card p-6 text-center shadow-sm">
-          <p className="text-xs font-mono uppercase tracking-[0.2em] text-accent">Step 4</p>
+        <div className="toon max-w-md p-6 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            Your account
+          </p>
           <h1 className="mt-2 font-display text-2xl font-bold">Home Dashboard</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Login first to open your resume dashboard.

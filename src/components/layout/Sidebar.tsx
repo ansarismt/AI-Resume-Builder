@@ -21,9 +21,9 @@ export function Sidebar({
   onStepClick,
 }: Props) {
   return (
-    <aside className="lg:sticky lg:top-24 self-start rounded-xl border border-border bg-card p-4 shadow-sm">
+    <aside className="toon lg:sticky lg:top-24 self-start p-4">
       <div className="mb-5">
-        <p className="text-[0.65rem] font-mono uppercase tracking-[0.2em] text-accent">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-primary">
           Resume Progress
         </p>
         <div className="mt-3 flex items-end justify-between gap-3">
@@ -68,7 +68,7 @@ export function Sidebar({
                 {isComplete ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
               </span>
               <span className="min-w-0">
-                <span className="block text-xs font-mono uppercase tracking-widest">
+                <span className="block text-xs font-semibold uppercase tracking-widest">
                   Step {index + 1}
                 </span>
                 <span className="block truncate text-sm font-semibold">{step.title}</span>

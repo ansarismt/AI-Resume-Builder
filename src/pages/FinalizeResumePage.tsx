@@ -32,8 +32,10 @@ export function FinalizeResumePage({
 }: Props) {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-      <section className="self-start rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6 lg:sticky lg:top-24">
-        <p className="text-[0.65rem] font-mono uppercase tracking-[0.2em] text-accent">Step 4</p>
+      <section className="toon self-start p-4 sm:p-6 lg:sticky lg:top-24">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-primary">
+          Step 4
+        </p>
         <h2 className="mt-2 font-display text-2xl font-bold">Export and finalize</h2>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
           Save your resume and download the final version in the format you need.
@@ -69,10 +71,7 @@ export function FinalizeResumePage({
         </Button>
       </section>
 
-      <section
-        id="resume-print"
-        className="rounded-xl border border-border bg-card p-3 shadow-sm sm:p-4"
-      >
+      <section id="resume-print" className="toon p-3 sm:p-4">
         <ResumeDocument data={data} accentColor={selectedColor} />
       </section>
     </div>

@@ -14,19 +14,13 @@ import {
   School,
   Sparkles,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import {
-  TEMPLATE_CATALOG,
-  type TemplateLayout,
-  type TemplateMeta,
-} from "@/components/resume/templateCatalog";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils";
 import { EditDemo, ExportDemo, PickDemo, SuggestDemo } from "./demos";
 import { Counter, Magnetic, ScrollProgress, SpotlightCard, Tilt } from "./motion";
-import { Mascot, Squiggle } from "./toon";
 
 const SWATCHES = ["#1f3a5f", "#2f5d8a", "#4a5568", "#2d3436", "#111111"];
 
@@ -43,79 +37,10 @@ function SectionHead({
 }) {
   return (
     <Reveal className={cn("max-w-2xl", center && "mx-auto text-center")}>
-      <p className="sticker">{eyebrow}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{eyebrow}</p>
       <h2 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>
       {text && <p className="mt-3 leading-7 text-muted-foreground">{text}</p>}
     </Reveal>
-  );
-}
-
-/** Tiny drawing of a template's structure. */
-function MiniTemplate({ layout, color }: { layout: TemplateLayout; color: string }) {
-  const bar = "h-1 rounded-full bg-slate-200";
-  const lines = (
-    <div className="space-y-1">
-      <div className={bar} style={{ width: "92%" }} />
-      <div className={bar} style={{ width: "78%" }} />
-      <div className={bar} style={{ width: "60%" }} />
-    </div>
-  );
-  const head = <div className="h-2 w-2/5 rounded-sm" style={{ background: color }} />;
-  if (layout === "sidebar-left" || layout === "sidebar-right") {
-    const side = (
-      <div
-        className="w-1/3 space-y-1 p-1.5"
-        style={{ background: layout === "sidebar-left" ? color : "#eef2f8" }}
-      />
-    );
-    return (
-      <div className="flex h-full">
-        {layout === "sidebar-left" && side}
-        <div className="flex-1 space-y-2 p-2">
-          {head}
-          {lines}
-          {lines}
-        </div>
-        {layout === "sidebar-right" && side}
-      </div>
-    );
-  }
-  if (layout === "banner") {
-    return (
-      <div className="h-full">
-        <div className="h-1/4" style={{ background: color }} />
-        <div className="space-y-2 p-2">
-          {lines}
-          {lines}
-        </div>
-      </div>
-    );
-  }
-  if (layout === "split") {
-    return (
-      <div className="space-y-2 p-2">
-        <div className="h-2 w-1/2 rounded-sm" style={{ background: color }} />
-        <div className="h-px" style={{ background: color }} />
-        <div className="flex gap-2">
-          <div className="flex-1 space-y-2">
-            {lines}
-            {lines}
-          </div>
-          <div className="w-1/3 rounded bg-slate-100" />
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div
-      className={cn("space-y-2 p-2", layout === "classic" && "text-center")}
-      style={layout === "framed" ? { borderTop: `4px solid ${color}` } : undefined}
-    >
-      <div className={cn(layout === "classic" && "mx-auto w-2/5")}>{head}</div>
-      <div className="h-px" style={{ background: layout === "ats" ? "#111" : color }} />
-      {lines}
-      {lines}
-    </div>
   );
 }
 
@@ -265,85 +190,6 @@ function ResumeTypes() {
           </SpotlightCard>
         </Reveal>
       ))}
-    </div>
-  );
-}
-
-function TemplateGallery() {
-  const categories = useMemo(
-    () => ["All", ...Array.from(new Set(TEMPLATE_CATALOG.map((template) => template.category)))],
-    [],
-  );
-  const [category, setCategory] = useState("All");
-  const [fontFilter, setFontFilter] = useState<"all" | "sans" | "serif">("all");
-  const visible = TEMPLATE_CATALOG.filter(
-    (template: TemplateMeta) =>
-      (category === "All" || template.category === category) &&
-      (fontFilter === "all" || template.font === fontFilter),
-  );
-
-  return (
-    <div className="mt-8">
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter templates">
-        {categories.map((name) => (
-          <button
-            key={name}
-            type="button"
-            aria-pressed={category === name}
-            onClick={() => setCategory(name)}
-            className={cn("toon-chip px-3.5 py-1.5 text-sm")}
-          >
-            {name}
-          </button>
-        ))}
-        <span className="mx-1 hidden h-6 w-px bg-border sm:block" />
-        {(["all", "sans", "serif"] as const).map((font) => (
-          <button
-            key={font}
-            type="button"
-            aria-pressed={fontFilter === font}
-            onClick={() => setFontFilter(font)}
-            className={cn("toon-chip px-3 py-1.5 text-sm", font === "serif" && "font-serif")}
-          >
-            {font === "all" ? "Any font" : font === "sans" ? "Sans" : "Serif"}
-          </button>
-        ))}
-      </div>
-      <p className="mt-3 text-sm text-muted-foreground" aria-live="polite">
-        Showing {visible.length} of {TEMPLATE_CATALOG.length} templates
-      </p>
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {visible.map((template, index) => (
-          <article
-            key={`${template.id}-${category}-${fontFilter}`}
-            className="pop-in toon toon-hover flex flex-col p-2"
-            style={{ animationDelay: `${index * 40}ms` }}
-          >
-            <div className="aspect-[5/3] overflow-hidden rounded-md border border-border bg-white">
-              <MiniTemplate layout={template.layout} color={template.colors[0]} />
-            </div>
-            <div className="mt-2 flex items-center justify-between gap-2">
-              <h3 className="truncate text-sm font-bold">{template.name}</h3>
-              <span className="rounded bg-secondary px-1 py-0.5 text-[0.6rem] font-semibold uppercase text-muted-foreground">
-                {template.font}
-              </span>
-            </div>
-            <p className="text-[0.7rem] font-medium text-primary">{template.category}</p>
-            <p className="mt-0.5 line-clamp-2 flex-1 text-[0.68rem] leading-4 text-muted-foreground">
-              {template.description}
-            </p>
-            <div className="mt-2 flex gap-1">
-              {template.colors.map((color) => (
-                <span
-                  key={color}
-                  className="h-3 w-3 rounded-full ring-1 ring-border"
-                  style={{ background: color }}
-                />
-              ))}
-            </div>
-          </article>
-        ))}
-      </div>
     </div>
   );
 }
@@ -679,12 +525,14 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
     <div className="min-h-screen overflow-x-clip bg-background">
       <ScrollProgress />
 
-      <section className="toon-hero border-b-2 border-foreground">
+      <section className="hero-glow border-b border-border">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <p className="sticker stage-in mb-5">For school, college and professional resumes</p>
+            <p className="stage-in mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              For school, college and professional resumes
+            </p>
             <h1 className="max-w-3xl font-display text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl">
-              Build a resume that is <Squiggle>ready to send.</Squiggle>
+              Build a resume that is ready to send.
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
               Fill in a guided form, choose from 20 designed templates, and download a clean PDF or
@@ -692,13 +540,13 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Magnetic>
-                <Button asChild size="lg" className="toon-btn px-7">
+                <Button asChild size="lg" className=" px-7">
                   <Link to="/signup">
                     Create my resume <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
               </Magnetic>
-              <Button asChild size="lg" variant="outline" className="toon-btn px-7">
+              <Button asChild size="lg" variant="outline" className=" px-7">
                 <Link to="/login">Log in</Link>
               </Button>
             </div>
@@ -718,13 +566,11 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
           </div>
           <div className="relative lg:col-span-5">
             <HeroResume />
-            <Mascot className="absolute -bottom-14 -left-2 z-10 hidden sm:block lg:-left-44" />
-            <Mascot className="mx-auto mt-6 flex flex-col items-center sm:hidden" />
           </div>
         </div>
       </section>
 
-      <section className="border-b-2 border-foreground bg-card">
+      <section className="border-b border-border bg-card">
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-8 px-4 py-10 sm:px-6 md:grid-cols-4">
           <Counter value={20} label="Templates" />
           <Counter value={3} label="Resume types" />
@@ -733,7 +579,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </section>
 
-      <section className="border-b-2 border-foreground">
+      <section className="border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <SectionHead
             eyebrow="Resume types"
@@ -744,22 +590,11 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </section>
 
-      <section className="border-b-2 border-foreground toon-dots">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-          <SectionHead
-            eyebrow="Templates"
-            title="20 templates, one set of content"
-            text="Every template shows the same information, so you can switch layouts freely. Filter by style or font."
-          />
-          <TemplateGallery />
-        </div>
-      </section>
-
-      <section className="border-b-2 border-foreground">
+      <section className="border-b border-border">
         <DemoRows />
       </section>
 
-      <section className="border-b-2 border-foreground toon-dots">
+      <section className="border-b border-border bg-secondary/40">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <SectionHead
             eyebrow="AI tools"
@@ -770,7 +605,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </section>
 
-      <section className="border-b-2 border-foreground">
+      <section className="border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <SectionHead
             eyebrow="Downloads"
@@ -781,18 +616,18 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </section>
 
-      <section className="border-b-2 border-foreground toon-dots">
+      <section className="border-b border-border bg-secondary/40">
         <ThreeSteps />
       </section>
 
-      <section className="border-b-2 border-foreground">
+      <section className="border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <SectionHead eyebrow="Resume tips" title="Four habits of resumes that get read" />
           <Tips />
         </div>
       </section>
 
-      <section className="border-b-2 border-foreground toon-dots">
+      <section className="border-b border-border bg-secondary/40">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <SectionHead eyebrow="Privacy" title="Your information stays in your hands" />
           <div className="mt-8 grid gap-5 md:grid-cols-3">
@@ -809,7 +644,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </section>
 
-      <section className="border-b-2 border-foreground">
+      <section className="border-b border-border">
         <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
           <SectionHead eyebrow="FAQ" title="Questions, answered" center />
           <Faq />
@@ -826,7 +661,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
           </p>
           <div className="mt-8">
             <Magnetic>
-              <Button asChild size="lg" variant="secondary" className="toon-btn px-8">
+              <Button asChild size="lg" variant="secondary" className=" px-8">
                 <Link to="/signup">
                   Get started <ArrowRight className="h-4 w-4" />
                 </Link>

@@ -114,7 +114,7 @@ export function ImprovedTextarea({
       {suggestions.map((suggestion, index) => (
         <div
           key={`${suggestion.before}-${index}`}
-          className="space-y-2 rounded-md border border-border bg-card p-3 text-sm"
+          className="toon space-y-2 rounded-md p-3 text-sm"
         >
           <p>
             <span className="font-medium">Before:</span> {suggestion.before}

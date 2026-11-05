@@ -64,10 +64,7 @@ export default function Summary({
         </p>
       )}
       {suggestions.map((suggestion, index) => (
-        <div
-          key={`${index}-${suggestion}`}
-          className="space-y-2 rounded-md border border-border bg-card p-3"
-        >
+        <div key={`${index}-${suggestion}`} className="toon space-y-2 rounded-md p-3">
           <p className="text-sm">{suggestion}</p>
           <div className="flex gap-2">
             <Button type="button" size="sm" onClick={() => onAcceptSuggestion(suggestion)}>

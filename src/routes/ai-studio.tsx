@@ -205,8 +205,8 @@ function AIStudioPage() {
 
   if (!isAuthenticated) {
     return (
-      <main className="mx-auto max-w-xl px-4 py-16">
-        <section className="rounded-2xl border border-border bg-card p-8 text-center shadow-paper">
+      <main className="hero-glow mx-auto max-w-xl px-4 py-16">
+        <section className="toon p-8 text-center shadow-paper">
           <BrainCircuit className="mx-auto h-10 w-10 text-primary" />
           <h1 className="mt-4 font-display text-2xl font-bold">Sign in to use AI Studio</h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -221,7 +221,7 @@ function AIStudioPage() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 sm:py-12">
+    <main className="hero-glow mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 sm:py-12">
       <header className="rounded-3xl border border-border bg-secondary/40 p-6 text-foreground shadow-paper sm:p-10">
         <Link
           to="/"
@@ -232,7 +232,7 @@ function AIStudioPage() {
         </Link>
         <div className="mt-7 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-2xl">
-            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
               <Sparkles className="h-4 w-4" />
               Local, dataset-trained career tools
             </p>
@@ -242,7 +242,7 @@ function AIStudioPage() {
               the training data, and compare your resume with a job description.
             </p>
           </div>
-          <div className="rounded-2xl border border-border bg-card px-5 py-4">
+          <div className="toon px-5 py-4">
             <div className="flex items-center gap-3">
               <BrainCircuit className="h-6 w-6 text-accent" />
               <div>
@@ -258,7 +258,7 @@ function AIStudioPage() {
 
       <section
         aria-live="polite"
-        className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between"
+        className="toon flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between"
       >
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -298,7 +298,7 @@ function AIStudioPage() {
       </section>
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-        <section className="space-y-6 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7">
+        <section className="toon space-y-6 p-5 sm:p-7">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
               Your profile
@@ -702,7 +702,7 @@ function ResultCard({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
+    <section className="toon p-5 sm:p-6">
       <div className="mb-5 flex items-start gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
           {icon}

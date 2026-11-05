@@ -44,7 +44,7 @@ export function ExportButtons({
     <div className="space-y-4">
       {exporting !== "idle" && (
         <div className="rounded-lg border border-accent/20 bg-accent/5 p-3">
-          <div className="flex items-center justify-between text-xs font-mono uppercase tracking-widest text-accent">
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-widest text-primary">
             <span>Preparing {exporting.toUpperCase()}</span>
             <Loader2 className="h-4 w-4 animate-spin" />
           </div>
