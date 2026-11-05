@@ -224,4 +224,4 @@ privately as described in [SECURITY.md](SECURITY.md).
 
 ## License
 
-Released under the [MIT License](LICENSE). Copyright (c) 2026 VDart.
+Copyright (c) 2026 VDart.
