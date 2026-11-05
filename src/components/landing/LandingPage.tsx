@@ -128,26 +128,26 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
       <GlowSection className="overflow-hidden border-b border-border bg-secondary/40">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2">
+        <div className="mx-auto grid max-w-7xl items-center gap-14 px-4 py-20 sm:px-6 sm:py-28 lg:min-h-[680px] lg:grid-cols-2 lg:gap-20">
           <div>
-            <h1 className="fade-up text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
+            <h1 className="fade-up text-5xl font-bold leading-[1.08] tracking-tight sm:text-6xl 2xl:text-7xl">
               Build a resume that is ready to send.
             </h1>
             <p
-              className="fade-up mt-5 max-w-lg text-base leading-7 text-muted-foreground"
+              className="fade-up mt-6 max-w-xl text-lg leading-8 text-muted-foreground"
               style={{ animationDelay: "100ms" }}
             >
               Fill in a guided form, choose from 20 templates, and download a clean PDF or Word
               file. Optional tools help with wording and show how your resume matches a job.
             </p>
-            <div className="fade-up mt-8 flex flex-wrap gap-3" style={{ animationDelay: "200ms" }}>
-              <Button asChild size="lg" className="group px-6">
+            <div className="fade-up mt-10 flex flex-wrap gap-4" style={{ animationDelay: "200ms" }}>
+              <Button asChild size="lg" className="group h-12 px-8 text-base">
                 <Link to="/signup">
                   Create my resume
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="px-6">
+              <Button asChild size="lg" variant="outline" className="h-12 px-8 text-base">
                 <Link to="/login">Log in</Link>
               </Button>
             </div>

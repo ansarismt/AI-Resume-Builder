@@ -78,7 +78,10 @@ export function HeroDemo() {
   const score = useAnimatedNumber(phase === -1 ? 0 : improved ? AFTER : BEFORE);
 
   return (
-    <div className="fade-up mx-auto w-full max-w-xl" style={{ animationDelay: "200ms" }}>
+    <div
+      className="fade-up mx-auto w-full max-w-2xl lg:origin-center lg:scale-105"
+      style={{ animationDelay: "200ms" }}
+    >
       <Tilt>
         <div
           className="relative overflow-hidden rounded-2xl border border-border bg-secondary p-4 sm:p-6"
