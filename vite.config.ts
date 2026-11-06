@@ -11,6 +11,23 @@ export default defineConfig({
     tailwindcss(),
     tsconfigPaths(),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // Long-lived vendor code in its own chunks, so app updates do not invalidate it.
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return undefined;
+          if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return "react";
+          if (id.includes("@tanstack")) return "router";
+          if (id.includes("@radix-ui") || id.includes("lucide-react") || id.includes("sonner")) {
+            return "ui";
+          }
+          if (id.includes("axios")) return "http";
+          return undefined;
+        },
+      },
+    },
+  },
   optimizeDeps: {
     include: ["react", "react-dom", "react-dom/client"],
   },

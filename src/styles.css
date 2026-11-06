@@ -113,38 +113,44 @@
 }
 
 .dark {
-  --background: oklch(0.2 0.018 55);
-  --foreground: oklch(0.95 0.012 78);
-  --card: oklch(0.25 0.022 55);
-  --card-foreground: oklch(0.95 0.012 78);
-  --popover: oklch(0.25 0.022 55);
-  --popover-foreground: oklch(0.95 0.012 78);
-  --primary: oklch(0.88 0.025 75);
-  --primary-foreground: oklch(0.24 0.025 55);
-  --secondary: oklch(0.31 0.025 55);
-  --secondary-foreground: oklch(0.95 0.012 78);
-  --muted: oklch(0.31 0.025 55);
-  --muted-foreground: oklch(0.74 0.025 70);
-  --accent: oklch(0.72 0.17 35);
-  --accent-foreground: oklch(0.2 0.018 55);
-  --destructive: oklch(0.62 0.18 30);
+  --background: oklch(0.17 0.02 260);
+  --foreground: oklch(0.96 0.008 255);
+  --card: oklch(0.22 0.025 260);
+  --card-foreground: oklch(0.96 0.008 255);
+  --popover: oklch(0.22 0.025 260);
+  --popover-foreground: oklch(0.96 0.008 255);
+  --primary: oklch(0.68 0.17 259);
+  --primary-foreground: oklch(0.14 0.02 260);
+  --secondary: oklch(0.26 0.028 260);
+  --secondary-foreground: oklch(0.96 0.008 255);
+  --muted: oklch(0.26 0.028 260);
+  --muted-foreground: oklch(0.74 0.02 255);
+  --accent: oklch(0.55 0.19 259);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.65 0.19 28);
   --destructive-foreground: oklch(0.98 0.005 78);
-  --border: oklch(0.38 0.025 55);
-  --input: oklch(0.38 0.025 55);
-  --ring: oklch(0.72 0.17 35);
-  --chart-1: oklch(0.488 0.243 264.376);
+  --border: oklch(0.34 0.03 260);
+  --input: oklch(0.38 0.03 260);
+  --ring: oklch(0.68 0.17 259);
+  --chart-1: oklch(0.68 0.17 259);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.25 0.022 55);
-  --sidebar-foreground: oklch(0.95 0.012 78);
-  --sidebar-primary: oklch(0.72 0.17 35);
-  --sidebar-primary-foreground: oklch(0.2 0.018 55);
-  --sidebar-accent: oklch(0.31 0.025 55);
-  --sidebar-accent-foreground: oklch(0.95 0.012 78);
-  --sidebar-border: oklch(0.38 0.025 55);
-  --sidebar-ring: oklch(0.72 0.17 35);
+  --sidebar: oklch(0.22 0.025 260);
+  --sidebar-foreground: oklch(0.96 0.008 255);
+  --sidebar-primary: oklch(0.68 0.17 259);
+  --sidebar-primary-foreground: oklch(0.14 0.02 260);
+  --sidebar-accent: oklch(0.28 0.03 260);
+  --sidebar-accent-foreground: oklch(0.96 0.008 255);
+  --sidebar-border: oklch(0.34 0.03 260);
+  --sidebar-ring: oklch(0.68 0.17 259);
+  --shadow-paper: 0 20px 50px -30px oklch(0 0 0 / 0.7);
+  --shadow-lift: 0 18px 40px -22px oklch(0 0 0 / 0.7);
+}
+
+.dark .toon-icon {
+  background: oklch(0.3 0.05 259);
 }
 
 @layer base {
@@ -184,8 +190,9 @@
     outline-offset: 2px;
   }
 
-  /* Keep narrow screens (360px) from scrolling sideways. */
-  html,
+  /* Keep narrow screens (360px) from scrolling sideways. Set on body only: body's overflow
+     propagates to the viewport, while clipping the root element itself makes Floating UI
+     (Radix menus/selects) mis-place fixed popovers by the scroll offset. */
   body {
     overflow-x: clip;
   }
@@ -213,9 +220,6 @@
   .font-display {
     font-family: var(--font-display);
   }
-  .font-body {
-    font-family: var(--font-body);
-  }
   .font-mono {
     font-family: var(--font-body);
     font-weight: 500;
@@ -225,14 +229,8 @@
   .shadow-paper {
     box-shadow: var(--shadow-paper);
   }
-  .text-ink {
-    color: var(--ink);
-  }
   .bg-paper {
     background-color: var(--paper);
-  }
-  .border-rule {
-    border-color: var(--rule);
   }
   .shadow-lift {
     box-shadow: var(--shadow-lift);
@@ -434,4 +432,344 @@
   .tilt {
     transition: none;
   }
+}
+
+/* ---------- launch-control hero ---------- */
+@keyframes launch-sweep {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes launch-blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes launch-pop {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+.launch-sweep {
+  animation: launch-sweep 6s linear infinite;
+  will-change: transform;
+}
+.launch-pop {
+  animation: launch-pop 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.launch-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: -0.12em;
+  background: currentColor;
+  animation: launch-blink 0.9s step-end infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .launch-sweep,
+  .launch-caret {
+    animation: none;
+  }
+}
+
+.launch-move {
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.launch-card {
+  transform: rotate(-3deg);
+  transition:
+    transform 0.45s cubic-bezier(0.6, 0, 0.4, 1),
+    opacity 0.45s ease;
+}
+.launch-card[data-folded="true"] {
+  transform: rotate(24deg) scale(0.12);
+  opacity: 0;
+}
+.launch-chip {
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+.launch-chip[data-show="true"] {
+  opacity: 1;
+  transform: none;
+}
+.launch-plane {
+  opacity: 0;
+  filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.55));
+  transition: opacity 0.35s ease;
+  will-change: transform;
+}
+.launch-plane[data-show="true"] {
+  opacity: 1;
+}
+
+/* ---------- landing hero dart ---------- */
+.hero-dart {
+  will-change: transform, opacity;
+  transition: opacity 0.35s ease 0.05s;
+}
+.hero-dart[data-done="true"] {
+  opacity: 0;
+}
+.hero-cta[data-arrived="true"] {
+  animation: hero-cta-glow 1.4s ease-out 1;
+}
+.hero-cta[data-arrived="true"] svg {
+  animation: hero-cta-nudge 0.6s cubic-bezier(0.2, 1.6, 0.4, 1) 1;
+}
+@keyframes hero-cta-glow {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 18px color-mix(in oklch, var(--primary) 0%, transparent);
+  }
+}
+@keyframes hero-cta-nudge {
+  0% {
+    transform: translateX(-6px) scale(1.4);
+  }
+  100% {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-cta[data-arrived="true"],
+  .hero-cta[data-arrived="true"] svg {
+    animation: none;
+  }
+}
+
+/* ================= the dart: signature element ================= */
+:root {
+  --dart-a: #2b6bff;
+  --dart-b: #0036b3;
+  --dart-glow: rgba(0, 71, 204, 0.35);
+  --hero-blob-1: oklch(0.47 0.19 259 / 0.16);
+  --hero-blob-2: oklch(0.7 0.14 230 / 0.14);
+  --hero-dot: oklch(0.47 0.19 259 / 0.13);
+}
+.dark {
+  --dart-a: #cfe0ff;
+  --dart-b: #5b95ff;
+  --dart-glow: rgba(96, 165, 250, 0.6);
+  --hero-blob-1: oklch(0.6 0.19 259 / 0.22);
+  --hero-blob-2: oklch(0.7 0.14 200 / 0.12);
+  --hero-dot: oklch(0.85 0.05 255 / 0.08);
+}
+
+.hero-stage {
+  background: var(--background);
+}
+.hero-texture {
+  background:
+    radial-gradient(40rem 26rem at 78% 18%, var(--hero-blob-1), transparent 65%),
+    radial-gradient(34rem 22rem at 8% 92%, var(--hero-blob-2), transparent 65%),
+    radial-gradient(circle at 1px 1px, var(--hero-dot) 1px, transparent 1.5px) 0 0 / 22px 22px;
+  mask-image: linear-gradient(to bottom, black 70%, transparent);
+}
+
+/* "send." gets the brand gradient and a hand-drawn swoosh like the dart's trail */
+.hero-word {
+  position: relative;
+  white-space: nowrap;
+  background: linear-gradient(100deg, var(--dart-b), var(--dart-a) 120%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-word::after {
+  content: "";
+  position: absolute;
+  left: 0.04em;
+  right: 0.1em;
+  bottom: -0.08em;
+  height: 0.12em;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--dart-a), var(--dart-b));
+  transform-origin: left;
+  animation: hero-swoosh 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.7s both;
+}
+@keyframes hero-swoosh {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+.hero-dart,
+.dart-guide-dart,
+.dart-ghost {
+  will-change: transform;
+}
+.hero-dart {
+  filter: drop-shadow(0 14px 22px var(--dart-glow));
+  transition: filter 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.hero-dart[data-hover="true"],
+.hero-dart:focus-visible {
+  filter: drop-shadow(0 0 26px var(--dart-glow)) drop-shadow(0 14px 22px var(--dart-glow));
+}
+.hero-dart-lines {
+  position: absolute;
+  inset: 22% auto 22% -38%;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.hero-dart-lines i {
+  display: block;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--dart-a));
+  transform-origin: right;
+}
+.hero-dart-lines i:nth-child(2) {
+  margin-left: -30%;
+}
+.hero-dart[data-hover="true"] .hero-dart-lines {
+  opacity: 1;
+}
+.hero-dart[data-hover="true"] .hero-dart-lines i {
+  animation: dart-lines 0.5s ease-in-out infinite alternate;
+}
+.hero-dart[data-hover="true"] .hero-dart-lines i:nth-child(2) {
+  animation-delay: 0.12s;
+}
+@keyframes dart-lines {
+  from {
+    transform: scaleX(0.5);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.dart-ghost {
+  opacity: 0;
+}
+
+/* scroll guide */
+.dart-guide-dart {
+  opacity: 0;
+  /* a thin halo in the page colour keeps it visible over the blue bands too */
+  filter: drop-shadow(0 0 1.5px var(--background)) drop-shadow(0 6px 12px var(--dart-glow));
+  transition:
+    opacity 0.4s ease,
+    filter 0.3s ease;
+}
+.dart-guide-dart[data-show="true"] {
+  opacity: 1;
+}
+.dart-guide-dart:hover {
+  filter: drop-shadow(0 0 14px var(--dart-glow));
+}
+.dart-guide:has(.dart-guide-dart[data-show="false"]) .dart-ghost {
+  display: none;
+}
+
+[data-dart-stop] {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+}
+.text-center [data-dart-stop] {
+  margin-inline: auto;
+}
+[data-dart-stop]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.35em;
+  width: 3.5rem;
+  height: 3px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.55;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-dart-stop][data-dart-active="true"]::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-word::after {
+    animation: none;
+  }
+  .hero-dart-lines i {
+    animation: none !important;
+  }
+}
+
+/* smooth cross-fade while switching theme (class added for ~400ms only) */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease,
+    fill 0.35s ease,
+    stop-color 0.35s ease !important;
+}
+
+/* ================= auth hero: theme-aware ================= */
+:root {
+  --auth-bg:
+    radial-gradient(60rem 40rem at 20% 10%, #ffffff, transparent 60%),
+    linear-gradient(160deg, #eef4ff 0%, #dde8ff 100%);
+  --auth-bg-solid: #eef4ff;
+  --auth-ink: #0f1b3d;
+  --auth-muted: #4b5b7c;
+  --auth-accent: #0047cc;
+  --auth-grid: rgba(0, 71, 204, 0.07);
+  --auth-ring: rgba(0, 71, 204, 0.16);
+  --auth-sweep: rgba(0, 71, 204, 0.14);
+  --auth-chip: rgba(255, 255, 255, 0.75);
+  --auth-plane-glow: rgba(0, 71, 204, 0.35);
+}
+.dark {
+  --auth-bg:
+    radial-gradient(60rem 40rem at 20% 10%, #0c1838, transparent 60%),
+    linear-gradient(160deg, #060c22 0%, #03081a 100%);
+  --auth-bg-solid: #050b1f;
+  --auth-ink: #ffffff;
+  --auth-muted: rgba(255, 255, 255, 0.68);
+  --auth-accent: #7dd3fc;
+  --auth-grid: rgba(255, 255, 255, 0.05);
+  --auth-ring: rgba(125, 211, 252, 0.14);
+  --auth-sweep: rgba(56, 189, 248, 0.2);
+  --auth-chip: rgba(255, 255, 255, 0.1);
+  --auth-plane-glow: rgba(56, 189, 248, 0.55);
+}
+.auth-hero {
+  background: var(--auth-bg);
+  color: var(--auth-ink);
+  border-right: 1px solid var(--border);
+}
+.auth-hero .launch-plane {
+  filter: drop-shadow(0 0 14px var(--auth-plane-glow));
+}
+.auth-hero .launch-card {
+  box-shadow: 0 24px 50px -20px var(--auth-plane-glow);
 }

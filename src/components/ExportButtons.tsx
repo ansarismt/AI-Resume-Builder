@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, FileArchive, FileJson, FileText, Loader2, Save } from "lucide-react";
+import { Download, FileArchive, FileCode2, FileJson, FileText, Loader2, Save } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -10,10 +10,12 @@ interface Props {
   onExportDocx: () => Promise<void>;
   onExportJson: () => Promise<void> | void;
   onExportTxt: () => Promise<void> | void;
+  onExportMd: () => Promise<void> | void;
+  onExportHtml: () => Promise<void> | void;
   onExportAll: () => Promise<void>;
 }
 
-type ExportState = "idle" | "pdf" | "docx" | "json" | "txt" | "all";
+type ExportState = "idle" | "pdf" | "docx" | "json" | "txt" | "md" | "html" | "all";
 
 export function ExportButtons({
   saving,
@@ -22,6 +24,8 @@ export function ExportButtons({
   onExportDocx,
   onExportJson,
   onExportTxt,
+  onExportMd,
+  onExportHtml,
   onExportAll,
 }: Props) {
   const [exporting, setExporting] = useState<ExportState>("idle");
@@ -98,6 +102,24 @@ export function ExportButtons({
         >
           <FileText className="mr-2 h-4 w-4" />
           Download TXT
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => runExport("md", onExportMd)}
+          disabled={busy}
+        >
+          <FileText className="mr-2 h-4 w-4" />
+          Download Markdown
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => runExport("html", onExportHtml)}
+          disabled={busy}
+        >
+          <FileCode2 className="mr-2 h-4 w-4" />
+          Download HTML
         </Button>
         <Button
           type="button"

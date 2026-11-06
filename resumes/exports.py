@@ -19,6 +19,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 from .export_styles import (
     TEMPLATE_CATALOG,
     TEMPLATE_COLORS as TEMPLATE_COLORS,
+    base_layout,
     ensure_pdf_text_supported,
     resolve_export_style,
     set_docx_font,
@@ -55,6 +56,33 @@ def _sections(resume):
             ("Internships", resume.internships),
             ("Certifications", resume.certifications),
             ("Achievements", resume.achievements),
+        ]
+    elif resume.user_type == "career_changer":
+        sections = [
+            ("Professional Summary", resume.summary),
+            ("Transferable Skills", resume.skills),
+            ("Experience", resume.experience),
+            ("Projects", resume.projects),
+            ("Certifications", resume.certifications),
+            ("Education", resume.education),
+        ]
+    elif resume.user_type == "freelancer":
+        sections = [
+            ("Professional Summary", resume.summary),
+            ("Selected Projects", resume.projects),
+            ("Skills", resume.skills),
+            ("Experience", resume.experience),
+            ("Certifications", resume.certifications),
+            ("Education", resume.education),
+        ]
+    elif resume.user_type == "executive":
+        sections = [
+            ("Executive Summary", resume.summary),
+            ("Experience", resume.experience),
+            ("Key Achievements", resume.achievements),
+            ("Skills", resume.skills),
+            ("Education", resume.education),
+            ("Certifications", resume.certifications),
         ]
     else:
         sections = [
@@ -145,7 +173,9 @@ def split_skills(text):
         else:
             current += char
     items.append(current)
-    return [item.strip().lstrip("•-*·").strip() for item in items if item.strip().lstrip("•-*·").strip()]
+    return [
+        item.strip().lstrip("•-*·").strip() for item in items if item.strip().lstrip("•-*·").strip()
+    ]
 
 
 def _blend(accent, amount):
@@ -216,7 +246,9 @@ class _Style:
 
 def _heading(container, title, st, *, on_accent=None):
     color = on_accent or st.accent
-    p = _para(container, title.upper(), st.font, size=8.5, color=color, bold=True, before=10, after=4)
+    p = _para(
+        container, title.upper(), st.font, size=8.5, color=color, bold=True, before=10, after=4
+    )
     p.paragraph_format.keep_with_next = True
     ppr = p._p.get_or_add_pPr()
     if on_accent:
@@ -241,7 +273,9 @@ def _section(container, title, text, st, *, on_accent=None, column=False):
         elif column:
             body = None
             for skill in skills:
-                body = _para(container, f"• {skill}", st.font, size=st.base - 0.5, color=color, after=1)
+                body = _para(
+                    container, f"• {skill}", st.font, size=st.base - 0.5, color=color, after=1
+                )
         else:
             body = _para(container, "   •   ".join(skills), st.font, size=st.base, color=color)
     else:
@@ -257,18 +291,42 @@ def _section(container, title, text, st, *, on_accent=None, column=False):
 def _identity(container, resume, st, *, align=None, name_color=None, text_color=None, first=False):
     write = _first_para if first else _para
     name_size = 20 if st.compact else 24
-    color = name_color or (st.accent if st.layout in {"modern", "sidebar-right", "split", "timeline"} else INK)
-    write(container, _clean(resume.name) or "Your Name", st.font, size=name_size, color=color,
-          bold=True, align=align, after=2)
+    color = name_color or (
+        st.accent if st.layout in {"modern", "sidebar-right", "split", "timeline"} else INK
+    )
+    write(
+        container,
+        _clean(resume.name) or "Your Name",
+        st.font,
+        size=name_size,
+        color=color,
+        bold=True,
+        align=align,
+        after=2,
+    )
     if _clean(resume.headline):
-        _para(container, _clean(resume.headline), st.font, size=11, color=text_color or MUTED,
-              align=align, after=3)
+        _para(
+            container,
+            _clean(resume.headline),
+            st.font,
+            size=11,
+            color=text_color or MUTED,
+            align=align,
+            after=3,
+        )
 
 
 def _contact_line(container, resume, st, *, align=None, color=None, after=6):
     if _contact(resume):
-        return _para(container, "   ·   ".join(_contact_items(resume)), st.font, size=8.5,
-                     color=color or MUTED, align=align, after=after)
+        return _para(
+            container,
+            "   ·   ".join(_contact_items(resume)),
+            st.font,
+            size=8.5,
+            color=color or MUTED,
+            align=align,
+            after=after,
+        )
     return None
 
 
@@ -307,9 +365,11 @@ def export_docx(resume, accent_color=None):
     page.left_margin = page.right_margin = Inches(0.6)
     content_width = 8.27 - 1.2
 
-    template = next((t for t in TEMPLATE_CATALOG if t["id"] == resume.template), TEMPLATE_CATALOG[0])
+    template = next(
+        (t for t in TEMPLATE_CATALOG if t["id"] == resume.template), TEMPLATE_CATALOG[0]
+    )
     accent, font = resolve_export_style(resume.template, accent_color or resume.accent_color)
-    st = _Style(template["layout"], accent, font)
+    st = _Style(base_layout(template["layout"]), accent, font)
     sections = _sections(resume)
     aside = [s for s in sections if s[0] in ASIDE_TITLES]
     main = [s for s in sections if s[0] not in ASIDE_TITLES]
@@ -350,8 +410,14 @@ def export_docx(resume, accent_color=None):
             left, right = _table(document, [content_width * 0.6, content_width * 0.4])
             _identity(left, resume, st, name_color=st.accent, first=True)
             items = _contact_items(resume)
-            _first_para(right, "\n".join(items) or " ", st.font, size=8.5, color=MUTED,
-                        align=WD_ALIGN_PARAGRAPH.RIGHT)
+            _first_para(
+                right,
+                "\n".join(items) or " ",
+                st.font,
+                size=8.5,
+                color=MUTED,
+                align=WD_ALIGN_PARAGRAPH.RIGHT,
+            )
             right.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.BOTTOM
             _rule_after(_para(document, "", st.font, size=2, after=6), RULE, 4)
         else:
@@ -365,9 +431,17 @@ def export_docx(resume, accent_color=None):
                 _rule_after(line or document.paragraphs[-1], *rule)
 
         if st.layout == "split":
-            body, side = _table(document, [round(content_width * 0.655, 2), round(content_width * 0.345, 2)])
+            body, side = _table(
+                document, [round(content_width * 0.655, 2), round(content_width * 0.345, 2)]
+            )
             _shade(side._tc.get_or_add_tcPr(), st.soft)
-            _border(side._tc.get_or_add_tcPr(), "w:tcBorders", ["top", "left", "bottom", "right"], RULE, 4)
+            _border(
+                side._tc.get_or_add_tcPr(),
+                "w:tcBorders",
+                ["top", "left", "bottom", "right"],
+                RULE,
+                4,
+            )
             body.vertical_alignment = side.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.TOP
             first = True
             for title, text in main:

@@ -79,7 +79,9 @@ function TemplateGallery() {
             </div>
             <div className="template-label">
               <strong>{template.name}</strong>
-              <span>{template.font} · {template.category}</span>
+              <span>
+                {template.font} · {template.category}
+              </span>
             </div>
           </article>
         ))}
@@ -89,4 +91,6 @@ function TemplateGallery() {
 }
 
 const root = createRoot(document.getElementById("root")!);
-root.render(new URLSearchParams(location.search).has("hero") ? <EditorHero /> : <TemplateGallery />);
+root.render(
+  new URLSearchParams(location.search).has("hero") ? <EditorHero /> : <TemplateGallery />,
+);

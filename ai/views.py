@@ -131,7 +131,7 @@ class ParseResumeView(AIAPIView):
                 "email, phone, highest_education, skills, experience, education, internships, "
                 "achievements, projects, certifications, summary, title, job_title_target, "
                 "location; use empty strings when absent. Also include user_type as school, "
-                "college, or professional when clearly supported, is_studying as a boolean, "
+                "college, professional, career_changer, freelancer or executive when clearly supported, is_studying as a boolean, "
                 "years_of_experience as a nonnegative integer, and links as an object."
             ),
             ResumeParseOutputSerializer,
@@ -208,6 +208,9 @@ def _normalize_resume_parse_output(output):
         "school",
         "college",
         "professional",
+        "career_changer",
+        "freelancer",
+        "executive",
     }:
         normalized.pop("user_type", None)
     studying = normalized.get("is_studying")

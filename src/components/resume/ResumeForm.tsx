@@ -92,6 +92,42 @@ function getSteps(userType: UserType): WizardStep[] {
     }));
   }
 
+  if (userType === "career_changer") {
+    return [
+      "personal",
+      "summary",
+      "skills",
+      "experience",
+      "projects",
+      "certifications",
+      "education",
+    ].map((id) => ({ id, title: STEP_LABELS[id as StepId] }));
+  }
+
+  if (userType === "freelancer") {
+    return [
+      "personal",
+      "summary",
+      "projects",
+      "skills",
+      "experience",
+      "certifications",
+      "education",
+    ].map((id) => ({ id, title: STEP_LABELS[id as StepId] }));
+  }
+
+  if (userType === "executive") {
+    return [
+      "personal",
+      "summary",
+      "experience",
+      "achievements",
+      "skills",
+      "certifications",
+      "education",
+    ].map((id) => ({ id, title: STEP_LABELS[id as StepId] }));
+  }
+
   if (userType === "professional") {
     return ["personal", "summary", "experience", "skills", "certifications", "education"].map(
       (id) => ({

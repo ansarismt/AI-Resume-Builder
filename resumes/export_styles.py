@@ -16,6 +16,21 @@ ALLOWED_COLORS = {
 DEFAULT_ACCENT = TEMPLATE_COLORS["template1"]
 
 
+# New layouts use the closest existing layout for the Word export, which cannot
+# reproduce every on-screen effect anyway.
+LAYOUT_BASE = {
+    "minimal": "classic",
+    "bold": "modern",
+    "elegant": "classic",
+    "tech": "compact",
+    "ribbon": "banner",
+}
+
+
+def base_layout(layout):
+    return LAYOUT_BASE.get(layout, layout)
+
+
 class UnsupportedPdfLanguageError(ValueError):
     pass
 

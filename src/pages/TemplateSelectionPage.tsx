@@ -90,7 +90,7 @@ export function TemplateSelectionPage({
             </p>
             <h2 className="mt-2 font-display text-3xl font-bold">Pick a resume template</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Choose from 20 professional layouts and a restrained colour palette. Every template
+              Choose from 30 professional layouts and a restrained colour palette. Every template
               shows the same content, so you can switch freely.
             </p>
           </div>

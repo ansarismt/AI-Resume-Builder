@@ -11,7 +11,12 @@ export type TemplateLayout =
   | "compact"
   | "timeline"
   | "ats"
-  | "framed";
+  | "framed"
+  | "minimal"
+  | "bold"
+  | "elegant"
+  | "tech"
+  | "ribbon";
 
 type TemplateFont = "sans" | "serif";
 
@@ -44,6 +49,11 @@ const layouts: readonly TemplateLayout[] = [
   "timeline",
   "ats",
   "framed",
+  "minimal",
+  "bold",
+  "elegant",
+  "tech",
+  "ribbon",
 ];
 
 export const TEMPLATE_CATALOG: TemplateMeta[] = templateData.map((template) => {

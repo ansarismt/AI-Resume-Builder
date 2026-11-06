@@ -22,7 +22,7 @@ describe("TemplateSelectionPage", () => {
     );
 
     expect(screen.getByRole("radiogroup", { name: "Resume templates" })).toBeInTheDocument();
-    expect(radios()).toHaveLength(20);
+    expect(radios()).toHaveLength(30);
     radios()[0].focus();
     fireEvent.keyDown(radios()[0], { key: "ArrowRight" });
 

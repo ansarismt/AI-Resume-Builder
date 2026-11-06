@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,8 +44,11 @@ function SignupPage() {
   };
 
   return (
-    <div className="hero-glow flex min-h-screen items-center justify-center p-4">
-      <form onSubmit={submit} className="toon max-w-md w-full p-6">
+    <AuthShell
+      title="Build a resume that gets you noticed."
+      text="Create a free account and go from blank page to a polished, job-ready resume in minutes."
+    >
+      <form onSubmit={submit} className="toon w-full p-6 sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Get started</p>
         <h2 className="text-2xl font-bold mt-2 mb-1">Signup</h2>
         <p className="mb-5 text-sm text-muted-foreground">
@@ -87,6 +91,6 @@ function SignupPage() {
           </div>
         </div>
       </form>
-    </div>
+    </AuthShell>
   );
 }

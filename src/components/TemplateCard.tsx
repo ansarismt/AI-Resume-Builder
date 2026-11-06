@@ -80,6 +80,108 @@ function TemplateThumbnail({ layout, color }: { layout: TemplateLayout; color: s
     );
   }
 
+  if (layout === "minimal") {
+    return (
+      <div className="h-full p-4">
+        <div className="border-b border-slate-200 pb-2">
+          <div className="h-2.5 w-20 rounded-sm bg-slate-500" />
+          <div className="mt-1.5 h-1.5 w-12 rounded-sm" style={{ backgroundColor: color }} />
+        </div>
+        <div className="mt-4 space-y-3">
+          <Block color="#94a3b8" />
+          <Block color="#94a3b8" />
+          <Block color="#94a3b8" />
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === "bold") {
+    return (
+      <div className="h-full p-4">
+        <div className="border-b-4 pb-2" style={{ borderColor: color }}>
+          <div className="h-4 w-28 rounded-sm" style={{ backgroundColor: color }} />
+        </div>
+        <div className="mt-3 space-y-2">
+          {[0, 1, 2].map((item) => (
+            <div key={item}>
+              <div className="mb-1 h-2 w-12 rounded-sm" style={{ backgroundColor: color }} />
+              <Lines widths={["100%", "86%"]} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === "elegant") {
+    return (
+      <div className="h-full p-4">
+        <div className="border-y-4 border-double py-2 text-center" style={{ borderColor: color }}>
+          <div className="mx-auto h-2.5 w-24 rounded-sm bg-slate-700" />
+        </div>
+        <div className="mt-3 space-y-2">
+          {[0, 1, 2].map((item) => (
+            <div key={item}>
+              <div className="mx-auto mb-1 h-1.5 w-12 rounded-sm bg-slate-400" />
+              <Lines widths={["100%", "90%"]} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === "tech") {
+    return (
+      <div className="h-full p-4">
+        <div className="border-b-2 pb-2" style={{ borderColor: color }}>
+          <div className="h-3 w-24 rounded-sm bg-slate-700" />
+        </div>
+        <div className="mt-3 space-y-2">
+          <div className="h-1.5 w-16 rounded-sm" style={{ backgroundColor: color }} />
+          <Lines widths={["100%", "80%"]} />
+          <div className="flex gap-1">
+            {[0, 1, 2].map((item) => (
+              <div
+                key={item}
+                className="h-3 w-8 rounded-sm border"
+                style={{ borderColor: color }}
+              />
+            ))}
+          </div>
+          <div className="h-1.5 w-16 rounded-sm" style={{ backgroundColor: color }} />
+          <Lines widths={["100%", "70%"]} />
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === "ribbon") {
+    return (
+      <div className="h-full">
+        <div className="border-t-8 bg-slate-100 p-4" style={{ borderColor: color }}>
+          <div className="h-3 w-24 rounded-sm bg-slate-700" />
+          <div className="mt-1.5 h-1.5 w-32 rounded-sm bg-slate-400" />
+        </div>
+        <div className="space-y-2 p-4">
+          {[0, 1, 2].map((item) => (
+            <div key={item}>
+              <div
+                className="mb-1 h-2.5 w-16"
+                style={{
+                  backgroundColor: color,
+                  clipPath: "polygon(0 0, 85% 0, 100% 50%, 85% 100%, 0 100%)",
+                }}
+              />
+              <Lines widths={["100%", "84%"]} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (layout === "banner") {
     return (
       <div className="h-full">

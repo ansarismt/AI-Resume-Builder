@@ -9,6 +9,9 @@ class Resume(models.Model):
         ("school", "School Student"),
         ("college", "College Student"),
         ("professional", "Working Professional"),
+        ("career_changer", "Career Changer"),
+        ("freelancer", "Freelancer / Consultant"),
+        ("executive", "Senior Leader / Executive"),
     ]
 
     TEMPLATE_CHOICES = [(template["id"], template["name"]) for template in TEMPLATE_CATALOG]

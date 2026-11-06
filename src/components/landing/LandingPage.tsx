@@ -7,34 +7,51 @@ import {
   FileUp,
   Gauge,
   History,
+  Keyboard,
   LayoutTemplate,
+  Smartphone,
   PenLine,
+  Save,
   Sparkles,
+  Stethoscope,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import categoryData from "../../../shared/categories.json";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CountUp, GlowSection, Reveal } from "./effects";
+import { FeatureShowcases } from "./FeatureShowcases";
+import { USER_TYPE_OPTIONS } from "@/components/resume/types";
+import { computeResumeHealth } from "@/components/resume/resumeInsights";
+import { emptyResume } from "@/components/resume/types";
+import { MODEL_STATS } from "@/lib/modelStats";
+import { DartGuide, HeroDart } from "./Dart";
 import { HeroDemo } from "./HeroDemo";
 
 function Section({
+  id,
   title,
   text,
   muted,
   children,
 }: {
+  id?: string;
   title: string;
   text?: string;
   muted?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <section className={cn("border-b border-border", muted && "bg-secondary/40")}>
+    <section
+      id={id}
+      className={cn("scroll-mt-20 border-b border-border", muted && "bg-secondary/40")}
+    >
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <Reveal>
-          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h2>
+          <h2 data-dart-stop className="text-2xl font-bold tracking-tight sm:text-3xl">
+            {title}
+          </h2>
           {text && <p className="mt-2 max-w-2xl text-muted-foreground">{text}</p>}
         </Reveal>
         <div className="mt-8">{children}</div>
@@ -55,13 +72,6 @@ function Bullets({ items }: { items: string[] }) {
     </ul>
   );
 }
-
-const STATS = [
-  [20, "", "Templates", "10 layouts, each in sans and serif"],
-  [3, "", "Resume types", "School, college and professional"],
-  [4, "", "Download formats", "PDF, Word, JSON and plain text"],
-  [24, "", "Job categories", "Used by the resume analysis"],
-] as const;
 
 const FEATURES = [
   {
@@ -86,13 +96,33 @@ const FEATURES = [
   },
   {
     icon: LayoutTemplate,
-    title: "20 templates, 5 colours",
+    title: "30 templates, 5 colours",
     text: "Sidebars, banners, timelines and plain ATS layouts. Switch any time without losing content.",
   },
   {
     icon: History,
     title: "Saved versions",
     text: "Keep a version for each role, reopen it later, and download it in any format.",
+  },
+  {
+    icon: Stethoscope,
+    title: "Live resume health score",
+    text: "A checklist scores your resume as you type and tells you exactly what to add next.",
+  },
+  {
+    icon: Save,
+    title: "Draft autosave",
+    text: "Your work is kept in this browser while you type, so a closed tab never costs you progress.",
+  },
+  {
+    icon: Keyboard,
+    title: "Shortcuts and dark mode",
+    text: "Save with Ctrl+S, print with Ctrl+P, and switch between light, dark or system themes.",
+  },
+  {
+    icon: Smartphone,
+    title: "Works on any screen",
+    text: "A responsive layout that stays readable on phones, tablets and desktops.",
   },
 ];
 
@@ -127,6 +157,42 @@ const RESUME_TYPES = [
       "Projects",
     ],
   },
+  {
+    title: "Career changers",
+    best: "Moving into a new field",
+    sections: [
+      "Professional summary",
+      "Transferable skills",
+      "Experience",
+      "Projects",
+      "Certifications",
+      "Education",
+    ],
+  },
+  {
+    title: "Freelancers and consultants",
+    best: "Independent work and client projects",
+    sections: [
+      "Professional summary",
+      "Selected projects",
+      "Skills",
+      "Experience",
+      "Certifications",
+      "Education",
+    ],
+  },
+  {
+    title: "Senior leaders",
+    best: "Executive and director-level roles",
+    sections: [
+      "Executive summary",
+      "Experience",
+      "Key achievements",
+      "Skills",
+      "Education",
+      "Certifications",
+    ],
+  },
 ];
 
 const STEPS = [
@@ -137,12 +203,12 @@ const STEPS = [
   ],
   [
     "Pick a template",
-    "Choose one of 20 layouts and a colour. Switch any time.",
+    "Choose one of 30 layouts and a colour. Switch any time.",
     ["Live preview with a template switcher", "Same content in every layout"],
   ],
   [
     "Download",
-    "Export as PDF, Word, JSON or plain text.",
+    "Export as PDF, Word, JSON, plain text, Markdown or HTML.",
     ["PDF keeps text selectable", "Word follows the template layout"],
   ],
 ] as const;
@@ -182,6 +248,28 @@ const FORMATS = [
     "For online forms",
     ["No formatting to break", "Paste into any portal", "Smallest file"],
   ],
+  [
+    "Markdown",
+    "For notes and GitHub",
+    ["Headings and bullet lists", "Works in any text editor", "Easy to version"],
+  ],
+  [
+    "HTML",
+    "For your own website",
+    ["A standalone styled page", "Uses your template colour", "Opens in any browser"],
+  ],
+] as const;
+const FORMAT_COUNT = FORMATS.length;
+
+const CHECK_COUNT = computeResumeHealth(emptyResume).checks.length;
+
+const STATS = [
+  [30, "", "Templates", "15 layouts, each in sans and serif"],
+  [USER_TYPE_OPTIONS.length, "", "Resume types", "From school students to senior leaders"],
+  [FORMAT_COUNT, "", "Download formats", "PDF, Word, JSON, TXT, Markdown and HTML"],
+  [MODEL_STATS.categories, "", "Job categories", "Used by the resume analysis"],
+  [MODEL_STATS.top1Accuracy, "%", "Role-match accuracy", "Top match on held-out resumes"],
+  [CHECK_COUNT, "", "Health checks", "Live feedback while you type"],
 ] as const;
 
 const TIPS = [
@@ -233,7 +321,7 @@ const FAQS = [
   ],
   [
     "Which resume type should I choose?",
-    "School for students with little experience, college for freshers with projects and internships, professional for people with work experience.",
+    "School for students with little experience, college for freshers with projects and internships, professional for people with work experience, career changer to lead with transferable skills, freelancer to lead with client projects, and senior leader for executive roles.",
   ],
   [
     "Can I use more than one resume?",
@@ -281,37 +369,75 @@ function Faq() {
 }
 
 export function LandingPage({ isStaff }: { isStaff: boolean }) {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLSpanElement>(null);
+  const homeRef = useRef<HTMLSpanElement>(null);
+  const [arrived, setArrived] = useState(false);
+  const handleArrive = useCallback(() => setArrived(true), []);
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
-      <GlowSection className="overflow-hidden border-b border-border bg-secondary/40">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-2 lg:gap-16">
-          <div>
-            <h1 className="fade-up text-5xl font-bold leading-[1.08] tracking-tight sm:text-6xl">
-              Build a resume that is ready to send.
-            </h1>
-            <p
-              className="fade-up mt-6 max-w-xl text-lg leading-8 text-muted-foreground"
-              style={{ animationDelay: "100ms" }}
-            >
-              Fill in a guided form, choose from 20 templates, and download a clean PDF or Word
-              file. Optional tools help with wording and show how your resume matches a job.
-            </p>
-            <div className="fade-up mt-8 flex flex-wrap gap-4" style={{ animationDelay: "200ms" }}>
-              <Button asChild size="lg" className="group h-12 px-8 text-base">
-                <Link to="/signup">
-                  Create my resume
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="h-12 px-8 text-base">
-                <Link to="/login">Log in</Link>
-              </Button>
+      <GlowSection className="hero-stage overflow-hidden border-b border-border">
+        <div ref={heroRef} className="relative">
+          <div aria-hidden="true" className="hero-texture pointer-events-none absolute inset-0" />
+          <HeroDart containerRef={heroRef} homeRef={homeRef} onLaunch={handleArrive} />
+          <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-20 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
+            <div className="relative z-20">
+              <p className="fade-up inline-flex items-center gap-2 rounded-full border border-primary/25 bg-card/70 px-3 py-1 text-xs font-semibold text-primary backdrop-blur">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                30 templates · 6 resume types · 6 formats
+              </p>
+              <h1
+                className="fade-up mt-6 text-5xl font-extrabold leading-[1.02] tracking-[-0.035em] sm:text-6xl lg:text-7xl"
+                style={{ animationDelay: "60ms" }}
+              >
+                Build a resume that is ready to <span className="hero-word">send.</span>
+              </h1>
+              <p
+                className="fade-up mt-6 max-w-xl text-lg leading-8 text-muted-foreground"
+                style={{ animationDelay: "140ms" }}
+              >
+                Fill in a guided form, choose from 30 templates, and download a clean PDF or Word
+                file. Optional tools help with wording and show how your resume matches a job.
+              </p>
+              <div
+                className="fade-up mt-9 flex flex-wrap items-center gap-4"
+                style={{ animationDelay: "220ms" }}
+              >
+                <span
+                  ref={ctaRef}
+                  className="hero-cta inline-flex rounded-md"
+                  data-arrived={arrived}
+                >
+                  <Button asChild size="lg" className="group h-12 px-8 text-base">
+                    <Link to="/signup">
+                      Create my resume
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </Button>
+                </span>
+                <Button asChild size="lg" variant="outline" className="h-12 px-8 text-base">
+                  <Link to="/login">Log in</Link>
+                </Button>
+              </div>
+              <p
+                className="fade-up mt-6 hidden text-xs text-muted-foreground sm:block"
+                style={{ animationDelay: "300ms" }}
+              >
+                Psst, the dart is alive. Hover it, then give it a click.
+              </p>
+            </div>
+            <div className="relative">
+              <span
+                ref={homeRef}
+                aria-hidden="true"
+                className="absolute -top-10 left-[6%] h-1 w-1 sm:-top-12"
+              />
+              <HeroDemo />
             </div>
           </div>
-          <HeroDemo />
         </div>
         <div className="border-t border-border bg-card/60">
-          <dl className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-8 sm:px-6 md:grid-cols-4">
+          <dl className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-8 sm:px-6 md:grid-cols-3 lg:grid-cols-6">
             {STATS.map(([value, suffix, label, note]) => (
               <div key={label}>
                 <dt className="text-sm font-semibold text-muted-foreground">{label}</dt>
@@ -326,6 +452,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
       </GlowSection>
 
       <Section
+        id="features"
         title="Everything you need to finish a resume"
         text="From the first draft to the file you send, in one place."
       >
@@ -347,12 +474,14 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </Section>
 
+      <FeatureShowcases />
+
       <Section
         title="Sections that fit where you are"
         text="Pick your resume type and the form asks only for what belongs on it."
         muted
       >
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {RESUME_TYPES.map((type, index) => (
             <Reveal
               as="article"
@@ -396,6 +525,10 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
             <h3 className="text-lg font-semibold">Resume analysis</h3>
             <p className="mt-1 text-sm font-medium text-primary">No API key needed</p>
             <Bullets items={LOCAL_TOOLS} />
+            <p className="mt-4 rounded-lg bg-primary/10 px-3 py-2 text-xs font-medium text-primary">
+              Role match is right {MODEL_STATS.top1Accuracy}% of the time on held-out resumes, and{" "}
+              {MODEL_STATS.top3Accuracy}% within its top three suggestions.
+            </p>
             <p className="mt-4 rounded-lg bg-secondary px-3 py-2 text-xs text-muted-foreground">
               Scores come from a statistical model trained on a resume dataset. Use them as
               guidance, not as a hiring decision.
@@ -432,7 +565,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
       </Section>
 
       <Section title="Download in any format" muted>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FORMATS.map(([name, best, points], index) => (
             <Reveal as="article" delay={index * 80} key={name} className="toon toon-hover p-5">
               <Download className="h-5 w-5 text-primary" />
@@ -475,7 +608,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </Section>
 
-      <Section title="Questions">
+      <Section id="faq" title="Questions">
         <div className="max-w-3xl">
           <Faq />
         </div>
@@ -483,7 +616,9 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
 
       <section className="bg-primary text-primary-foreground">
         <Reveal className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
-          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Ready to build yours?</h2>
+          <h2 data-dart-stop className="text-2xl font-bold tracking-tight sm:text-3xl">
+            Ready to build yours?
+          </h2>
           <p className="mx-auto mt-2 max-w-md text-primary-foreground/80">
             Create an account, fill in the form and download a finished resume.
           </p>
@@ -495,6 +630,8 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
           </Button>
         </Reveal>
       </section>
+
+      <DartGuide heroRef={heroRef} />
 
       {isStaff && (
         <section className="border-t border-border">

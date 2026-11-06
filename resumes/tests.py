@@ -13,13 +13,13 @@ from pypdf import PdfReader
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from .export_styles import ALLOWED_COLORS, TEMPLATE_CATALOG
+from .export_styles import ALLOWED_COLORS, TEMPLATE_CATALOG, base_layout
 from .exports import TEMPLATE_COLORS, _accent, safe_filename
 from .models import Resume
 
 
-
 TABLE_LAYOUTS = {"sidebar-left", "sidebar-right", "split", "banner", "framed"}
+USER_TYPE_KEYS = tuple(value for value, _label in Resume.USER_TYPE_CHOICES)
 
 
 def _docx_paragraphs(document):
@@ -34,7 +34,6 @@ def _docx_paragraphs(document):
 
 def _docx_text(document):
     return "\n".join(p.text for p in _docx_paragraphs(document))
-
 
 
 class CanonicalResumeRouteTests(SimpleTestCase):
@@ -396,11 +395,11 @@ class ResumeTemplateTests(APITestCase):
         self.user = User.objects.create_user(username="template-user", password="test-pass-123")
         self.client.force_authenticate(self.user)
 
-    def test_model_offers_exactly_twenty_templates(self):
+    def test_model_offers_exactly_thirty_templates(self):
         choices = [value for value, _label in Resume.TEMPLATE_CHOICES]
 
-        self.assertEqual(len(self.TEMPLATE_IDS), 20)
-        self.assertEqual(len(set(self.TEMPLATE_IDS)), 20)
+        self.assertEqual(len(self.TEMPLATE_IDS), 30)
+        self.assertEqual(len(set(self.TEMPLATE_IDS)), 30)
         self.assertEqual(choices, self.TEMPLATE_IDS)
 
     def test_shared_catalog_uses_only_allowed_palette_colors(self):
@@ -416,7 +415,7 @@ class ResumeTemplateTests(APITestCase):
     def test_every_template_has_an_export_accent_colour(self):
         self.assertEqual(sorted(TEMPLATE_COLORS), sorted(self.TEMPLATE_IDS))
 
-    def test_all_twenty_templates_can_be_saved(self):
+    def test_all_thirty_templates_can_be_saved(self):
         for template in self.TEMPLATE_IDS:
             with self.subTest(template=template):
                 response = self.client.post(
@@ -428,10 +427,41 @@ class ResumeTemplateTests(APITestCase):
                 self.assertEqual(response.status_code, 201)
                 self.assertEqual(response.data["template"], template)
 
+    def test_new_resume_types_can_be_saved(self):
+        for user_type, years in (("career_changer", 2), ("freelancer", 0), ("executive", 12)):
+            with self.subTest(user_type=user_type):
+                response = self.client.post(
+                    "/api/resumes/",
+                    {
+                        "name": "Type Test",
+                        "email": "t@example.com",
+                        "user_type": user_type,
+                        "years_of_experience": years,
+                    },
+                    format="json",
+                )
+
+                self.assertEqual(response.status_code, 201)
+                self.assertEqual(response.data["user_type"], user_type)
+
+    def test_executive_needs_work_experience(self):
+        response = self.client.post(
+            "/api/resumes/",
+            {
+                "name": "Type Test",
+                "email": "t@example.com",
+                "user_type": "executive",
+                "years_of_experience": 0,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+
     def test_unknown_template_is_rejected(self):
         response = self.client.post(
             "/api/resumes/",
-            {"name": "Template Test", "email": "t@example.com", "template": "template21"},
+            {"name": "Template Test", "email": "t@example.com", "template": "template31"},
             format="json",
         )
 
@@ -440,7 +470,7 @@ class ResumeTemplateTests(APITestCase):
     def test_all_exports_work_for_each_template_and_user_type(self):
         exports = ("export_pdf", "export_docx", "export_txt", "export_json")
         for template in self.TEMPLATE_IDS:
-            for user_type in ("school", "college", "professional"):
+            for user_type in USER_TYPE_KEYS:
                 resume = Resume.objects.create(
                     user=self.user,
                     name="Template Test",
@@ -473,9 +503,13 @@ class ResumeTemplateTests(APITestCase):
                             self.assertIn("Template Test", text)
                         elif export == "export_docx":
                             document = Document(BytesIO(content))
-                            layout = next(t["layout"] for t in TEMPLATE_CATALOG if t["id"] == template)
+                            layout = next(
+                                t["layout"] for t in TEMPLATE_CATALOG if t["id"] == template
+                            )
                             # Word layout follows the preview: column/band layouts use a table.
-                            self.assertEqual(bool(document.tables), layout in TABLE_LAYOUTS)
+                            self.assertEqual(
+                                bool(document.tables), base_layout(layout) in TABLE_LAYOUTS
+                            )
                             self.assertIn("Template Test", _docx_text(document))
                         elif export == "export_txt":
                             self.assertIn(b"Template Test", content)
@@ -681,10 +715,23 @@ class DocxMatchesPreviewTests(SimpleTestCase):
         from .exports import export_docx
 
         fields = dict(
-            name="Preview Match", headline="Data Analyst", email="pm@example.test", phone="555",
-            location="", links={}, user_type="professional", template=template, accent_color="",
-            summary="Summary text.", experience="Analyst | Example Co", skills="SQL, Python (pandas), Excel",
-            certifications="Cert A", education="BSc", projects="Project A", achievements="", internships="",
+            name="Preview Match",
+            headline="Data Analyst",
+            email="pm@example.test",
+            phone="555",
+            location="",
+            links={},
+            user_type="professional",
+            template=template,
+            accent_color="",
+            summary="Summary text.",
+            experience="Analyst | Example Co",
+            skills="SQL, Python (pandas), Excel",
+            certifications="Cert A",
+            education="BSc",
+            projects="Project A",
+            achievements="",
+            internships="",
             title="",
         )
         fields.update(extra)
@@ -693,8 +740,10 @@ class DocxMatchesPreviewTests(SimpleTestCase):
     def test_skills_are_split_like_the_preview(self):
         from .exports import split_skills
 
-        self.assertEqual(split_skills("SQL, Python (pandas, numpy); Excel\n• Git"),
-                         ["SQL", "Python (pandas, numpy)", "Excel", "Git"])
+        self.assertEqual(
+            split_skills("SQL, Python (pandas, numpy); Excel\n• Git"),
+            ["SQL", "Python (pandas, numpy)", "Excel", "Git"],
+        )
 
     def test_classic_header_is_centered(self):
         from docx.enum.text import WD_ALIGN_PARAGRAPH
