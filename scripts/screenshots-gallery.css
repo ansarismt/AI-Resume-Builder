@@ -59,13 +59,18 @@ body {
 .editor-panel h1,
 .gallery-header h1 {
   margin: 8px 0;
-  font: 700 30px/1.15 Georgia, serif;
+  font:
+    700 30px/1.15 Georgia,
+    serif;
 }
 
 .eyebrow {
   margin: 0;
   color: #2f5d8a;
-  font: 700 10px/1.4 "Segoe UI", Arial, sans-serif;
+  font:
+    700 10px/1.4 "Segoe UI",
+    Arial,
+    sans-serif;
   letter-spacing: 0.18em;
 }
 
@@ -86,7 +91,10 @@ body {
   padding: 10px;
   color: #344054;
   background: #fbfcfe;
-  font: 13px/1.5 "Segoe UI", Arial, sans-serif;
+  font:
+    13px/1.5 "Segoe UI",
+    Arial,
+    sans-serif;
 }
 
 .editor-panel textarea {
@@ -114,7 +122,10 @@ body {
 
 .preview-title h2 {
   margin: 3px 0 0;
-  font: 600 16px "Segoe UI", Arial, sans-serif;
+  font:
+    600 16px "Segoe UI",
+    Arial,
+    sans-serif;
 }
 
 .live-preview > .rd-wrap {
@@ -165,7 +176,7 @@ body {
 
 .scaled-resume {
   width: 794px;
-  transform: scale(0.30);
+  transform: scale(0.3);
   transform-origin: top left;
 }
 

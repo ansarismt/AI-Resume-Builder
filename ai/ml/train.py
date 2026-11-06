@@ -8,7 +8,6 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn.calibration import CalibratedClassifierCV
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import chi2
 from sklearn.metrics import accuracy_score, classification_report, f1_score
 from sklearn.model_selection import StratifiedKFold, cross_validate, train_test_split
@@ -17,6 +16,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.class_weight import compute_sample_weight
+
+from .features import ResumeFeatures
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -203,6 +204,13 @@ def _small_class_recall(test_labels, report):
     }
 
 
+def _top_k_accuracy(pipeline, texts, labels, k):
+    probabilities = pipeline.predict_proba(texts)
+    classes = np.asarray(pipeline.classes_)
+    top = classes[np.argsort(probabilities, axis=1)[:, -k:]]
+    return float(np.mean([label in row for label, row in zip(labels, top)]))
+
+
 def train_model(data_path=DATA_PATH, artifacts_dir=ARTIFACTS_DIR):
     data_path = Path(data_path)
     artifacts_dir = Path(artifacts_dir)
@@ -227,12 +235,6 @@ def train_model(data_path=DATA_PATH, artifacts_dir=ARTIFACTS_DIR):
         random_state=42,
         stratify=labels,
     )
-    vectorizer = TfidfVectorizer(
-        ngram_range=(1, 2),
-        sublinear_tf=True,
-        max_features=50000,
-        stop_words="english",
-    )
     candidates = {
         "LogisticRegression": LogisticRegression(
             class_weight="balanced",
@@ -247,7 +249,7 @@ def train_model(data_path=DATA_PATH, artifacts_dir=ARTIFACTS_DIR):
     for name, classifier in candidates.items():
         pipeline = Pipeline(
             [
-                ("tfidf", vectorizer),
+                ("tfidf", ResumeFeatures()),
                 ("classifier", classifier),
             ]
         )
@@ -274,15 +276,7 @@ def train_model(data_path=DATA_PATH, artifacts_dir=ARTIFACTS_DIR):
         )
     best_pipeline = Pipeline(
         [
-            (
-                "tfidf",
-                TfidfVectorizer(
-                    ngram_range=(1, 2),
-                    sublinear_tf=True,
-                    max_features=50000,
-                    stop_words="english",
-                ),
-            ),
+            ("tfidf", ResumeFeatures()),
             ("classifier", best_classifier),
         ]
     )
@@ -312,11 +306,12 @@ def train_model(data_path=DATA_PATH, artifacts_dir=ARTIFACTS_DIR):
         "cross_validation": scores,
         "test_accuracy": float(accuracy_score(test_labels, predicted)),
         "test_macro_f1": float(f1_score(test_labels, predicted, average="macro")),
+        "test_top3_accuracy": _top_k_accuracy(best_pipeline, test_texts, test_labels, 3),
         "classification_report": report,
         "small_class_recall": _small_class_recall(test_labels, report),
     }
 
-    stats_vectorizer = best_pipeline.named_steps["tfidf"]
+    stats_vectorizer = best_pipeline.named_steps["tfidf"].word_vectorizer_
     stats_matrix = stats_vectorizer.transform(texts)
     category_stats = _category_statistics(
         texts,
@@ -343,6 +338,7 @@ def train_model(data_path=DATA_PATH, artifacts_dir=ARTIFACTS_DIR):
     print(f"Selected model: {best_name}")
     print(f"Test accuracy: {metrics['test_accuracy']:.4f}")
     print(f"Test macro-F1: {metrics['test_macro_f1']:.4f}")
+    print(f"Test top-3 accuracy: {metrics['test_top3_accuracy']:.4f}")
     print(classification_report(test_labels, predicted, zero_division=0))
     for category, recall in metrics["small_class_recall"].items():
         print(f"{category} recall: {recall:.4f}")

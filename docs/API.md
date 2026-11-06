@@ -6,25 +6,25 @@ unless otherwise noted. Rate limits and validation errors are returned as standa
 
 ## Accounts
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| POST | `/api/auth/signup/` | Create an account and obtain a token. |
-| POST | `/api/auth/login/` | Authenticate and obtain a token. |
-| GET | `/api/auth/me/` | Return the authenticated account. |
-| POST | `/api/auth/logout/` | Revoke the current token. |
-| PUT | `/api/auth/account/` | Update account credentials. |
+| Method | Path                 | Purpose                               |
+| ------ | -------------------- | ------------------------------------- |
+| POST   | `/api/auth/signup/`  | Create an account and obtain a token. |
+| POST   | `/api/auth/login/`   | Authenticate and obtain a token.      |
+| GET    | `/api/auth/me/`      | Return the authenticated account.     |
+| POST   | `/api/auth/logout/`  | Revoke the current token.             |
+| PUT    | `/api/auth/account/` | Update account credentials.           |
 
 ## Resumes
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET, POST | `/api/resumes/` | List owned resumes or create one. |
-| GET, PUT, PATCH, DELETE | `/api/resumes/{id}/` | Read, update, or delete an owned resume. |
-| GET | `/api/resumes/{id}/export_docx/` | Export an editable DOCX. |
-| GET | `/api/resumes/{id}/export_pdf/` | Export a backend PDF for supported text. |
-| GET | `/api/resumes/{id}/export_json/` | Export JSON. |
-| GET | `/api/resumes/{id}/export_txt/` | Export plain text. |
-| POST | `/api/resume/detect-type/` | Detect a suggested user type; rate-limited. |
+| Method                  | Path                             | Purpose                                     |
+| ----------------------- | -------------------------------- | ------------------------------------------- |
+| GET, POST               | `/api/resumes/`                  | List owned resumes or create one.           |
+| GET, PUT, PATCH, DELETE | `/api/resumes/{id}/`             | Read, update, or delete an owned resume.    |
+| GET                     | `/api/resumes/{id}/export_docx/` | Export an editable DOCX.                    |
+| GET                     | `/api/resumes/{id}/export_pdf/`  | Export a backend PDF for supported text.    |
+| GET                     | `/api/resumes/{id}/export_json/` | Export JSON.                                |
+| GET                     | `/api/resumes/{id}/export_txt/`  | Export plain text.                          |
+| POST                    | `/api/resume/detect-type/`       | Detect a suggested user type; rate-limited. |
 
 Resume writes validate user type, category, links, accent color, and ownership-sensitive fields.
 See the serializers and regression tests in `resumes/` for the precise request shape.

@@ -12,7 +12,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 ARTIFACTS_DIR = Path(__file__).resolve().parent / "artifacts"
 CONFIDENCE_THRESHOLD = 0.25
 _RESUME_FIELDS = (
-    "name",
     "summary",
     "experience",
     "education",
@@ -74,6 +73,10 @@ def load_model_info():
 
 
 def resume_to_text(resume):
+    # The classifier reads the first line as the job title, so the headline always comes first
+    # (an empty first line when there is none) and the body follows.
+    headline = str(resume.get("headline") or resume.get("title") or "").strip()
+    headline = " ".join(headline.split())
     parts = []
     for key in _RESUME_FIELDS:
         value = resume.get(key, "")
@@ -149,6 +152,10 @@ def _required_sections(user_type):
         return ("summary", "education", "skills", "achievements")
     if user_type == "college":
         return ("summary", "education", "skills", "projects", "internships")
+    if user_type == "freelancer":
+        return ("summary", "projects", "skills", "experience")
+    if user_type == "executive":
+        return ("summary", "experience", "achievements", "skills", "education")
     return ("summary", "experience", "skills", "education")
 
 
@@ -189,7 +196,9 @@ def _keyword_match(resume_text, job_description, vectorizer):
 
 def ats_analysis(resume, job_description, pipeline=None):
     pipeline = pipeline or load_pipeline()
-    vectorizer = pipeline.named_steps["tfidf"]
+    features = pipeline.named_steps["tfidf"]
+    # Keyword extraction needs plain word features, without the title columns.
+    vectorizer = getattr(features, "word_vectorizer_", features)
     resume_text = resume_to_text(resume)
     job_text = job_description.strip()
     if not resume_text or not job_text:

@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
-import { AlertCircle, FileText, Loader2, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { AlertCircle, Copy, FileText, Loader2, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import axios from "axios";
-import { deleteResume, getApiErrorMessage, listResumes } from "@/lib/resumeApi";
+import { createResume, deleteResume, getApiErrorMessage, listResumes } from "@/lib/resumeApi";
+import { formatRelativeTime } from "./resumeInsights";
 
 import { TEMPLATE_CATALOG } from "./templateCatalog";
 import { TEMPLATE_IDS, type SavedResume, type TemplateId } from "./types";
@@ -25,6 +26,9 @@ export function SavedResumes({ refreshKey, onLoad, currentId, onDeleted, onCount
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<"recent" | "name">("recent");
 
   useEffect(() => {
     let active = true;
@@ -88,6 +92,44 @@ export function SavedResumes({ refreshKey, onLoad, currentId, onDeleted, onCount
     }
   };
 
+  const handleDuplicate = async (resume: SavedResume, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setDuplicatingId(resume.id);
+    try {
+      const copy = await createResume({
+        ...resume,
+        title: `${resume.title || resume.name} (copy)`,
+      });
+      setItems((current) => {
+        const next = [copy as SavedResume, ...current];
+        onCount?.(next.length);
+        return next;
+      });
+      toast.success("Resume duplicated");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not duplicate the resume"));
+    } finally {
+      setDuplicatingId(null);
+    }
+  };
+
+  const visible = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    const filtered = needle
+      ? items.filter((resume) =>
+          [resume.name, resume.title, resume.email, resume.job_title_target, resume.user_type]
+            .join(" ")
+            .toLowerCase()
+            .includes(needle),
+        )
+      : items;
+    return [...filtered].sort((a, b) =>
+      sort === "name"
+        ? a.name.localeCompare(b.name)
+        : String(b.updated_at ?? b.created_at).localeCompare(String(a.updated_at ?? a.created_at)),
+    );
+  }, [items, query, sort]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8 text-muted-foreground">
@@ -119,52 +161,96 @@ export function SavedResumes({ refreshKey, onLoad, currentId, onDeleted, onCount
   }
 
   return (
-    <ul className="divide-y divide-border">
-      {items.map((resume) => (
-        <li
-          key={resume.id}
-          className={`flex items-center gap-2 ${currentId === resume.id ? "bg-accent/5" : ""}`}
-        >
-          <button
-            onClick={() => onLoad(resume)}
-            className="group flex min-w-0 flex-1 items-center gap-3 py-3 text-left transition-colors hover:text-accent"
+    <>
+      {items.length > 1 && (
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Search saved resumes</span>
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search by name, role or email"
+              className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm"
+            />
+          </label>
+          <select
+            value={sort}
+            onChange={(event) => setSort(event.target.value as "recent" | "name")}
+            aria-label="Sort saved resumes"
+            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
           >
-            <FileText className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-accent" />
-            <div className="min-w-0 flex-1">
-              <div className="truncate font-medium">
-                {resume.name}
-                {currentId === resume.id && (
-                  <span className="ml-2 text-[10px] font-mono uppercase tracking-widest text-accent">
-                    Editing
-                  </span>
-                )}
-              </div>
-              <div className="truncate text-xs text-muted-foreground">
-                {resume.email}
-                {resume.phone ? ` | ${resume.phone}` : ""}
-              </div>
-              <div className="truncate text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                {resume.user_type}
-              </div>
-            </div>
-            <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-              {TEMPLATE_LABELS[resume.template]}
-            </span>
-          </button>
-          <button
-            onClick={(event) => handleDelete(resume.id, event)}
-            disabled={deletingId === resume.id}
-            className="p-2 text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
-            aria-label="Delete resume"
+            <option value="recent">Most recent</option>
+            <option value="name">Name A to Z</option>
+          </select>
+        </div>
+      )}
+      {visible.length === 0 && (
+        <p className="py-4 text-sm italic text-muted-foreground">No resumes match your search.</p>
+      )}
+      <ul className="divide-y divide-border">
+        {visible.map((resume) => (
+          <li
+            key={resume.id}
+            className={`flex items-center gap-2 ${currentId === resume.id ? "bg-accent/5" : ""}`}
           >
-            {deletingId === resume.id ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Trash2 className="h-4 w-4" />
-            )}
-          </button>
-        </li>
-      ))}
-    </ul>
+            <button
+              onClick={() => onLoad(resume)}
+              className="group flex min-w-0 flex-1 items-center gap-3 py-3 text-left transition-colors hover:text-accent"
+            >
+              <FileText className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-accent" />
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-medium">
+                  {resume.name}
+                  {currentId === resume.id && (
+                    <span className="ml-2 text-[10px] font-mono uppercase tracking-widest text-accent">
+                      Editing
+                    </span>
+                  )}
+                </div>
+                <div className="truncate text-xs text-muted-foreground">
+                  {resume.email}
+                  {resume.phone ? ` | ${resume.phone}` : ""}
+                </div>
+                <div className="truncate text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                  {resume.title ? `${resume.title} | ` : ""}
+                  {resume.user_type}
+                  {resume.updated_at ? ` | updated ${formatRelativeTime(resume.updated_at)}` : ""}
+                </div>
+              </div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                {TEMPLATE_LABELS[resume.template]}
+              </span>
+            </button>
+            <button
+              onClick={(event) => handleDuplicate(resume, event)}
+              disabled={duplicatingId === resume.id}
+              className="p-2 text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
+              aria-label="Duplicate resume"
+              title="Duplicate"
+            >
+              {duplicatingId === resume.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </button>
+            <button
+              onClick={(event) => handleDelete(resume.id, event)}
+              disabled={deletingId === resume.id}
+              className="p-2 text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
+              aria-label="Delete resume"
+            >
+              {deletingId === resume.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }

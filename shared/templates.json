@@ -178,5 +178,95 @@
     "layout": "framed",
     "font": "serif",
     "colors": ["#2d3436", "#1f3a5f", "#2f5d8a", "#4a5568", "#111111"]
+  },
+  {
+    "id": "template21",
+    "name": "Minimal",
+    "category": "Minimal",
+    "description": "Light, airy header with quiet small-caps headings and generous white space.",
+    "layout": "minimal",
+    "font": "sans",
+    "colors": ["#1f3a5f", "#2f5d8a", "#4a5568", "#2d3436", "#111111"]
+  },
+  {
+    "id": "template22",
+    "name": "Minimal Serif",
+    "category": "Minimal",
+    "description": "Serif version of the minimal layout for a calm, editorial feel.",
+    "layout": "minimal",
+    "font": "serif",
+    "colors": ["#4a5568", "#1f3a5f", "#2f5d8a", "#2d3436", "#111111"]
+  },
+  {
+    "id": "template23",
+    "name": "Bold",
+    "category": "Bold",
+    "description": "Large uppercase name, a thick accent rule and filled section labels.",
+    "layout": "bold",
+    "font": "sans",
+    "colors": ["#1f3a5f", "#2f5d8a", "#4a5568", "#2d3436", "#111111"]
+  },
+  {
+    "id": "template24",
+    "name": "Bold Serif",
+    "category": "Bold",
+    "description": "Strong serif name with a heavy rule and filled section labels.",
+    "layout": "bold",
+    "font": "serif",
+    "colors": ["#2d3436", "#1f3a5f", "#2f5d8a", "#4a5568", "#111111"]
+  },
+  {
+    "id": "template25",
+    "name": "Elegant",
+    "category": "Elegant",
+    "description": "Centred, letter-spaced name between double rules for formal roles.",
+    "layout": "elegant",
+    "font": "serif",
+    "colors": ["#1f3a5f", "#2f5d8a", "#4a5568", "#2d3436", "#111111"]
+  },
+  {
+    "id": "template26",
+    "name": "Elegant Sans",
+    "category": "Elegant",
+    "description": "The elegant layout in clean sans-serif type.",
+    "layout": "elegant",
+    "font": "sans",
+    "colors": ["#2f5d8a", "#1f3a5f", "#4a5568", "#2d3436", "#111111"]
+  },
+  {
+    "id": "template27",
+    "name": "Technical",
+    "category": "Technical",
+    "description": "Monospaced headings and boxed skills for engineering and data roles.",
+    "layout": "tech",
+    "font": "sans",
+    "colors": ["#2f5d8a", "#1f3a5f", "#4a5568", "#2d3436", "#111111"]
+  },
+  {
+    "id": "template28",
+    "name": "Technical Serif",
+    "category": "Technical",
+    "description": "Monospaced headings with a serif body for a mixed, bookish look.",
+    "layout": "tech",
+    "font": "serif",
+    "colors": ["#2d3436", "#1f3a5f", "#2f5d8a", "#4a5568", "#111111"]
+  },
+  {
+    "id": "template29",
+    "name": "Ribbon",
+    "category": "Ribbon",
+    "description": "Soft tinted header with arrow-shaped ribbon section labels.",
+    "layout": "ribbon",
+    "font": "sans",
+    "colors": ["#1f3a5f", "#2f5d8a", "#4a5568", "#2d3436", "#111111"]
+  },
+  {
+    "id": "template30",
+    "name": "Ribbon Serif",
+    "category": "Ribbon",
+    "description": "Serif body with arrow-shaped ribbon section labels.",
+    "layout": "ribbon",
+    "font": "serif",
+    "colors": ["#4a5568", "#1f3a5f", "#2f5d8a", "#2d3436", "#111111"]
   }
 ]

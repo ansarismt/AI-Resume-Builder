@@ -1,4 +1,4 @@
-/* Shared styles for all 20 resume templates (10 layouts x sans/serif). */
+/* Shared styles for all 30 resume templates (15 layouts x sans/serif). */
 
 .rd-wrap {
   container-type: inline-size;
@@ -504,4 +504,149 @@
   .rd__contact .rd__placeholder {
     display: none !important;
   }
+}
+
+/* ---------- minimal: airy, quiet headings ---------- */
+
+.rd--minimal {
+  padding: 2.75rem 3rem;
+}
+
+.rd--minimal .rd__name {
+  font-size: 2.15rem;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+
+.rd--minimal .rd__headline {
+  color: var(--rd-accent);
+  font-size: 0.95rem;
+}
+
+.rd--minimal .rd__header {
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--rd-rule);
+}
+
+.rd--minimal .rd__section {
+  margin-top: 1.4rem;
+}
+
+.rd--minimal .rd__heading {
+  color: var(--rd-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+}
+
+/* ---------- bold: heavy name, thick rule, filled labels ---------- */
+
+.rd--bold .rd__name {
+  color: var(--rd-accent);
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.rd--bold .rd__header {
+  padding-bottom: 1rem;
+  border-bottom: 5px solid var(--rd-accent);
+}
+
+.rd--bold .rd__heading {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  background: var(--rd-accent);
+  color: var(--rd-on-accent);
+  letter-spacing: 0.12em;
+}
+
+/* ---------- elegant: centred between double rules ---------- */
+
+.rd--elegant .rd__header {
+  padding: 1rem 0;
+  text-align: center;
+  border-top: 4px double var(--rd-accent);
+  border-bottom: 4px double var(--rd-accent);
+}
+
+.rd--elegant .rd__name {
+  font-size: 1.8rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.rd--elegant .rd__contact {
+  justify-content: center;
+}
+
+.rd--elegant .rd__main {
+  margin-top: 0.4rem;
+}
+
+.rd--elegant .rd__heading {
+  padding-bottom: 0.3rem;
+  text-align: center;
+  letter-spacing: 0.26em;
+  border-bottom: 1px solid var(--rd-rule);
+}
+
+/* ---------- tech: monospaced headings, boxed skills ---------- */
+
+.rd--tech {
+  font-size: 0.86rem;
+}
+
+.rd--tech .rd__heading,
+.rd--tech .rd__contact {
+  font-family: "Cascadia Code", Consolas, "SFMono-Regular", Menlo, monospace;
+}
+
+.rd--tech .rd__heading {
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-size: 0.85rem;
+}
+
+.rd--tech .rd__heading::before {
+  content: "// ";
+  color: var(--rd-muted);
+}
+
+.rd--tech .rd__header {
+  padding-bottom: 0.9rem;
+  border-bottom: 2px solid var(--rd-accent);
+}
+
+.rd--tech .rd__skills li {
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--rd-accent);
+  border-radius: 4px;
+  background: var(--rd-soft);
+}
+
+/* ---------- ribbon: tinted header, arrow-shaped labels ---------- */
+
+.rd--ribbon {
+  padding: 0;
+}
+
+.rd--ribbon .rd__header {
+  padding: 2rem 2.5rem 1.4rem;
+  background: var(--rd-soft);
+  border-top: 8px solid var(--rd-accent);
+}
+
+.rd--ribbon .rd__main {
+  padding: 0.6rem 2.5rem 2.25rem;
+}
+
+.rd--ribbon .rd__heading {
+  display: inline-block;
+  padding: 0.25rem 1.6rem 0.25rem 0.75rem;
+  background: var(--rd-accent);
+  color: var(--rd-on-accent);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
 }

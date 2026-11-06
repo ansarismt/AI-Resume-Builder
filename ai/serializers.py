@@ -2,6 +2,8 @@ import os
 
 from rest_framework import serializers
 
+USER_TYPES = ("school", "college", "professional", "career_changer", "freelancer", "executive")
+
 
 class ResumeTextInputSerializer(serializers.Serializer):
     text = serializers.CharField(required=False, allow_blank=True, max_length=50000)
@@ -39,7 +41,7 @@ class ResumePayloadSerializer(serializers.Serializer):
 
 
 class UserTypeInputSerializer(ResumePayloadSerializer):
-    user_type = serializers.ChoiceField(choices=("school", "college", "professional"))
+    user_type = serializers.ChoiceField(choices=USER_TYPES)
     tone = serializers.CharField(required=False, allow_blank=True, max_length=50)
 
 
@@ -77,7 +79,7 @@ class TailorInputSerializer(serializers.Serializer):
 class SkillsInputSerializer(serializers.Serializer):
     target_role = serializers.CharField(max_length=150)
     user_type = serializers.ChoiceField(
-        choices=("school", "college", "professional"),
+        choices=USER_TYPES,
         required=False,
         default="professional",
     )
@@ -105,7 +107,7 @@ class ResumeParseOutputSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, allow_blank=True)
     phone = serializers.CharField(required=False, allow_blank=True, max_length=20)
     user_type = serializers.ChoiceField(
-        choices=("school", "college", "professional"),
+        choices=USER_TYPES,
         required=False,
     )
     highest_education = serializers.CharField(required=False, allow_blank=True, max_length=100)
@@ -120,6 +122,7 @@ class ResumeParseOutputSerializer(serializers.Serializer):
     certifications = serializers.CharField(required=False, allow_blank=True)
     summary = serializers.CharField(required=False, allow_blank=True)
     title = serializers.CharField(required=False, allow_blank=True, max_length=150)
+    headline = serializers.CharField(required=False, allow_blank=True, max_length=220)
     job_title_target = serializers.CharField(required=False, allow_blank=True, max_length=150)
     links = serializers.DictField(required=False)
     location = serializers.CharField(required=False, allow_blank=True, max_length=150)

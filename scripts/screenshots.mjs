@@ -40,7 +40,9 @@ try {
   browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 
-  await page.goto(`${origin}/scripts/screenshots-gallery.html?hero=1`, { waitUntil: "networkidle" });
+  await page.goto(`${origin}/scripts/screenshots-gallery.html?hero=1`, {
+    waitUntil: "networkidle",
+  });
   await page.locator(".live-preview .rd__name").waitFor();
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: path.join(output, "editor.png"), fullPage: true });

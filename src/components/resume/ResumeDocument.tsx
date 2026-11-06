@@ -1,58 +1,9 @@
 import "./ResumeDocument.css";
 import { getTemplateMeta } from "./templateCatalog";
-import type { ResumeData, UserType } from "./types";
+import type { ResumeData } from "./types";
+import { SECTION_SETS, type SectionDef, type SectionKey } from "./sections";
 import { splitSkills } from "./resumeUtils";
 import type { CSSProperties } from "react";
-
-type SectionKey =
-  | "summary"
-  | "experience"
-  | "education"
-  | "internships"
-  | "projects"
-  | "achievements"
-  | "certifications"
-  | "skills";
-
-interface SectionDef {
-  key: SectionKey;
-  title: string;
-  placeholder: string;
-}
-
-const SUMMARY_PLACEHOLDER = "Add a short summary.";
-
-// Section order and titles mirror the PDF/DOCX exports in resumes/exports.py,
-// so the on-screen preview matches the downloaded file.
-const SECTION_SETS: Record<UserType, SectionDef[]> = {
-  school: [
-    { key: "summary", title: "Career Objective", placeholder: SUMMARY_PLACEHOLDER },
-    { key: "education", title: "Education", placeholder: "Add your education." },
-    { key: "skills", title: "Skills", placeholder: "List your skills." },
-    {
-      key: "achievements",
-      title: "Achievements / Activities",
-      placeholder: "Add your achievements and activities.",
-    },
-  ],
-  college: [
-    { key: "summary", title: "Career Objective", placeholder: SUMMARY_PLACEHOLDER },
-    { key: "education", title: "Education", placeholder: "Add your education." },
-    { key: "skills", title: "Skills", placeholder: "List your skills." },
-    { key: "projects", title: "Projects", placeholder: "Add your projects." },
-    { key: "internships", title: "Internships", placeholder: "Add your internships." },
-    { key: "certifications", title: "Certifications", placeholder: "Add your certifications." },
-    { key: "achievements", title: "Achievements", placeholder: "Add your achievements." },
-  ],
-  professional: [
-    { key: "summary", title: "Professional Summary", placeholder: SUMMARY_PLACEHOLDER },
-    { key: "experience", title: "Experience", placeholder: "Add your work history." },
-    { key: "skills", title: "Skills", placeholder: "List your skills." },
-    { key: "certifications", title: "Certifications", placeholder: "Add your certifications." },
-    { key: "education", title: "Education", placeholder: "Add your education." },
-    { key: "projects", title: "Projects", placeholder: "Add your projects." },
-  ],
-};
 
 // Sections that move into the side column on sidebar and split layouts.
 const ASIDE_KEYS: SectionKey[] = ["skills", "education", "certifications"];

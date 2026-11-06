@@ -153,6 +153,8 @@ function AIStudioPage() {
       email: profile.email,
       phone: profile.phone,
       user_type: profile.user_type,
+      headline: profile.headline ?? "",
+      title: profile.title ?? "",
       summary: profile.summary,
       experience: profile.experience,
       education: profile.education,
@@ -353,6 +355,9 @@ function AIStudioPage() {
                 <option value="school">School student</option>
                 <option value="college">College student / fresher</option>
                 <option value="professional">Working professional</option>
+                <option value="career_changer">Career changer</option>
+                <option value="freelancer">Freelancer / consultant</option>
+                <option value="executive">Senior leader / executive</option>
               </select>
             </div>
             <div className="space-y-2">

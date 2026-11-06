@@ -6,14 +6,14 @@ import { PROFESSIONAL_COLORS, TEMPLATE_CATALOG } from "./templateCatalog";
 import { JOB_CATEGORY_OPTIONS } from "./types";
 
 describe("shared frontend catalogs", () => {
-  it("contains twenty unique templates and only approved colors", () => {
+  it("contains thirty unique templates and only approved colors", () => {
     const ids = TEMPLATE_CATALOG.map((template) => template.id);
     const allowedColors = new Set(
       Object.values(PROFESSIONAL_COLORS).map((color) => color.toUpperCase()),
     );
 
-    expect(ids).toHaveLength(20);
-    expect(new Set(ids).size).toBe(20);
+    expect(ids).toHaveLength(30);
+    expect(new Set(ids).size).toBe(30);
     for (const template of TEMPLATE_CATALOG) {
       expect(template.colors.length).toBeGreaterThan(0);
       for (const color of template.colors) {

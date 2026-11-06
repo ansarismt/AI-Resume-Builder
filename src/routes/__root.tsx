@@ -10,6 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BrainCircuit, LogOut, Plus, Timer } from "lucide-react";
+import { ThemeProvider } from "@/lib/theme";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { VDartBadge } from "@/components/shared/VDartBadge";
+import { ScrollHelpers } from "@/components/shared/BackToTop";
 import { toast } from "sonner";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -47,8 +51,8 @@ export const Route = createRootRoute({
         content:
           "Create polished resumes for school, college, internships, and jobs with clean templates, guided writing, and instant preview.",
       },
-      { name: "author", content: "AI Resume Builder" },
-      { property: "og:title", content: "AI Resume Builder" },
+      { name: "author", content: "VDart" },
+      { property: "og:title", content: "AI Resume Builder by VDart" },
       {
         property: "og:description",
         content:
@@ -91,6 +95,31 @@ function AuthHeader() {
 
   return (
     <div className="ml-auto flex flex-wrap items-center gap-3">
+      {!isAuthenticated && (
+        <>
+          <Link
+            to="/"
+            hash="features"
+            className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground md:inline"
+          >
+            Features
+          </Link>
+          <Link
+            to="/"
+            hash="faq"
+            className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground md:inline"
+          >
+            FAQ
+          </Link>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/login">Log in</Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link to="/signup">Get started</Link>
+          </Button>
+        </>
+      )}
+      <ThemeToggle />
       {isAuthenticated && (
         <Link
           to="/ai-studio"
@@ -172,39 +201,57 @@ function RootComponent() {
   return (
     <>
       <HeadContent />
-      <AuthProvider>
-        <div className="flex min-h-screen flex-col">
-          <nav className="sticky top-0 z-30 flex flex-wrap items-center gap-4 border-b border-border bg-background/85 px-4 py-3 backdrop-blur sm:px-6 no-print">
-            <Link
-              to="/"
-              className="group flex items-center gap-3 text-foreground transition-colors hover:text-primary"
-            >
-              <img
-                src="/logo.png"
-                alt=""
-                width={46}
-                height={39}
-                className="h-10 w-auto transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
-              />
-              <span className="font-display text-2xl font-bold tracking-tight">
-                AI Resume Builder
-              </span>
-            </Link>
-            <AuthHeader />
-          </nav>
-          <div className="flex-1">
-            <Outlet />
-          </div>
-          <footer className="border-t border-border bg-background px-4 py-5 sm:px-6">
-            <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground sm:flex-row">
-              <span>© AI Resume Builder 2026</span>
-              <span>Built for study, internships, and careers</span>
-              <span>Crafted with care</span>
+      <ThemeProvider>
+        <AuthProvider>
+          <a
+            href="#main-content"
+            className="sr-only z-[60] rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+          >
+            Skip to content
+          </a>
+          <ScrollHelpers />
+          <div className="flex min-h-screen flex-col">
+            <nav className="sticky top-0 z-30 flex flex-wrap items-center gap-4 border-b border-border bg-background/85 px-4 py-3 backdrop-blur sm:px-6 no-print">
+              <Link
+                to="/"
+                className="group flex items-center gap-3 text-foreground transition-colors hover:text-primary"
+              >
+                <span className="relative inline-flex h-10 w-14 shrink-0 transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
+                  <img
+                    src="/logo.png"
+                    alt=""
+                    width={56}
+                    height={40}
+                    className="h-10 w-14 object-contain dark:hidden"
+                  />
+                  <img
+                    src="/logo-dark.png"
+                    alt=""
+                    width={56}
+                    height={40}
+                    className="hidden h-10 w-14 object-contain dark:block"
+                  />
+                </span>
+                <span className="font-display text-2xl font-bold tracking-tight">
+                  AI Resume Builder
+                </span>
+              </Link>
+              <AuthHeader />
+            </nav>
+            <div id="main-content" className="flex-1">
+              <Outlet />
             </div>
-          </footer>
-          <Toaster />
-        </div>
-      </AuthProvider>
+            <footer className="border-t border-border bg-background px-4 py-6 no-print sm:px-6">
+              <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-xs text-muted-foreground sm:flex-row">
+                <span>© 2026 AI Resume Builder. All rights reserved.</span>
+                <span>Built for study, internships, and careers</span>
+                <VDartBadge variant="text" />
+              </div>
+            </footer>
+            <Toaster />
+          </div>
+        </AuthProvider>
+      </ThemeProvider>
     </>
   );
 }

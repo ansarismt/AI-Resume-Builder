@@ -79,11 +79,9 @@ class ResumeSerializer(serializers.ModelSerializer):
             attrs["experience"] = ""
             attrs["years_of_experience"] = 0
 
-        if user_type == "professional" and int(years_of_experience or 0) <= 0:
+        if user_type in {"professional", "executive"} and int(years_of_experience or 0) <= 0:
             raise serializers.ValidationError(
-                {
-                    "years_of_experience": "Working professionals must have more than 0 years of experience."
-                }
+                {"years_of_experience": "This resume type needs more than 0 years of experience."}
             )
 
         if user_type == "school":

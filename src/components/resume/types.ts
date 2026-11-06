@@ -21,11 +21,22 @@ export const TEMPLATE_IDS = [
   "template18",
   "template19",
   "template20",
+  "template21",
+  "template22",
+  "template23",
+  "template24",
+  "template25",
+  "template26",
+  "template27",
+  "template28",
+  "template29",
+  "template30",
 ] as const;
 
 export type TemplateId = (typeof TEMPLATE_IDS)[number];
 
-export type UserType = "school" | "college" | "professional";
+export type UserType =
+  "school" | "college" | "professional" | "career_changer" | "freelancer" | "executive";
 
 export const JOB_CATEGORY_OPTIONS = categoryData.categories;
 
@@ -44,6 +55,21 @@ export const USER_TYPE_OPTIONS: Array<{ value: UserType; label: string; descript
     value: "professional",
     label: "Working Professional",
     description: "Best for candidates with real work experience.",
+  },
+  {
+    value: "career_changer",
+    label: "Career Changer",
+    description: "Best for moving into a new field, with transferable skills up front.",
+  },
+  {
+    value: "freelancer",
+    label: "Freelancer / Consultant",
+    description: "Best for independent work, led by selected client projects.",
+  },
+  {
+    value: "executive",
+    label: "Senior Leader / Executive",
+    description: "Best for senior roles, led by an executive summary and key achievements.",
   },
 ];
 

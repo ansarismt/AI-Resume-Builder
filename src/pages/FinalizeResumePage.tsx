@@ -2,6 +2,7 @@ import { ArrowLeft, CheckCircle2 } from "lucide-react";
 
 import { ExportButtons } from "@/components/ExportButtons";
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
+import { ResumeHealthCard } from "@/components/resume/ResumeHealthCard";
 import { Button } from "@/components/ui/button";
 import type { ResumeData } from "@/components/resume/types";
 
@@ -15,6 +16,8 @@ interface Props {
   onExportDocx: () => Promise<void>;
   onExportJson: () => Promise<void> | void;
   onExportTxt: () => Promise<void> | void;
+  onExportMd: () => Promise<void> | void;
+  onExportHtml: () => Promise<void> | void;
   onExportAll: () => Promise<void>;
 }
 
@@ -28,6 +31,8 @@ export function FinalizeResumePage({
   onExportDocx,
   onExportJson,
   onExportTxt,
+  onExportMd,
+  onExportHtml,
   onExportAll,
 }: Props) {
   return (
@@ -61,8 +66,14 @@ export function FinalizeResumePage({
             onExportDocx={onExportDocx}
             onExportJson={onExportJson}
             onExportTxt={onExportTxt}
+            onExportMd={onExportMd}
+            onExportHtml={onExportHtml}
             onExportAll={onExportAll}
           />
+        </div>
+
+        <div className="mt-5">
+          <ResumeHealthCard data={data} compact showCopy />
         </div>
 
         <Button type="button" variant="outline" onClick={onBack} className="mt-4 w-full">

@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
+import { ResumeHealthCard } from "@/components/resume/ResumeHealthCard";
 import { Button } from "@/components/ui/button";
 import type { ResumeData } from "@/components/resume/types";
 
@@ -32,6 +33,9 @@ export function ResumePreviewPage({ data, selectedColor, onEdit, onContinue }: P
             Continue
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
+        </div>
+        <div className="mt-6 no-print">
+          <ResumeHealthCard data={data} showCopy />
         </div>
       </section>
 

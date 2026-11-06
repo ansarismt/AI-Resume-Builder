@@ -2,6 +2,7 @@ import axios from "axios";
 
 import {
   TEMPLATE_IDS,
+  USER_TYPE_OPTIONS,
   type ResumeData,
   type SavedResume,
   type TemplateId,
@@ -157,8 +158,8 @@ export function normalizeTemplate(template: string): TemplateId {
 }
 
 function normalizeUserType(userType: string | undefined): UserType {
-  return userType === "school" || userType === "college" || userType === "professional"
-    ? userType
+  return USER_TYPE_OPTIONS.some((option) => option.value === userType)
+    ? (userType as UserType)
     : "college";
 }
 
