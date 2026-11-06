@@ -18,8 +18,19 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CountUp, GlowSection, Reveal } from "./effects";
 import { HeroDemo } from "./HeroDemo";
+import { ScrollArrowRail } from "./ArrowStage";
+import { ArrowField } from "./ArrowField";
+import { ModelLab } from "./ModelLab";
+import { CareerSlingshot } from "./CareerSlingshot";
+import { RotatingWords } from "./RotatingWords";
+
+const HERO_WORDS = ["ready to send.", "ATS-friendly.", "interview-ready.", "uniquely yours."];
+import { FeaturePlayground } from "./FeaturePlayground";
+import { BeforeAfter } from "./BeforeAfter";
+import { ArrowMark } from "@/components/brand/Logo";
 
 function Section({
+  id,
   title,
   text,
   muted,
@@ -28,12 +39,17 @@ function Section({
   title: string;
   text?: string;
   muted?: boolean;
+  id?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className={cn("border-b border-border", muted && "bg-secondary/40")}>
+    <section
+      id={id}
+      className={cn("scroll-mt-20 border-b border-border", muted && "bg-secondary/40")}
+    >
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <Reveal>
+          <ArrowMark animateOnLoad={false} className="section-arrow mb-3 h-5 w-auto text-brand" />
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h2>
           {text && <p className="mt-2 max-w-2xl text-muted-foreground">{text}</p>}
         </Reveal>
@@ -283,11 +299,13 @@ function Faq() {
 export function LandingPage({ isStaff }: { isStaff: boolean }) {
   return (
     <div className="min-h-screen overflow-x-clip bg-background">
+      <ScrollArrowRail />
       <GlowSection className="overflow-hidden border-b border-border bg-secondary/40">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-2 lg:gap-16">
+        <ArrowField />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-2 lg:gap-16">
           <div>
             <h1 className="fade-up text-5xl font-bold leading-[1.08] tracking-tight sm:text-6xl">
-              Build a resume that is ready to send.
+              Build a resume that is <RotatingWords words={HERO_WORDS} />
             </h1>
             <p
               className="fade-up mt-6 max-w-xl text-lg leading-8 text-muted-foreground"
@@ -326,6 +344,7 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
       </GlowSection>
 
       <Section
+        id="features"
         title="Everything you need to finish a resume"
         text="From the first draft to the file you send, in one place."
       >
@@ -371,7 +390,23 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </Section>
 
-      <Section title="How it works">
+      <Section
+        id="aim"
+        title="Aim for your next role"
+        text="Every goal needs a different resume. Launch the arrow at yours and get a plan."
+      >
+        <CareerSlingshot />
+      </Section>
+
+      <Section
+        title="From rough draft to ready to send"
+        text="The guided form and writing tools turn loose notes into clear, consistent sections."
+        muted
+      >
+        <BeforeAfter />
+      </Section>
+
+      <Section id="how-it-works" title="How it works">
         <ol className="grid gap-5 md:grid-cols-3">
           {STEPS.map(([title, text, points], index) => (
             <Reveal as="li" delay={index * 90} key={title} className="toon toon-hover group p-6">
@@ -384,6 +419,16 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
             </Reveal>
           ))}
         </ol>
+      </Section>
+
+      <ModelLab />
+
+      <Section
+        id="ai-tools"
+        title="Try the AI tools"
+        text="Pick a tool and press run to watch what it does. These are samples; in AI Studio the tools work on your own resume."
+      >
+        <FeaturePlayground />
       </Section>
 
       <Section
@@ -475,14 +520,18 @@ export function LandingPage({ isStaff }: { isStaff: boolean }) {
         </div>
       </Section>
 
-      <Section title="Questions">
+      <Section id="faq" title="Questions">
         <div className="max-w-3xl">
           <Faq />
         </div>
       </Section>
 
-      <section className="bg-primary text-primary-foreground">
-        <Reveal className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
+      <section className="cta-section relative overflow-hidden bg-primary text-primary-foreground">
+        <svg aria-hidden="true" viewBox="40 110 320 180" className="cta-arrow" fill="currentColor">
+          <path d="M57 127 344 207 316 212 118 210 115 209Z" />
+          <path d="M148 256 162 274 344 207 316 212Z" />
+        </svg>
+        <Reveal className="relative mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Ready to build yours?</h2>
           <p className="mx-auto mt-2 max-w-md text-primary-foreground/80">
             Create an account, fill in the form and download a finished resume.

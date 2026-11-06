@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
+import { ArrowMark, BrandLoader } from "@/components/brand/Logo";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardRoute,
@@ -20,6 +21,7 @@ function DashboardRoute() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="toon max-w-md p-6 text-center">
+          <ArrowMark className="mx-auto mb-4 h-8 w-auto text-brand" />
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
             Your account
           </p>
@@ -40,9 +42,5 @@ function DashboardRoute() {
     );
   }
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <p className="text-sm text-muted-foreground">Opening dashboard...</p>
-    </div>
-  );
+  return <BrandLoader label="Opening dashboard" />;
 }

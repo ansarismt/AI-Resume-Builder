@@ -13,6 +13,8 @@ and optional local analysis and AI writing tools.
 
 ## Features
 
+- Light and dark themes, plus an interactive landing page with an arrow-field hero, a live
+  AI-tool playground, a model preview and a career "slingshot".
 - Guided resume editor and live preview for school, college, and professional resumes.
 - 20 professional templates, saved resumes, and version history.
 - Vector, selectable-text PDF through the browser print dialog; editable DOCX, JSON, and TXT

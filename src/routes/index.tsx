@@ -18,6 +18,7 @@ import {
 } from "@/lib/resumeApi";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { BrandLoader } from "@/components/brand/Logo";
 import { ResumeWizard } from "@/pages/ResumeWizard";
 import { ResumePreviewPage } from "@/pages/ResumePreviewPage";
 import { TemplateSelectionPage } from "@/pages/TemplateSelectionPage";
@@ -314,7 +315,7 @@ function Index() {
 
   if (!isAuthenticated) {
     return (
-      <Suspense fallback={<div className="min-h-screen bg-background" aria-busy="true" />}>
+      <Suspense fallback={<BrandLoader />}>
         <LandingPage isStaff={isStaff} />
       </Suspense>
     );

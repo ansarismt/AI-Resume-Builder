@@ -113,7 +113,15 @@ export function GlowSection({ children, className }: { children: ReactNode; clas
 }
 
 /** Number that counts up the first time it scrolls into view. */
-export function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
+export function CountUp({
+  value,
+  suffix = "",
+  decimals = 0,
+}: {
+  value: number;
+  suffix?: string;
+  decimals?: number;
+}) {
   const ref = useRef<HTMLSpanElement>(null);
   const reduced = usePrefersReducedMotion();
   const [shown, setShown] = useState(reduced ? value : 0);
@@ -133,7 +141,8 @@ export function CountUp({ value, suffix = "" }: { value: number; suffix?: string
         const start = performance.now();
         const tick = (now: number) => {
           const progress = Math.min(1, (now - start) / 1200);
-          setShown(Math.round(value * (1 - Math.pow(1 - progress, 3))));
+          const f = 10 ** decimals;
+          setShown(Math.round(value * (1 - Math.pow(1 - progress, 3)) * f) / f);
           if (progress < 1) frame = requestAnimationFrame(tick);
         };
         frame = requestAnimationFrame(tick);
@@ -145,11 +154,11 @@ export function CountUp({ value, suffix = "" }: { value: number; suffix?: string
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [value, reduced]);
+  }, [value, reduced, decimals]);
 
   return (
     <span ref={ref}>
-      {shown}
+      {shown.toFixed(decimals)}
       {suffix}
     </span>
   );

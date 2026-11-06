@@ -1,17 +1,8 @@
 import { Outlet, Link, createRootRoute, HeadContent } from "@tanstack/react-router";
-import { AuthProvider, useAuth } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { BrainCircuit, LogOut, Plus, Timer } from "lucide-react";
-import { toast } from "sonner";
-
+import { AuthProvider } from "@/lib/auth";
+import { ThemeProvider } from "@/lib/theme";
+import { SiteNav } from "@/components/layout/SiteNav";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -76,135 +67,22 @@ export const Route = createRootRoute({
   notFoundComponent: NotFoundComponent,
 });
 
-function AuthHeader() {
-  const { isAuthenticated, isStaff, username, email, loginAt, logout } = useAuth();
-  const usageTime = (() => {
-    if (!loginAt) return "0 min";
-    const totalMinutes = Math.max(
-      0,
-      Math.floor((Date.now() - new Date(loginAt).getTime()) / 60000),
-    );
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes} min`;
-  })();
-
-  return (
-    <div className="ml-auto flex flex-wrap items-center gap-3">
-      {isAuthenticated && (
-        <Link
-          to="/ai-studio"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-accent"
-        >
-          <BrainCircuit className="h-4 w-4" />
-          AI Studio
-        </Link>
-      )}
-      {isAuthenticated && (
-        <Link
-          to="/dashboard"
-          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Dashboard
-        </Link>
-      )}
-      {isStaff && (
-        <Link
-          to="/admin-panel"
-          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Admin Panel
-        </Link>
-      )}
-      {isAuthenticated ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                {(username || "U").slice(0, 1).toUpperCase()}
-              </span>
-              Account
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-72">
-            <DropdownMenuLabel>
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                  {(username || "U").slice(0, 1).toUpperCase()}
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate font-semibold">{username}</p>
-                  <p className="truncate text-xs font-normal text-muted-foreground">
-                    {email || "No email saved"}
-                  </p>
-                </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/login">
-                <Plus className="h-4 w-4" />
-                Add account
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Timer className="h-4 w-4" />
-              Usage time: {usageTime}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => {
-                void logout().catch(() => toast.error("Could not log out. Please try again."));
-              }}
-              className="text-destructive focus:text-destructive"
-            >
-              <LogOut className="h-4 w-4" />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : null}
-    </div>
-  );
-}
-
 function RootComponent() {
   return (
     <>
       <HeadContent />
-      <AuthProvider>
-        <div className="flex min-h-screen flex-col">
-          <nav className="sticky top-0 z-30 flex flex-wrap items-center gap-4 border-b border-border bg-background/85 px-4 py-3 backdrop-blur sm:px-6 no-print">
-            <Link
-              to="/"
-              className="group flex items-center gap-3 text-foreground transition-colors hover:text-primary"
-            >
-              <img
-                src="/logo.png"
-                alt=""
-                width={46}
-                height={39}
-                className="h-10 w-auto transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
-              />
-              <span className="font-display text-2xl font-bold tracking-tight">
-                AI Resume Builder
-              </span>
-            </Link>
-            <AuthHeader />
-          </nav>
-          <div className="flex-1">
-            <Outlet />
-          </div>
-          <footer className="border-t border-border bg-background px-4 py-5 sm:px-6">
-            <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground sm:flex-row">
-              <span>© AI Resume Builder 2026</span>
-              <span>Built for study, internships, and careers</span>
-              <span>Crafted with care</span>
+      <ThemeProvider>
+        <AuthProvider>
+          <div className="flex min-h-screen flex-col">
+            <SiteNav />
+            <div className="flex-1">
+              <Outlet />
             </div>
-          </footer>
-          <Toaster />
-        </div>
-      </AuthProvider>
+            <SiteFooter />
+            <Toaster />
+          </div>
+        </AuthProvider>
+      </ThemeProvider>
     </>
   );
 }
